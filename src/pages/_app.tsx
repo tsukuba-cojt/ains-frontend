@@ -8,7 +8,7 @@ export const theme = extendTheme(
     useSystemColorMode: false,
     colors: {
       primary: baseTheme.colors.cyan,
-      // secondary:
+      secondary: "#b5aebf",
     },
   },
   withDefaultColorScheme({ colorScheme: "primary" })
