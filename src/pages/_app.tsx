@@ -1,6 +1,7 @@
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import { ChakraProvider, extendTheme, withDefaultColorScheme, theme as baseTheme } from "@chakra-ui/react";
+import Navbar from "@/components/Navbar";
 
 export const theme = extendTheme(
   {
@@ -20,6 +21,8 @@ export const theme = extendTheme(
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <ChakraProvider theme={theme}>
+      <Navbar />
+      <div style={{ marginTop: "60px" }} />
       <Component {...pageProps} />
     </ChakraProvider>
   );
