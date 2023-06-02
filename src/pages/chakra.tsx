@@ -1,8 +1,12 @@
-import { Button, Flex, Box, Text } from "@chakra-ui/react";
+import { Button, Flex, Box, Text, useColorMode, useColorModeValue } from "@chakra-ui/react";
 import { useState } from "react";
+import { theme } from "./_app";
 
 const ChakraDemoPage = () => {
+  const { colorMode, toggleColorMode } = useColorMode();
   const [count, setCount] = useState<number>(0);
+
+  const secondary = useColorModeValue(theme.colors.secondary.ml, theme.colors.secondary.md);
 
   const addCount = (): void => {
     setCount(count + 1);
@@ -13,9 +17,13 @@ const ChakraDemoPage = () => {
   };
 
   return (
-    <Box w='100vw' h='100vh' bg='#000000'>
-      <Text color='secondary'>hoge</Text>
-      <Box bg='secondary' w='100px' h='100px'></Box>
+    <Box>
+      <Box>
+        <p>Current color mode: {colorMode}</p>
+        <Button onClick={toggleColorMode}>Change color mode</Button>
+      </Box>
+      <Text color={secondary}>hoge</Text>
+      <Box bg={secondary} w='100px' h='100px'></Box>
       <Button>hoge</Button>
       <Flex align='center' gap={2}>
         <Button colorScheme='blue' onClick={subCount}>
