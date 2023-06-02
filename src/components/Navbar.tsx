@@ -6,8 +6,6 @@ import { Input, InputGroup, InputLeftElement } from "@chakra-ui/react";
 import React from "react";
 
 const Navbar = () => {
-  const [count, setCount] = useState<number>(0);
-
   const homeflag: boolean = false;
   const loginflag: boolean = true;
 
