@@ -2,7 +2,8 @@ import { Button, Flex, Box, Text, useColorMode, useColorModeValue } from "@chakr
 import { useState } from "react";
 import { theme } from "./_app";
 import { getFirestore } from "firebase/firestore";
-import { collection, doc, addDoc, getDocs, updateDoc } from "firebase/firestore";
+import { collection, doc, addDoc, getDocs, updateDoc, getDocFromCache, deleteDoc } from "firebase/firestore";
+import { getStorage, ref } from "firebase/storage";
 
 const FirebaseTestPage = () => {
   const db = getFirestore();
@@ -30,11 +31,28 @@ const FirebaseTestPage = () => {
     });
   };
   const updateData = async (): Promise<void> => {
-    const docRef = doc(db, "cities", "DC");
+    const docRef = doc(db, "users", "bvJup5fhaPXLPgJlduhr");
     // Set the "capital" field of the city 'DC'
     await updateDoc(docRef, {
-      capital: true,
+      bornDif: true,
     });
+  };
+
+  const deleteData = async (): Promise<void> => {
+    await deleteDoc(doc(db, "users", "bvJup5fhaPXLPgJlduhr"));
+    console.log("DataDeleted");
+  };
+
+  const uploadPicture = async (): Promise<void> => {
+    // Create a root reference
+    const storage = getStorage();
+
+    // Create a reference to 'images/mountains.jpg'
+    const mountainImagesRef = ref(storage, "images/mountains.jpg");
+
+    const metadata = {
+      contentType: "image/jpeg",
+    };
   };
 
   return (
@@ -47,7 +65,9 @@ const FirebaseTestPage = () => {
       <Box bg={secondary} w='100px' h='100px'></Box>
       <Button>hoge</Button>
       <Button onClick={addData}>addData</Button>
+      <Button onClick={deleteData}>deleteData</Button>
       <Button onClick={getData}>GetData</Button>
+      <Button onClick={updateData}>UpdateData</Button>
       <Flex align='center' gap={2}>
         <Button colorScheme='blue' onClick={addData}>
           sub
