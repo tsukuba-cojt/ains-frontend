@@ -1,8 +1,21 @@
 import React, { useState } from "react";
 import { Box } from "@chakra-ui/react";
 import { Grid, GridItem } from "@chakra-ui/react";
-import { AbsoluteCenter, Center, Text, Square, Circle, Flex, Spacer, Button } from "@chakra-ui/react";
-import { ArrowUpIcon } from "@chakra-ui/icons";
+import {
+  AbsoluteCenter,
+  Center,
+  Text,
+  Square,
+  Circle,
+  Flex,
+  Spacer,
+  Button,
+  Input,
+  Stack,
+  VStack,
+  HStack,
+} from "@chakra-ui/react";
+import { ArrowUpIcon, StarIcon } from "@chakra-ui/icons";
 
 const ImageUploadForm = () => {
   const [selectedImage, setSelectedImage] = useState(null);
@@ -19,10 +32,10 @@ const ImageUploadForm = () => {
 
   return (
     <Box position='relative' h='1200px'>
-      <AbsoluteCenter bg='tomato' p='4' w='1000' h='1100' color='white' axis='both'>
-        <Flex color='gray'>
-          <Flex w='400px' h='1000' bg='green.500' direction='column' alignItems='center'>
-            <Flex w='380' h='500' bg='tomato' direction='column' alignItems='center'>
+      <AbsoluteCenter bg='black' p='4' w='1000' h='1100' color='white' axis='both' borderRadius='lg'>
+        <Flex color='white'>
+          <Flex w='400px' h='1000' bg='black' direction='column' alignItems='center'>
+            <Flex w='380' h='500' bg='gray' direction='column' alignItems='center' borderRadius='lg'>
               <Spacer />
               <ArrowUpIcon />
               <h2>画像をアップロードする</h2>
@@ -33,15 +46,25 @@ const ImageUploadForm = () => {
             </Flex>
           </Flex>
           <Spacer />
-          <Flex w='400px' bg='blue.500'>
-            <Button colorScheme='blue'>アップロード</Button>
-            {/* <button onClick={handleUpload}>アップロード</button> */}
-            <Box></Box>
+          <VStack spacing='50px' w='400px' bg='black'>
+            <HStack spacing='100px'>
+              <Box w='70px' h='10' bg='black' />
+              <Spacer />
+              <Box>
+                <Button>アップロード</Button>
+                {/* <button onClick={handleUpload}>アップロード</button> */}
+              </Box>
+            </HStack>
+            <Input size='lg' placeholder='タイトルを入力してください' />
+            <Flex>
+              <StarIcon boxSize={6} />
+              <Text fontSize='xl'> ユーザー名</Text>
+            </Flex>
 
-            <Box as='button' borderRadius='md' color='black' px={4} h={8}>
-              Button
-            </Box>
-          </Flex>
+            <Input placeholder='＃タグ' size='md' />
+          </VStack>
+
+          <Flex></Flex>
         </Flex>
       </AbsoluteCenter>
     </Box>
