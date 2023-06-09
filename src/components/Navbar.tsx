@@ -1,16 +1,38 @@
-import { Button, Flex, Stack, Image } from "@chakra-ui/react";
-import { ChatIcon, BellIcon, SearchIcon } from "@chakra-ui/icons";
-import { useState } from "react";
-import { Box, HStack } from "@chakra-ui/react";
-import { Input, InputGroup, InputLeftElement } from "@chakra-ui/react";
-import React from "react";
+import {
+  Button,
+  IconButton,
+  Flex,
+  Image,
+  Box,
+  Input,
+  InputGroup,
+  InputLeftElement,
+  useColorMode,
+  useColorModeValue,
+} from "@chakra-ui/react";
+import { ChatIcon, BellIcon, SearchIcon, SunIcon, MoonIcon } from "@chakra-ui/icons";
+import UserIcon from "@/icons/UserIcon";
 
 const Navbar = () => {
+  const { colorMode, toggleColorMode } = useColorMode();
+  const icon_fill_color = useColorModeValue("white", "gray.800");
+
   const homeflag: boolean = false;
   const loginflag: boolean = true;
 
   return (
-    <Flex zIndex={100} gap={2} align='center' bg='black' position='fixed' top='0' left='0' w='100%' h='60px' p={4}>
+    <Flex
+      bg='chakra-body-bg'
+      gap={2}
+      zIndex={100}
+      align='center'
+      position='fixed'
+      top='0'
+      left='0'
+      w='100%'
+      h='60px'
+      p={4}
+    >
       <Button size='sm'>
         <Image borderRadius='full' boxSize='30px' src='https://bit.ly/dan-abramov' alt='Dan Abramov' />
       </Button>
@@ -30,17 +52,23 @@ const Navbar = () => {
           <Input variant='filled' placeholder='検索'></Input>
         </InputGroup>
       </Box>
-      <Button leftIcon={<BellIcon />} size='sm'>
+      <IconButton
+        variant='ghost'
+        aria-label='ダークモードの切り替え'
+        onClick={toggleColorMode}
+        icon={colorMode === "light" ? <SunIcon /> : <MoonIcon />}
+      ></IconButton>
+      <Button variant='ghost' leftIcon={<BellIcon />} size='sm'>
         通知
       </Button>
-      <Button leftIcon={<ChatIcon />} size='sm'>
+      <Button variant='ghost' leftIcon={<ChatIcon />} size='sm'>
         メッセージ
       </Button>
       {loginflag == false ? (
         <Button size='sm'>ログイン</Button>
       ) : (
         <Button size='sm'>
-          <Image boxSize='30px' src='app_icon_account.png' alt='app_icon_account' />
+          <UserIcon color={icon_fill_color} boxSize='1.2rem' />
         </Button>
       )}
     </Flex>
