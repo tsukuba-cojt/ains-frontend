@@ -10,7 +10,7 @@ const Navbar = () => {
   const loginflag: boolean = true;
 
   return (
-    <Flex gap={2} align='center' bg='black' position='fixed' top='0' left='0' w='100%' h='60px' p={4}>
+    <Flex zIndex={100} gap={2} align='center' bg='black' position='fixed' top='0' left='0' w='100%' h='60px' p={4}>
       <Button size='sm'>
         <Image borderRadius='full' boxSize='30px' src='https://bit.ly/dan-abramov' alt='Dan Abramov' />
       </Button>
