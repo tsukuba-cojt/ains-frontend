@@ -3,7 +3,8 @@ import { useState } from "react";
 import { theme } from "./_app";
 import { getFirestore } from "firebase/firestore";
 import { collection, doc, addDoc, getDocs, updateDoc, getDocFromCache, deleteDoc } from "firebase/firestore";
-import { getStorage, ref } from "firebase/storage";
+import { getStorage, ref, getDownloadURL, uploadBytes } from "firebase/storage";
+import { Console } from "console";
 
 const FirebaseTestPage = () => {
   const db = getFirestore();
@@ -55,6 +56,36 @@ const FirebaseTestPage = () => {
     };
   };
 
+  const getImgURL = async (): Promise<void> => {
+    const storage = getStorage();
+    getDownloadURL(ref(storage, "bib.jpg")).then((url) => {
+      console.log(url);
+      const img = document.getElementById("myimg");
+      if (img) {
+        img.setAttribute("src", url);
+      }
+    });
+  };
+  const [file, setFile] = useState<File | null>(null);
+  const onChangeFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files[0]) {
+      setFile(files[0]);
+    }
+  };
+
+  const submitFile = () => {
+    if (file) {
+      const storage = getStorage();
+      const storageRef = ref(storage, file.name);
+      uploadBytes(storageRef, file).then((snapshot) => {
+        console.log("Uploaded a blob or file!");
+      });
+    } else {
+      console.log("file is not selected");
+    }
+  };
+
   return (
     <Box>
       <Box>
@@ -63,11 +94,17 @@ const FirebaseTestPage = () => {
       </Box>
       <Text color={secondary}>hoge</Text>
       <Box bg={secondary} w='100px' h='100px'></Box>
+      <Box bg={secondary} w='100px' h='100px'>
+        <img id='myimg' src='' alt='代替テキスト'></img>
+      </Box>
       <Button>hoge</Button>
       <Button onClick={addData}>addData</Button>
       <Button onClick={deleteData}>deleteData</Button>
       <Button onClick={getData}>GetData</Button>
       <Button onClick={updateData}>UpdateData</Button>
+      <Button onClick={getImgURL}>getImgURL</Button>
+      <input name='file' type='file' accept='image/*' onChange={onChangeFile} />
+      <Button onClick={submitFile}>送信</Button>
       <Flex align='center' gap={2}>
         <Button colorScheme='blue' onClick={addData}>
           sub
