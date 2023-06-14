@@ -10,8 +10,8 @@ export const theme = extendTheme(
     colors: {
       primary: baseTheme.colors.cyan,
       secondary: {
-        ml: "#A0AEC0",
-        md: "#A0AEC0",
+        ml: baseTheme.colors.gray[200],
+        md: baseTheme.colors.whiteAlpha[50],
       },
     },
   },

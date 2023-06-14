@@ -22,6 +22,7 @@ const Navbar = () => {
 
   return (
     <Flex
+      as='header'
       bg='chakra-body-bg'
       gap={2}
       zIndex={100}
