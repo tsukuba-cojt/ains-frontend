@@ -47,7 +47,7 @@ const IndexPage = () => {
       </AspectRatio>
       <AspectRatio ratio={1}>
         <GridItem bg='blue.500'>
-          <Image boxSize='100%' src='/MA.jpg' alt='代替テキスト' />
+          <Image boxSize='100%' src='/MB.jpg' alt='代替テキスト' />
         </GridItem>
       </AspectRatio>
     </Grid>
