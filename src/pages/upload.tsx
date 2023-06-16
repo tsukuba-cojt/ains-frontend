@@ -1,20 +1,6 @@
 import React, { useState } from "react";
 import { Box } from "@chakra-ui/react";
-import { Grid, GridItem } from "@chakra-ui/react";
-import {
-  AbsoluteCenter,
-  Center,
-  Text,
-  Square,
-  Circle,
-  Flex,
-  Spacer,
-  Button,
-  Input,
-  Stack,
-  VStack,
-  HStack,
-} from "@chakra-ui/react";
+import { AbsoluteCenter, Text, Flex, Spacer, Button, Input, VStack, HStack } from "@chakra-ui/react";
 import { ArrowUpIcon, StarIcon } from "@chakra-ui/icons";
 
 const ImageUploadForm = () => {
