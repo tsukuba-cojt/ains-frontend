@@ -20,7 +20,7 @@ const CommentBox = (props: Props) => {
   return (
     <Box>
       <Flex gap={3}>
-        <Image boxSize='2.25rem' rounded='full' src={props.icon_url} />
+        <Image boxSize='2.25rem' rounded='full' src={props.icon_url} alt={props.icon_url} />
         <Box>
           <Text as='b'>{props.username}</Text>
           <Text>{convert_to_br_text}</Text>

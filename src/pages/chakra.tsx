@@ -1,5 +1,6 @@
 import { Button, Flex, Box, Text, useColorMode, useColorModeValue } from "@chakra-ui/react";
 import { useState } from "react";
+
 import { theme } from "./_app";
 
 const ChakraDemoPage = () => {

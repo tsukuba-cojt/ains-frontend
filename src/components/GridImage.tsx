@@ -1,7 +1,8 @@
-import { ImageListData } from "@/types/api/image";
 import { GridItem, AspectRatio, Image, Link, useColorModeValue } from "@chakra-ui/react";
 import NextLink from "next/link";
+
 import { theme } from "@/pages/_app";
+import { ImageListData } from "@/types/api/image";
 
 interface Props {
   image: ImageListData;
