@@ -1,14 +1,14 @@
-import React, { useState } from "react";
-import { Box } from "@chakra-ui/react";
-import { AbsoluteCenter, Text, Flex, Spacer, Button, Input, VStack, HStack } from "@chakra-ui/react";
 import { ArrowUpIcon, StarIcon } from "@chakra-ui/icons";
+import { Box } from "@chakra-ui/react";
+import { AbsoluteCenter, Text, Flex, Spacer, Button, Input, VStack, HStack, Image } from "@chakra-ui/react";
+import { useState, ChangeEvent } from "react";
 
 const ImageUploadForm = () => {
   const [selectedImage, setSelectedImage] = useState(null);
 
-  const handleImageChange = (event) => {
-    const file = event.target.files[0];
-    setSelectedImage(URL.createObjectURL(file));
+  const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
+    // const file = event.target.files[0];
+    // setSelectedImage(URL.createObjectURL(file));
   };
 
   const handleUpload = () => {
@@ -27,7 +27,7 @@ const ImageUploadForm = () => {
               <h2>画像をアップロードする</h2>
               <Spacer />
               <input type='file' accept='image/*' onChange={handleImageChange} />
-              {selectedImage && <img src={selectedImage} alt='選択された画像のプレビュー' />}
+              {selectedImage && <Image src={selectedImage} alt='選択された画像のプレビュー' />}
               <Spacer />
             </Flex>
           </Flex>

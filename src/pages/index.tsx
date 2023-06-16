@@ -1,10 +1,8 @@
-import { ImageListData } from "@/types/api/image";
-import { Image, Stack } from "@chakra-ui/react";
-import { Grid, GridItem } from "@chakra-ui/react";
-import { AspectRatio } from "@chakra-ui/react";
+import { Grid } from "@chakra-ui/react";
 import { useMemo, useState } from "react";
 
 import GridImage from "@/components/GridImage";
+import { ImageListData } from "@/types/api/image";
 
 const IndexPage = () => {
   const [images, setImages] = useState<ImageListData[]>([
@@ -20,7 +18,10 @@ const IndexPage = () => {
   ]);
 
   const image_grid_items = useMemo<JSX.Element[]>(
-    () => images.map<JSX.Element>((image: ImageListData): JSX.Element => <GridImage image={image} />),
+    () =>
+      images.map<JSX.Element>(
+        (image: ImageListData, index: number): JSX.Element => <GridImage key={index} image={image} />
+      ),
     [images]
   );
 

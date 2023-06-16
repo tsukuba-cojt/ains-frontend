@@ -1,3 +1,4 @@
+import { ChatIcon, BellIcon, SearchIcon, SunIcon, MoonIcon } from "@chakra-ui/icons";
 import {
   Button,
   IconButton,
@@ -10,9 +11,9 @@ import {
   useColorMode,
   useColorModeValue,
 } from "@chakra-ui/react";
-import { ChatIcon, BellIcon, SearchIcon, SunIcon, MoonIcon } from "@chakra-ui/icons";
-import UserIcon from "@/icons/UserIcon";
 import { useState } from "react";
+
+import UserIcon from "@/icons/UserIcon";
 
 const Navbar = () => {
   const { colorMode, toggleColorMode } = useColorMode();
