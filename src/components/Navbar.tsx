@@ -1,3 +1,4 @@
+import { ChatIcon, BellIcon, SearchIcon, SunIcon, MoonIcon } from "@chakra-ui/icons";
 import {
   Button,
   IconButton,
@@ -10,18 +11,20 @@ import {
   useColorMode,
   useColorModeValue,
 } from "@chakra-ui/react";
-import { ChatIcon, BellIcon, SearchIcon, SunIcon, MoonIcon } from "@chakra-ui/icons";
+import { useState } from "react";
+
 import UserIcon from "@/icons/UserIcon";
 
 const Navbar = () => {
   const { colorMode, toggleColorMode } = useColorMode();
   const icon_fill_color = useColorModeValue("white", "gray.800");
 
-  const homeflag: boolean = false;
-  const loginflag: boolean = true;
+  const [isHome, setIsHome] = useState<boolean>(false);
+  const [isLoggingIn, setIsLoggingIn] = useState<boolean>(true);
 
   return (
     <Flex
+      as='header'
       bg='chakra-body-bg'
       gap={2}
       zIndex={100}
@@ -36,7 +39,7 @@ const Navbar = () => {
       <Button size='sm'>
         <Image borderRadius='full' boxSize='30px' src='https://bit.ly/dan-abramov' alt='Dan Abramov' />
       </Button>
-      {homeflag == false ? (
+      {isHome == false ? (
         <Button variant='outline' size='sm'>
           ホームじゃない
         </Button>
@@ -64,7 +67,7 @@ const Navbar = () => {
       <Button variant='ghost' leftIcon={<ChatIcon />} size='sm'>
         メッセージ
       </Button>
-      {loginflag == false ? (
+      {isLoggingIn == false ? (
         <Button size='sm'>ログイン</Button>
       ) : (
         <Button size='sm'>

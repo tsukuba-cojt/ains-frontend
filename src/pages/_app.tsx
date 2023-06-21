@@ -1,6 +1,8 @@
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
+
 import { ChakraProvider, extendTheme, withDefaultColorScheme, theme as baseTheme } from "@chakra-ui/react";
+
 import Navbar from "@/components/Navbar";
 
 export const theme = extendTheme(
@@ -10,8 +12,8 @@ export const theme = extendTheme(
     colors: {
       primary: baseTheme.colors.cyan,
       secondary: {
-        ml: "#A0AEC0",
-        md: "#A0AEC0",
+        ml: baseTheme.colors.gray[200],
+        md: baseTheme.colors.whiteAlpha[50],
       },
     },
   },
