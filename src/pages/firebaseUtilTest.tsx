@@ -1,7 +1,7 @@
-import { Button, Flex, Box, Text, useColorMode, useColorModeValue } from "@chakra-ui/react";
+import { Button, Image, Box, Text, useColorMode, useColorModeValue } from "@chakra-ui/react";
 import { useState } from "react";
+
 import { theme } from "./_app";
-import { Console } from "console";
 import { uploadFileAndGetWorksID, getWorksURL, deleteImg, getAllWorksID } from "../firebase_util/UnauthFirebaseUtil";
 
 const FirebaseUtilTestPage = () => {
@@ -47,7 +47,7 @@ const FirebaseUtilTestPage = () => {
       <Text color={secondary}>hoge</Text>
       <Box bg={secondary} w='100px' h='100px'></Box>
       <Box bg={secondary} w='100px' h='100px'>
-        <img id='myimg' src='' alt='代替テキスト'></img>
+        <Image id='myimg' src='' alt='代替テキスト' />
       </Box>
       <Button onClick={getAllWorksID_check}>getAllWorksID_check</Button>
       <Button onClick={getImgURL_check}>getImgURL_check</Button>

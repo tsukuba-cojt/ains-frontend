@@ -1,10 +1,10 @@
-import { Button, Flex, Box, Text, useColorMode, useColorModeValue } from "@chakra-ui/react";
-import { useState } from "react";
-import { theme } from "./_app";
+import { Box, Button, Text, Flex, Image, useColorMode, useColorModeValue } from "@chakra-ui/react";
 import { getFirestore } from "firebase/firestore";
 import { collection, doc, addDoc, getDocs, updateDoc, getDocFromCache, deleteDoc } from "firebase/firestore";
 import { getStorage, ref, getDownloadURL, uploadBytes } from "firebase/storage";
-import { Console } from "console";
+import { useState } from "react";
+
+import { theme } from "./_app";
 
 const FirebaseTestPage = () => {
   const db = getFirestore();
@@ -95,7 +95,7 @@ const FirebaseTestPage = () => {
       <Text color={secondary}>hoge</Text>
       <Box bg={secondary} w='100px' h='100px'></Box>
       <Box bg={secondary} w='100px' h='100px'>
-        <img id='myimg' src='' alt='代替テキスト'></img>
+        <Image id='myimg' src='' alt='代替テキスト' />
       </Box>
       <Button>hoge</Button>
       <Button onClick={addData}>addData</Button>
