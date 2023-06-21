@@ -4,6 +4,7 @@ import type { AppProps } from "next/app";
 import { ChakraProvider, extendTheme, withDefaultColorScheme, theme as baseTheme } from "@chakra-ui/react";
 
 import Navbar from "@/components/Navbar";
+import "@/plugins/Firebase";
 
 export const theme = extendTheme(
   {
