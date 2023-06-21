@@ -2,9 +2,8 @@ import { Button, Flex, Box, Text, useColorMode, useColorModeValue } from "@chakr
 import { useState } from "react";
 import { theme } from "./_app";
 import { Console } from "console";
-import { uploadFileAndGetImgID, getImgURL, deleteImg } from "../firebase_util/UnauthFirebaseUtil";
+import { uploadFileAndGetWorksID, getWorksURL, deleteImg, getAllWorksID } from "../firebase_util/UnauthFirebaseUtil";
 
-let pushedImgID = "";
 const FirebaseUtilTestPage = () => {
   const { colorMode, toggleColorMode } = useColorMode();
   const [count, setCount] = useState<number>(0);
@@ -19,18 +18,24 @@ const FirebaseUtilTestPage = () => {
       setFile(files[0]);
     }
   };
-  const addData = () => {};
+  const getAllWorksID_check = async () => {
+    const temp = await getAllWorksID();
+    temp.map((id) => console.log(id));
+  };
+
   const uploadFileAndGetImgID_check = async () => {
     if (file) {
-      pushedImgID = await uploadFileAndGetImgID(file, "abebebeb");
+      await uploadFileAndGetWorksID(file, "abebebeb");
     }
   };
   const getImgURL_check = async () => {
-    const gotURL = await getImgURL("4hBUHI9GUuD7R4cuW7lJ");
+    const IDList = await getAllWorksID();
+    const gotURL = await getWorksURL(IDList[0]);
     console.log(gotURL);
   };
-  const deleteImg_check = () => {
-    deleteImg(pushedImgID);
+  const deleteImg_check = async () => {
+    const IDList = await getAllWorksID();
+    deleteImg(IDList[0]);
   };
 
   return (
@@ -44,12 +49,11 @@ const FirebaseUtilTestPage = () => {
       <Box bg={secondary} w='100px' h='100px'>
         <img id='myimg' src='' alt='代替テキスト'></img>
       </Box>
-      <Button>hoge</Button>
-      <Button onClick={addData}>addData</Button>
-      <Button onClick={getImgURL_check}>getImgURL</Button>
+      <Button onClick={getAllWorksID_check}>getAllWorksID_check</Button>
+      <Button onClick={getImgURL_check}>getImgURL_check</Button>
       <input name='file' type='file' accept='image/*' onChange={onChangeFile} />
       <Button onClick={uploadFileAndGetImgID_check}>送信</Button>
-      <Button onClick={deleteImg_check}>削除</Button>
+      <Button onClick={deleteImg_check}>deleteImg_check</Button>
     </Box>
   );
 };

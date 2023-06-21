@@ -2,9 +2,9 @@ import { getDoc, getFirestore } from "firebase/firestore";
 import { collection, doc, addDoc, getDocs, updateDoc, getDocFromCache, deleteDoc } from "firebase/firestore";
 import { getStorage, ref, deleteObject, getDownloadURL, uploadBytes } from "firebase/storage";
 
-const userListName = "UserTable";
+const usersListName = "UserTable";
 const worksListName = "UserWorks";
-const worksPath = "UserWorks";
+const worksDirPath = "UserWorks";
 const db = getFirestore();
 const storage = getStorage();
 
@@ -14,13 +14,32 @@ const getFileExt = (file: File): string => {
 const getStrExt = (str: string): string => {
   return str.slice(str.lastIndexOf("."));
 };
-//console.log(getStrExt("fffegrf.txt.exe"));
 
-//ファイルをアップロードする。戻り値としてファイルのIDを返す
-export const uploadFileAndGetImgID = async (file: File, userId: string): Promise<string> => {
+export const getAllWorksID = async (): Promise<Array<string>> => {
+  const querySnapshot = await getDocs(collection(db, worksListName));
+  let IDList: Array<string> = [];
+  querySnapshot.forEach((doc) => IDList.push(doc.id));
+  return IDList;
+};
+
+//IDに対応する作品のデータ(authorID,name,description,type,vc,sc,created_at)を返す
+export const getDatas = async (worksID: string): Promise<Object> => {
+  const docRef = doc(db, worksListName, worksID);
+  const docSnap = await getDoc(docRef);
+  if (docSnap.exists()) {
+    return docSnap.data();
+  } else {
+    //worksIDに対応する作品がデータベース上にない場合
+    console.log("作品ID" + worksID + "は存在しません");
+    return {};
+  }
+};
+
+//ファイルをアップロードする。返り値として作品のIDを返す
+export const uploadFileAndGetWorksID = async (file: File, userId: string): Promise<string> => {
   const docRef = await addDoc(collection(db, worksListName), {
     authorID: userId,
-    name: "",
+    name: "作品1",
     description: "",
     filePath: "",
     type: "image",
@@ -29,38 +48,46 @@ export const uploadFileAndGetImgID = async (file: File, userId: string): Promise
     created_at: "",
   });
 
-  const imgID = docRef.id;
-  const filePath = worksPath + "/" + imgID + getFileExt(file);
+  //ここでdocumentに割り当てられたIDを作品のIDとする
+  const worksID = docRef.id;
+  //ファイル名が重複しないようファイル名にIDを使う。
+  const filePath = worksDirPath + "/" + worksID + getFileExt(file);
 
   const storageRef = ref(storage, filePath);
   uploadBytes(storageRef, file).then((snapshot) => {
-    console.log("Uploaded a blob or file! ID:" + imgID);
+    console.log("Uploaded a blob or file! ID:" + worksID);
   });
   await updateDoc(docRef, {
     filePath: filePath,
   });
-  return imgID;
+  return worksID;
 };
-export const getImgURL = async (imgID: string): Promise<string> => {
-  const docRef = doc(db, worksListName, imgID);
-  const docSS = await getDoc(docRef);
-  if (docSS.exists()) {
-    const gotString = await getDownloadURL(ref(storage, docSS.data().filePath));
+
+//worksIDに対応する作品のurlを返す
+export const getWorksURL = async (worksID: string): Promise<string> => {
+  const docRef = doc(db, worksListName, worksID);
+  const docSnap = await getDoc(docRef);
+  if (docSnap.exists()) {
+    const gotString = await getDownloadURL(ref(storage, docSnap.data().filePath));
     return gotString;
   }
+  //worksIDに対応する作品がデータベース上にない場合
+  console.log("作品ID" + worksID + "は存在しません");
   return "";
 };
 
-export const deleteImg = async (imgID: string): Promise<void> => {
-  console.log("delete " + imgID);
-  const docRef = doc(db, worksListName, imgID);
-  const docSS = await getDoc(docRef);
-  if (docSS.exists()) {
-    const imgRef = ref(storage, docSS.data().filePath);
+//worksIDに対応する作品をデータベース及びストレージから削除する
+export const deleteImg = async (worksID: string): Promise<void> => {
+  console.log("delete " + worksID);
+  const docRef = doc(db, worksListName, worksID);
+  const docSnap = await getDoc(docRef);
+  if (docSnap.exists()) {
+    const imgRef = ref(storage, docSnap.data().filePath);
     deleteObject(imgRef);
     deleteDoc(docRef);
-    console.log("img deleted");
+    console.log(worksID + " deleted");
   } else {
-    console.log("作品ID" + imgID + "は存在しません");
+    //worksIDに対応する作品がデータベース上にない場合
+    console.log("作品ID" + worksID + "は存在しません");
   }
 };
