@@ -24,11 +24,11 @@ const Navbar = () => {
   const [isHome, setIsHome] = useState<boolean>(false);
   const [isLoggingIn, setIsLoggingIn] = useState<boolean>(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false);
-  const [isAccountModalOpen, setIsAccountModalOpen] = useState<boolean>(false);
+  const [isSignupModalOpen, setIsSignupModalOpen] = useState<boolean>(false);
 
-  const loginSignupSwitching = () => {
+  const loginSignupSwitching = (): void => {
     setIsLoginModalOpen(!isLoginModalOpen);
-    setIsAccountModalOpen(!isAccountModalOpen);
+    setIsSignupModalOpen(!isSignupModalOpen);
   };
 
   return (
@@ -87,8 +87,8 @@ const Navbar = () => {
             switching={() => loginSignupSwitching()}
           />
           <SignupModal
-            isOpen={isAccountModalOpen}
-            onClose={() => setIsAccountModalOpen(false)}
+            isOpen={isSignupModalOpen}
+            onClose={() => setIsSignupModalOpen(false)}
             switching={() => loginSignupSwitching()}
           />
         </>
