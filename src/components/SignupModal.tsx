@@ -45,7 +45,7 @@ const SignupModal = (props: Props) => {
             </Box>
           </VStack>
           <Button borderRadius='full' width='80%'>
-            続行
+            登録
           </Button>
           <VStack align='left' w='350px' paddingBottom='30px'>
             <Text fontSize='sm'>
