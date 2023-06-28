@@ -15,7 +15,7 @@ const LoginModal = (props: Props) => {
   const [show, setShow] = useState(false);
   const switchPasswordVisible = () => setShow(!show);
   return (
-    <Modal isOpen={props.isOpen} onClose={props.onClose}>
+    <Modal isOpen={props.isOpen} onClose={props.onClose} isCentered blockScrollOnMount={false}>
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>

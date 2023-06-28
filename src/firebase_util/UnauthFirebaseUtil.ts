@@ -1,5 +1,5 @@
 import { getDoc, getFirestore } from "firebase/firestore";
-import { collection, doc, addDoc, getDocs, updateDoc, getDocFromCache, deleteDoc } from "firebase/firestore";
+import { collection, doc, addDoc, getDocs, updateDoc, deleteDoc } from "firebase/firestore";
 import { getStorage, ref, deleteObject, getDownloadURL, uploadBytes } from "firebase/storage";
 
 const usersListName = "UserTable";

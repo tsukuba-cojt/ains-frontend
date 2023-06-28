@@ -11,24 +11,26 @@ import {
   useColorMode,
   useColorModeValue,
 } from "@chakra-ui/react";
-import { useState } from "react";
+import { useState, useContext } from "react";
 
 import UserIcon from "@/icons/UserIcon";
 
+import { FirebaseAuthContext } from "./FirebaseAuthProvider";
 import LoginModal from "./LoginModal";
 import SignupModal from "./SignupModal";
 
 const Navbar = () => {
   const { colorMode, toggleColorMode } = useColorMode();
   const icon_fill_color = useColorModeValue("white", "gray.800");
-  const [isHome, setIsHome] = useState<boolean>(false);
-  const [isLoggingIn, setIsLoggingIn] = useState<boolean>(false);
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false);
-  const [isAccountModalOpen, setIsAccountModalOpen] = useState<boolean>(false);
+  const { user } = useContext(FirebaseAuthContext);
 
-  const loginSignupSwitching = () => {
+  const [isHome, setIsHome] = useState<boolean>(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false);
+  const [isSignupModalOpen, setIsSignupModalOpen] = useState<boolean>(false);
+
+  const loginSignupSwitching = (): void => {
     setIsLoginModalOpen(!isLoginModalOpen);
-    setIsAccountModalOpen(!isAccountModalOpen);
+    setIsSignupModalOpen(!isSignupModalOpen);
   };
 
   return (
@@ -76,10 +78,13 @@ const Navbar = () => {
       <Button variant='ghost' leftIcon={<ChatIcon />} size='sm'>
         メッセージ
       </Button>
-      {isLoggingIn == false ? (
+      {user === null ? (
         <>
           <Button onClick={() => setIsLoginModalOpen(true)} size='sm'>
             ログイン
+          </Button>
+          <Button colorScheme='gray' onClick={() => setIsSignupModalOpen(true)} size='sm'>
+            新規登録
           </Button>
           <LoginModal
             isOpen={isLoginModalOpen}
@@ -87,8 +92,8 @@ const Navbar = () => {
             switching={() => loginSignupSwitching()}
           />
           <SignupModal
-            isOpen={isAccountModalOpen}
-            onClose={() => setIsAccountModalOpen(false)}
+            isOpen={isSignupModalOpen}
+            onClose={() => setIsSignupModalOpen(false)}
             switching={() => loginSignupSwitching()}
           />
         </>
