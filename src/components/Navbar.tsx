@@ -15,12 +15,21 @@ import { useState } from "react";
 
 import UserIcon from "@/icons/UserIcon";
 
+import LoginModal from "./LoginModal";
+import SignupModal from "./SignupModal";
+
 const Navbar = () => {
   const { colorMode, toggleColorMode } = useColorMode();
   const icon_fill_color = useColorModeValue("white", "gray.800");
-
   const [isHome, setIsHome] = useState<boolean>(false);
-  const [isLoggingIn, setIsLoggingIn] = useState<boolean>(true);
+  const [isLoggingIn, setIsLoggingIn] = useState<boolean>(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false);
+  const [isAccountModalOpen, setIsAccountModalOpen] = useState<boolean>(false);
+
+  const loginSignupSwitching = () => {
+    setIsLoginModalOpen(!isLoginModalOpen);
+    setIsAccountModalOpen(!isAccountModalOpen);
+  };
 
   return (
     <Flex
@@ -68,7 +77,21 @@ const Navbar = () => {
         メッセージ
       </Button>
       {isLoggingIn == false ? (
-        <Button size='sm'>ログイン</Button>
+        <>
+          <Button onClick={() => setIsLoginModalOpen(true)} size='sm'>
+            ログイン
+          </Button>
+          <LoginModal
+            isOpen={isLoginModalOpen}
+            onClose={() => setIsLoginModalOpen(false)}
+            switching={() => loginSignupSwitching()}
+          />
+          <SignupModal
+            isOpen={isAccountModalOpen}
+            onClose={() => setIsAccountModalOpen(false)}
+            switching={() => loginSignupSwitching()}
+          />
+        </>
       ) : (
         <Button size='sm'>
           <UserIcon color={icon_fill_color} boxSize='1.2rem' />
@@ -77,5 +100,4 @@ const Navbar = () => {
     </Flex>
   );
 };
-
 export default Navbar;
