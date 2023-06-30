@@ -1,4 +1,16 @@
-import { Container, Tag, HStack, Box, Flex, Image, Heading, Text, useColorModeValue } from "@chakra-ui/react";
+import {
+  Container,
+  Tag,
+  HStack,
+  VStack,
+  Box,
+  Flex,
+  Image,
+  Heading,
+  Text,
+  useColorModeValue,
+  Spacer,
+} from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
@@ -16,8 +28,11 @@ const ArtworkDetailPage = () => {
 
   return (
     <Container maxW='container.lg' p={5}>
-      <Flex justify='center' alignItems='center' direction={{ base: "column", md: "row" }} gap={10}>
-        <Image maxH='80vh' maxW='40vw' src={`/${artworks_id}`} alt='tmp string' />
+      <Flex justify='center' direction={{ base: "column", md: "row" }} gap={10}>
+        <VStack>
+          <Image maxH='80vh' maxW='40vw' src={`/${artworks_id}`} alt='tmp string' />
+          <Spacer />
+        </VStack>
         <Flex borderLeft='1px' borderColor='gray.500' paddingLeft={10} paddingY={5} direction='column' gap={5}>
           <Heading as='h3' size='lg'>
             {artworks_id}
