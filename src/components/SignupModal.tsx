@@ -3,6 +3,7 @@ import { Button } from "@chakra-ui/react";
 import { VStack, Text, Box } from "@chakra-ui/react";
 import { Input, InputGroup, InputRightElement } from "@chakra-ui/react";
 import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton } from "@chakra-ui/react";
+import { useToast } from "@chakra-ui/react";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { useState } from "react";
 
@@ -19,6 +20,41 @@ const SignupModal = (props: Props) => {
   const [email, setEmail] = useState("");
   const [loginPass, setLoginPass] = useState("");
   const auth = getAuth();
+
+  const toast = useToast();
+  const onSignupBtnClicked = () => {
+    createUserWithEmailAndPassword(auth, email, loginPass)
+      .then((userCredential) => {
+        // Signed in
+        const user = userCredential.user;
+        toast({
+          title: "Account Created!",
+          status: "success",
+          duration: 9000,
+          isClosable: true,
+        });
+        // ...
+      })
+      .catch((err) => {
+        console.log(err);
+        if (err.errorMessage == "auth/email-already-in-use") {
+          toast({
+            title: "email-aliready-in-use",
+            description: "このメールアドレスはすでに登録されています",
+            status: "error",
+            duration: 9000,
+            isClosable: true,
+          });
+        } else {
+          toast({
+            title: "Signup Failed",
+            status: "error",
+            duration: 9000,
+            isClosable: true,
+          });
+        }
+      });
+  };
 
   return (
     <Modal isOpen={props.isOpen} onClose={props.onClose} isCentered blockScrollOnMount={false}>
@@ -64,13 +100,7 @@ const SignupModal = (props: Props) => {
             borderRadius='full'
             width='80%'
             onClick={() => {
-              createUserWithEmailAndPassword(auth, email, loginPass).then((userCredential) => {
-                // Signed in
-                const user = userCredential.user;
-                console.log("ログインしたよ");
-                console.log(user.displayName + "/" + user.email + "/" + user.uid + "/" + user.getIdToken());
-                // ...
-              });
+              onSignupBtnClicked();
               switchPasswordVisible();
             }}
           >
