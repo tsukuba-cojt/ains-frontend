@@ -3,6 +3,7 @@ import { Button } from "@chakra-ui/react";
 import { VStack, Text, Box } from "@chakra-ui/react";
 import { Input, InputGroup, InputRightElement } from "@chakra-ui/react";
 import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton } from "@chakra-ui/react";
+import { useToast } from "@chakra-ui/react";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { useState } from "react";
 
@@ -19,6 +20,32 @@ const LoginModal = (props: Props) => {
   const [email, setEmail] = useState("");
   const [loginPass, setLoginPass] = useState("");
   const auth = getAuth();
+
+  const toast = useToast();
+  const onSigninBtnClicked = () => {
+    signInWithEmailAndPassword(auth, email, loginPass)
+      .then((userCredential) => {
+        // Signed in
+        const user = userCredential.user;
+        toast({
+          title: "Signin Succeeded!",
+          status: "success",
+          duration: 9000,
+          isClosable: true,
+        });
+        // ...
+      })
+      .catch((err) => {
+        console.log(err);
+        toast({
+          title: "Signin Failed",
+          description: "メールアドレスかパスワードが正しいか確認してください",
+          status: "error",
+          duration: 9000,
+          isClosable: true,
+        });
+      });
+  };
 
   return (
     <Modal isOpen={props.isOpen} onClose={props.onClose} isCentered blockScrollOnMount={false}>
@@ -64,7 +91,7 @@ const LoginModal = (props: Props) => {
             borderRadius='full'
             width='80%'
             onClick={() => {
-              signInWithEmailAndPassword(auth, email, loginPass);
+              onSigninBtnClicked();
               switchPasswordVisible();
             }}
           >
