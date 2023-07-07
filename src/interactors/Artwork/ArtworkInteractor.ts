@@ -20,6 +20,8 @@ export default class ArtworkInteractor {
   }
 
   async upload(data: ArtworkFormData): Promise<ArtworkData | null> {
+    if (!data.file) return null;
+
     const file_interactor = new FileInteractor();
     const file_data = await file_interactor.upload(data.file);
     if (!file_data) return null;

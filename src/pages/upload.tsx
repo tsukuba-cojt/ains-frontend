@@ -1,19 +1,52 @@
 import { ArrowUpIcon, StarIcon } from "@chakra-ui/icons";
-import { Box } from "@chakra-ui/react";
-import { AbsoluteCenter, Text, Flex, Spacer, Button, Input, VStack, HStack, Image } from "@chakra-ui/react";
-import { useState, ChangeEvent } from "react";
+import { AbsoluteCenter, Text, Flex, Spacer, Input, VStack, HStack, Box, Button, useToast } from "@chakra-ui/react";
+import { useState, ChangeEvent, useContext } from "react";
+
+import { FirebaseAuthContext } from "@/components/FirebaseAuthProvider";
+import ArtworkInteractor from "@/interactors/Artwork/ArtworkInteractor";
+import { ArtworkFormData, INITIAL_ARTWORK_FORM_DATA } from "@/types/api/artwork";
 
 const ImageUploadForm = () => {
-  const [selectedImage, setSelectedImage] = useState(null);
+  const { user } = useContext(FirebaseAuthContext);
+  const [artworkFormData, setArtWorkFormData] = useState<ArtworkFormData>(INITIAL_ARTWORK_FORM_DATA);
+  const toast = useToast();
+
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>): void => {
+    if (e.target.type === "file") {
+      if (!e.target.files) return;
+      setArtWorkFormData({
+        ...artworkFormData,
+        [e.target.id]: e.target.files[0],
+      });
+    } else {
+      setArtWorkFormData({
+        ...artworkFormData,
+        [e.target.id]: e.target.value,
+      });
+    }
+  };
 
   const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
     // const file = event.target.files[0];
     // setSelectedImage(URL.createObjectURL(file));
   };
 
-  const handleUpload = () => {
-    // ここで画像をサーバーに送信する処理を実装します
-    console.log("画像をアップロードしました:", selectedImage);
+  const handleUpload = async () => {
+    if (!user) {
+      toast({
+        title: "ログインしてください",
+        status: "error",
+        duration: 9000,
+        isClosable: true,
+      });
+      return;
+    }
+    console.log(
+      await new ArtworkInteractor().upload({
+        ...artworkFormData,
+        author_id: user?.uid,
+      })
+    );
   };
 
   return (
@@ -26,8 +59,8 @@ const ImageUploadForm = () => {
               <ArrowUpIcon />
               <h2>画像をアップロードする</h2>
               <Spacer />
-              <input type='file' accept='image/*' onChange={handleImageChange} />
-              {selectedImage && <Image src={selectedImage} alt='選択された画像のプレビュー' />}
+              <input id='file' type='file' accept='image/*' onChange={handleInputChange} />
+              {/* {selectedImage && <Image src={selectedImage} alt='選択された画像のプレビュー' />} */}
               <Spacer />
             </Flex>
           </Flex>
@@ -37,11 +70,11 @@ const ImageUploadForm = () => {
               <Box w='70px' h='10' bg='black' />
               <Spacer />
               <Box>
-                <Button>アップロード</Button>
-                {/* <button onClick={handleUpload}>アップロード</button> */}
+                {/* <Button>アップロード</Button> */}
+                <Button onClick={handleUpload}>アップロード</Button>
               </Box>
             </HStack>
-            <Input size='lg' placeholder='タイトルを入力してください' />
+            <Input id='name' onChange={handleInputChange} size='lg' placeholder='タイトルを入力してください' />
             <Flex>
               <StarIcon boxSize={6} />
               <Text fontSize='xl'> ユーザー名</Text>

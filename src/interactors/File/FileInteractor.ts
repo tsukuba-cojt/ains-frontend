@@ -14,7 +14,7 @@ export default class FileInteractor {
     if (file_name.split(".").length < 2) {
       return null;
     }
-    const file_ext = file_name.split(".")[-1];
+    const file_ext = file_name.split(".").slice(-1)[0];
 
     return `/${this.COLLECTION_NAME}/${file_id}.${file_ext}`;
   }

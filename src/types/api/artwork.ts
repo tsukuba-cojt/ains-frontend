@@ -33,11 +33,22 @@ export interface ArtworkData {
   parent_ids: string[];
 }
 
+export const INITIAL_ARTWORK_FORM_DATA: ArtworkFormData = {
+  type: "image",
+  name: "",
+  description: "",
+  file: null,
+
+  author_id: "",
+  tag_ids: [],
+  comment_ids: [],
+  parent_ids: [],
+};
 export interface ArtworkFormData {
   type: ArtworkType;
   name: string;
   description?: string;
-  file: Blob;
+  file: Blob | null;
 
   author_id: string;
   tag_ids: string[];
