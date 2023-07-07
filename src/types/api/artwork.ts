@@ -4,14 +4,25 @@ export interface ImageListData {
   url: string;
 }
 
+export interface FileData {
+  id: string;
+  path: string;
+  url: string;
+}
+
+export interface FileCreateData {
+  path: string;
+  url: string;
+}
+
 export type ArtworkType = "image" | "novel" | "music" | "movie";
 
-export interface ArtworkGet {
+export interface ArtworkData {
   id: string;
   type: ArtworkType;
   name: string;
   description?: string;
-  url: string;
+  file: FileData;
   view_num: number;
   save_num: number;
   uploaded: Date;
@@ -22,11 +33,28 @@ export interface ArtworkGet {
   parent_ids: string[];
 }
 
-export interface ArtworkCreate {
+export interface ArtworkFormData {
   type: ArtworkType;
   name: string;
   description?: string;
   file: Blob;
+
   author_id: string;
+  tag_ids: string[];
+  comment_ids: string[];
+  parent_ids: string[];
+}
+
+export interface ArtworkCreateData {
+  type: ArtworkType;
+  name: string;
+  description?: string;
+  view_num: number;
+  save_num: number;
+
+  file_id: string;
+  author_id: string;
+  tag_ids: string[];
+  comment_ids: string[];
   parent_ids: string[];
 }

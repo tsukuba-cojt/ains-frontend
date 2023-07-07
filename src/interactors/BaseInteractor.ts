@@ -35,6 +35,10 @@ export default class BaseInteractor {
     this.storage = getStorage();
   }
 
+  uuidv4(): string {
+    return uuidv4();
+  }
+
   async get(collection_name: string, doc_id: string): Promise<DocumentData | null> {
     try {
       const ref = doc(this.db, collection_name, doc_id);
@@ -90,9 +94,8 @@ export default class BaseInteractor {
     }
   }
 
-  async set(collection_name: string, data: DocumentData): Promise<DocumentData | null> {
+  async set(collection_name: string, doc_id: string, data: DocumentData): Promise<DocumentData | null> {
     try {
-      const doc_id = uuidv4();
       const ref = doc(this.db, collection_name, doc_id);
       data = Object.assign(data, { created_at: serverTimestamp(), updated_at: serverTimestamp() });
       await setDoc(ref, data).catch((_err) => {
