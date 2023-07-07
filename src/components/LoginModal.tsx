@@ -33,7 +33,9 @@ const LoginModal = (props: Props) => {
           duration: 9000,
           isClosable: true,
         });
-        // ...
+        setEmail("");
+        setLoginPass("");
+        props.onClose();
       })
       .catch((err) => {
         console.log(err);
@@ -92,7 +94,6 @@ const LoginModal = (props: Props) => {
             width='80%'
             onClick={() => {
               onSigninBtnClicked();
-              switchPasswordVisible();
             }}
           >
             ログイン
