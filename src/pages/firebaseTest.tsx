@@ -1,17 +1,44 @@
 import { Box, Button, Text, Flex, Image, useColorMode, useColorModeValue } from "@chakra-ui/react";
+import { getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
-import { collection, doc, addDoc, getDocs, updateDoc, getDocFromCache, deleteDoc } from "firebase/firestore";
+import { collection, doc, addDoc, getDocs, updateDoc, deleteDoc } from "firebase/firestore";
 import { getStorage, ref, getDownloadURL, uploadBytes } from "firebase/storage";
 import { useState } from "react";
 
 import { theme } from "./_app";
 
 const FirebaseTestPage = () => {
+  const auth = getAuth();
   const db = getFirestore();
   const { colorMode, toggleColorMode } = useColorMode();
   const [count, setCount] = useState<number>(0);
 
   const secondary = useColorModeValue(theme.colors.secondary.ml, theme.colors.secondary.md);
+
+  const signoutUser = () => {
+    signOut(auth)
+      .then(() => {
+        console.log("サインアウトしたよ~");
+      })
+      .catch((error) => {
+        // An error happened.
+      });
+  };
+
+  const LoginWithEmailAndPass = () => {
+    signInWithEmailAndPassword(auth, "toktabea@gmail.com", "xp2800ch")
+      .then((userCredential) => {
+        // Signed in
+        const user = userCredential.user;
+        console.log("ログインしたよ");
+        console.log(user.displayName + "/" + user.email + "/" + user.uid + "/" + user.getIdToken());
+        // ...
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+      });
+  };
 
   const addData = async (): Promise<void> => {
     try {
@@ -98,6 +125,8 @@ const FirebaseTestPage = () => {
         <Image id='myimg' src='' alt='代替テキスト' />
       </Box>
       <Button>hoge</Button>
+      <Button onClick={LoginWithEmailAndPass}>Logindayo</Button>
+      <Button onClick={signoutUser}>signoutDayo</Button>
       <Button onClick={addData}>addData</Button>
       <Button onClick={deleteData}>deleteData</Button>
       <Button onClick={getData}>GetData</Button>
