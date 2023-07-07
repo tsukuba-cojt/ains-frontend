@@ -48,6 +48,8 @@ const ImageUploadForm = () => {
             </Flex>
 
             <Input placeholder='＃タグ' size='md' />
+            <Text fontSize='l'> 参考コンテンツ</Text>
+            <Input placeholder='作品ID' size='md' />
           </VStack>
 
           <Flex></Flex>
