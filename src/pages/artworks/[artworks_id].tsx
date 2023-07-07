@@ -10,6 +10,7 @@ import {
   Text,
   useColorModeValue,
   Spacer,
+  Button,
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -52,6 +53,9 @@ const ArtworkDetailPage = () => {
             <Tag>fuga</Tag>
             <Tag>piyo</Tag>
           </HStack>
+          <Button>
+            参考アップロード
+          </Button>
           <Box p={3} rounded='md' bg={secondary}>
             <Heading size='md' as='h3' py={2} borderBottom='1px' borderColor='gray.500'>
               コメント
