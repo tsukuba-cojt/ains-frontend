@@ -11,6 +11,14 @@ export default class ArtworkInteractor {
     this.interactor = new BaseInteractor();
   }
 
+  async get(artwork_id: string): Promise<ArtworkData | null> {
+    const res_data = await this.interactor.get(this.COLLECTION_NAME, artwork_id);
+    if (!res_data) return null;
+
+    const artwork_data = await ArtworkMapper.mapDocDataToArtworkData(res_data);
+    return artwork_data;
+  }
+
   async upload(data: ArtworkFormData): Promise<ArtworkData | null> {
     const file_interactor = new FileInteractor();
     const file_data = await file_interactor.upload(data.file);
