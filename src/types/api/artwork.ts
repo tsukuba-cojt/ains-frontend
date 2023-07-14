@@ -28,7 +28,7 @@ export interface ArtworkData {
   uploaded: Date;
 
   author_id: string;
-  tag_ids: string[];
+  tags: string[];
   comment_ids: string[];
   parent_ids: string[];
 }
@@ -40,7 +40,7 @@ export const INITIAL_ARTWORK_FORM_DATA: ArtworkFormData = {
   file: null,
 
   author_id: "",
-  tag_ids: [],
+  tags: [],
   comment_ids: [],
   parent_ids: [],
 };
@@ -51,7 +51,7 @@ export interface ArtworkFormData {
   file: Blob | null;
 
   author_id: string;
-  tag_ids: string[];
+  tags: string[];
   comment_ids: string[];
   parent_ids: string[];
 }
@@ -65,7 +65,7 @@ export interface ArtworkCreateData {
 
   file_id: string;
   author_id: string;
-  tag_ids: string[];
+  tags: string[];
   comment_ids: string[];
   parent_ids: string[];
 }
