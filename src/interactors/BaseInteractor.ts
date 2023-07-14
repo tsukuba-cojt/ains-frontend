@@ -17,6 +17,7 @@ import {
   or,
   serverTimestamp,
 } from "firebase/firestore";
+import { orderBy, limit } from "firebase/firestore";
 import { FirebaseStorage, getDownloadURL, getStorage, ref as storageRef, uploadBytes } from "firebase/storage";
 import { v4 as uuidv4 } from "uuid";
 
@@ -48,6 +49,21 @@ export default class BaseInteractor {
       } else {
         return null;
       }
+    } catch (_err) {
+      return null;
+    }
+  }
+  async getLatests(collection_name: string, limitNum: number): Promise<Array<DocumentData> | null> {
+    try {
+      const collectionRef = collection(this.db, collection_name);
+      const q = query(collectionRef, orderBy("created_at"), limit(limitNum));
+      const snapshot = await getDocs(q);
+      const res_data: Array<DocumentData> = [];
+      snapshot.forEach((doc) => {
+        // doc.data() is never undefined for query doc snapshots
+        res_data.push(Object.assign(doc.data(), { id: doc.id }));
+      });
+      return res_data;
     } catch (_err) {
       return null;
     }
