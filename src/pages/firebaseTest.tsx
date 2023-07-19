@@ -1,8 +1,9 @@
 import { Box, Button, Text, Flex, Image, useColorMode, useColorModeValue } from "@chakra-ui/react";
-import { getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword, signOut, sendEmailVerification } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { collection, doc, addDoc, getDocs, updateDoc, deleteDoc } from "firebase/firestore";
 import { getStorage, ref, getDownloadURL, uploadBytes } from "firebase/storage";
+import { useRouter } from "next/router";
 import { useState } from "react";
 
 import { theme } from "./_app";
@@ -113,6 +114,27 @@ const FirebaseTestPage = () => {
     }
   };
 
+  const emailVerification = () => {
+    if (auth.currentUser) {
+      sendEmailVerification(auth.currentUser).then(() => {
+        console.log("uwaaaaa");
+      });
+    }
+  };
+  const showIsVerificated = () => {
+    if (auth.currentUser) {
+      console.log(auth.currentUser.emailVerified);
+    }
+  };
+
+  const router = useRouter();
+  const goToRoot = () => {
+    if (auth.currentUser) {
+      console.log(auth.currentUser.emailVerified);
+      router.push("/");
+    }
+  };
+
   return (
     <Box>
       <Box>
@@ -125,6 +147,8 @@ const FirebaseTestPage = () => {
         <Image id='myimg' src='' alt='代替テキスト' />
       </Box>
       <Button>hoge</Button>
+      <Button onClick={showIsVerificated}>showVerificated</Button>
+      <Button onClick={emailVerification}>verificationdayo</Button>
       <Button onClick={LoginWithEmailAndPass}>Logindayo</Button>
       <Button onClick={signoutUser}>signoutDayo</Button>
       <Button onClick={addData}>addData</Button>
@@ -132,6 +156,7 @@ const FirebaseTestPage = () => {
       <Button onClick={getData}>GetData</Button>
       <Button onClick={updateData}>UpdateData</Button>
       <Button onClick={getImgURL}>getImgURL</Button>
+      <Button onClick={goToRoot}>GoToRoot</Button>
       <input name='file' type='file' accept='image/*' onChange={onChangeFile} />
       <Button onClick={submitFile}>送信</Button>
       <Flex align='center' gap={2}>

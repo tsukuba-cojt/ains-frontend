@@ -4,7 +4,8 @@ import { VStack, Text, Box } from "@chakra-ui/react";
 import { Input, InputGroup, InputRightElement } from "@chakra-ui/react";
 import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton } from "@chakra-ui/react";
 import { useToast } from "@chakra-ui/react";
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
+import { useRouter } from "next/router";
 import { useState } from "react";
 
 interface Props {
@@ -20,6 +21,7 @@ const SignupModal = (props: Props) => {
   const [email, setEmail] = useState("");
   const [loginPass, setLoginPass] = useState("");
   const auth = getAuth();
+  const router = useRouter();
 
   const toast = useToast();
   const onSignupBtnClicked = () => {
@@ -36,6 +38,12 @@ const SignupModal = (props: Props) => {
         setEmail("");
         setLoginPass("");
         props.onClose();
+        if (auth.currentUser && !auth.currentUser.emailVerified) {
+          sendEmailVerification(auth.currentUser).then(() => {
+            console.log("認証メールを送りました。");
+            router.push("/waitEmailVerify");
+          });
+        }
       })
       .catch((err) => {
         console.log(err);
