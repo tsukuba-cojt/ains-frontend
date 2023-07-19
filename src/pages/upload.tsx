@@ -1,4 +1,5 @@
 import {
+  Image,
   Container,
   useToast,
   Box,
@@ -16,14 +17,14 @@ import {
   Flex,
   FormErrorMessage,
 } from "@chakra-ui/react";
-import { useState, ChangeEvent, useContext, useMemo } from "react";
+import { useState, ChangeEvent, useContext, useMemo, useEffect, ReactNode } from "react";
 
 import { FirebaseAuthContext } from "@/components/FirebaseAuthProvider";
 import HoverTag from "@/components/HoverTag";
 import UploadIcon from "@/icons/UploadIcon";
 import ArtworkInteractor from "@/interactors/Artwork/ArtworkInteractor";
 import { theme } from "@/pages/_app";
-import { ArtworkFormData, INITIAL_ARTWORK_FORM_DATA } from "@/types/api/artwork";
+import { ArtworkFormData, ArtworkType, INITIAL_ARTWORK_FORM_DATA } from "@/types/api/artwork";
 
 interface TagInputData {
   text: string;
@@ -38,31 +39,97 @@ interface ParentInputData {
   parents: string[];
 }
 
+const INITIAL_TAG_INPUT_DATA: TagInputData = {
+  text: "",
+  is_error: false,
+  error_msg: "error!",
+};
+
+const INITIAL_PARENT_INPUT_DATA: ParentInputData = {
+  parent_id: "",
+  is_error: false,
+  error_msg: "error!",
+  parents: [],
+};
+
 const ImageUploadForm = () => {
   const { user } = useContext(FirebaseAuthContext);
   const [artworkFormData, setArtWorkFormData] = useState<ArtworkFormData>(INITIAL_ARTWORK_FORM_DATA);
-  const [tagInputData, setTagInputData] = useState<TagInputData>({
-    text: "",
-    is_error: false,
-    error_msg: "error!",
-  });
-  const [parentInputData, setParentInputData] = useState<ParentInputData>({
-    parent_id: "",
-    is_error: false,
-    error_msg: "error!",
-    parents: [],
-  });
+  const [tagInputData, setTagInputData] = useState<TagInputData>(INITIAL_TAG_INPUT_DATA);
+  const [parentInputData, setParentInputData] = useState<ParentInputData>(INITIAL_PARENT_INPUT_DATA);
+  const [fileContentElement, setFileContentElement] = useState<ReactNode>(<></>);
 
   const toast = useToast();
   const secondary = useColorModeValue(theme.colors.secondary.ml, theme.colors.secondary.md);
   const icon_fill_color = useColorModeValue("gray.800", "white");
 
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>): void => {
+  useEffect(() => {
+    if (artworkFormData.file === null) return;
+    const reader = new FileReader();
+    switch (artworkFormData.type) {
+      case "image": {
+        reader.onloadend = (e: ProgressEvent<FileReader>) => {
+          if (e.target?.result && typeof e.target.result === "string") {
+            setFileContentElement(<Image src={e.target.result} alt='アップロードした画像' />);
+          }
+        };
+        reader.readAsDataURL(artworkFormData.file);
+        break;
+      }
+      case "text": {
+        reader.onloadend = (e: ProgressEvent<FileReader>) => {
+          if (e.target?.result && typeof e.target.result === "string") {
+            setFileContentElement(<p>{e.target.result}</p>);
+          }
+        };
+        reader.readAsText(artworkFormData.file);
+        break;
+      }
+      case "audio": {
+        reader.onloadend = (e: ProgressEvent<FileReader>) => {
+          if (e.target?.result && typeof e.target.result === "string") {
+            setFileContentElement(<audio controls src={e.target.result}></audio>);
+          }
+        };
+        reader.readAsDataURL(artworkFormData.file);
+        break;
+      }
+      case "video": {
+        reader.onloadend = (e: ProgressEvent<FileReader>) => {
+          if (e.target?.result && typeof e.target.result === "string") {
+            setFileContentElement(<video controls src={e.target.result}></video>);
+          }
+        };
+        reader.readAsDataURL(artworkFormData.file);
+        break;
+      }
+      default: {
+        setFileContentElement(<></>);
+      }
+    }
+  }, [artworkFormData.file]);
+
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
     if (e.target.type === "file") {
-      if (!e.target.files) return;
+      if (!("files" in e.target) || !e.target.files || e.target.files[0] === undefined) return;
+
+      const new_file = e.target.files[0];
+      const file_type = new_file.type.split("/")[0];
+      if (!["image", "text", "audio", "video"].includes(file_type)) {
+        toast({
+          title: "対応していないファイルです",
+          status: "error",
+          duration: 9000,
+          isClosable: true,
+        });
+        return;
+      }
+      const artwork_type: ArtworkType = file_type as ArtworkType;
+
       setArtWorkFormData({
         ...artworkFormData,
-        [e.target.id]: e.target.files[0],
+        type: artwork_type,
+        file: new_file,
       });
     } else {
       setArtWorkFormData({
@@ -70,11 +137,6 @@ const ImageUploadForm = () => {
         [e.target.id]: e.target.value,
       });
     }
-  };
-
-  const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
-    // const file = event.target.files[0];
-    // setSelectedImage(URL.createObjectURL(file));
   };
 
   const handleUpload = async () => {
@@ -87,12 +149,29 @@ const ImageUploadForm = () => {
       });
       return;
     }
-    console.log(
-      await new ArtworkInteractor().upload({
-        ...artworkFormData,
-        author_id: user?.uid,
-      })
-    );
+
+    const result = await new ArtworkInteractor().upload({
+      ...artworkFormData,
+      author_id: user?.uid,
+    });
+    if (result) {
+      toast({
+        title: "アップロードに成功しました",
+        status: "success",
+        duration: 9000,
+        isClosable: true,
+      });
+      setArtWorkFormData(INITIAL_ARTWORK_FORM_DATA);
+      setTagInputData(INITIAL_TAG_INPUT_DATA);
+      setParentInputData(INITIAL_PARENT_INPUT_DATA);
+    } else {
+      toast({
+        title: "アップロードに失敗しました",
+        status: "error",
+        duration: 9000,
+        isClosable: true,
+      });
+    }
   };
 
   const addTag = () => {
@@ -215,6 +294,7 @@ const ImageUploadForm = () => {
               style={{
                 width: "100%",
                 height: "100%",
+                position: "relative",
                 backgroundColor: "#a1a5ad",
                 borderRadius: ".75rem",
                 display: "flex",
@@ -224,20 +304,35 @@ const ImageUploadForm = () => {
                 gap: ".75rem",
               }}
             >
+              {artworkFormData.file !== null ? (
+                <Flex
+                  backgroundColor='#a1a5ad'
+                  borderRadius='.75rem'
+                  position='absolute'
+                  w='full'
+                  h='full'
+                  inset={0}
+                  padding={3}
+                  justifyContent='center'
+                  alignItems='center'
+                >
+                  {fileContentElement}
+                </Flex>
+              ) : null}
               <UploadIcon strokeWidth={1.5} boxSize={12} color={icon_fill_color} />
               <Text>コンテンツをアップロードする</Text>
-              <input id='file' type='file' hidden />
+              <input id='file' onChange={handleInputChange} type='file' hidden />
             </label>
           </GridItem>
           <GridItem>
             <VStack spacing={5}>
               <FormControl>
                 <FormLabel>作品名</FormLabel>
-                <Input type='text' />
+                <Input id='name' onChange={handleInputChange} value={artworkFormData.name} type='text' />
               </FormControl>
               <FormControl>
                 <FormLabel>概要</FormLabel>
-                <Textarea />
+                <Textarea id='description' value={artworkFormData.description} onChange={handleInputChange} />
               </FormControl>
               <FormControl isInvalid={tagInputData.is_error}>
                 <FormLabel>タグ</FormLabel>
@@ -285,54 +380,15 @@ const ImageUploadForm = () => {
                   {parentInputData.parents.length}/10
                 </Text>
               </FormControl>
+              <Button w='full' onClick={handleUpload}>
+                アップロード
+              </Button>
             </VStack>
           </GridItem>
         </Grid>
       </Box>
     </Container>
   );
-
-  // return (
-  //   <Box position='relative' h='1200px'>
-  //     <AbsoluteCenter bg='black' p='4' w='1000' h='1100' color='white' axis='both' borderRadius='lg'>
-  //       <Flex color='white'>
-  //         <Flex w='400px' h='1000' bg='black' direction='column' alignItems='center'>
-  //           <Flex w='380' h='500' bg='gray' direction='column' alignItems='center' borderRadius='lg'>
-  //             <Spacer />
-  //             <ArrowUpIcon />
-  //             <h2>画像をアップロードする</h2>
-  //             <Spacer />
-  //             <input id='file' type='file' accept='image/*' onChange={handleInputChange} />
-  //             {/* {selectedImage && <Image src={selectedImage} alt='選択された画像のプレビュー' />} */}
-  //             <Spacer />
-  //           </Flex>
-  //         </Flex>
-  //         <Spacer />
-  //         <VStack spacing='50px' w='400px' bg='black'>
-  //           <HStack spacing='100px'>
-  //             <Box w='70px' h='10' bg='black' />
-  //             <Spacer />
-  //             <Box>
-  //               {/* <Button>アップロード</Button> */}
-  //               <Button onClick={handleUpload}>アップロード</Button>
-  //             </Box>
-  //           </HStack>
-  //           <Input id='name' onChange={handleInputChange} size='lg' placeholder='タイトルを入力してください' />
-  //           <Flex>
-  //             <StarIcon boxSize={6} />
-  //             <Text fontSize='xl'> ユーザー名</Text>
-  //           </Flex>
-
-  //           <Input placeholder='＃タグ' size='md' />
-  //           <Text fontSize='l'> 参考コンテンツ</Text>
-  //           <Input placeholder='作品ID' size='md' />
-  //         </VStack>
-
-  //         <Flex></Flex>
-  //       </Flex>
-  //     </AbsoluteCenter>
-  //   </Box>
-  // );
 };
 
 export default ImageUploadForm;

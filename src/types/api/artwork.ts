@@ -15,7 +15,7 @@ export interface FileCreateData {
   url: string;
 }
 
-export type ArtworkType = "image" | "novel" | "music" | "movie";
+export type ArtworkType = "image" | "text" | "audio" | "video";
 
 export interface ArtworkData {
   id: string;
