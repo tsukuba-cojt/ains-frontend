@@ -15,7 +15,7 @@ const FirebaseAuthProvider = (props: Props) => {
 
   useEffect(() => {
     const unsubscribed = auth.onAuthStateChanged((new_user: User | null) => {
-      if (new_user) {
+      if (new_user && new_user.emailVerified) {
         setUser(new_user);
       } else {
         setUser(null);
