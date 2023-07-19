@@ -36,7 +36,7 @@ export default class ArtworkInteractor {
 
       file_id: file_data.id,
       author_id: data.author_id,
-      tag_ids: data.tag_ids,
+      tags: data.tags,
       comment_ids: data.comment_ids,
       parent_ids: data.parent_ids,
     };

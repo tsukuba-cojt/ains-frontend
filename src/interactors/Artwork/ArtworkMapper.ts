@@ -19,7 +19,7 @@ export default class ArtworkMapper {
       uploaded: new Date(data.uploaded),
 
       author_id: data.author_id,
-      tag_ids: data.tag_ids,
+      tags: data.tags,
       comment_ids: data.comment_ids,
       parent_ids: data.parent_ids,
     };
