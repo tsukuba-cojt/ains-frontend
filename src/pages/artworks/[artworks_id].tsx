@@ -21,6 +21,8 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 
 import CommentBox from "@/components/CommentBox";
+import ArtworkInteractor from "@/interactors/Artwork/ArtworkInteractor";
+import { ArtworkData } from "@/types/api/artwork";
 
 import { theme } from "../_app";
 
@@ -31,8 +33,23 @@ const ArtworkDetailPage = () => {
   const [doesExpandDescription, setDoesExpandDescription] = useState<boolean>(false);
   const [doesExpandDescription2, setDoesExpandDescription2] = useState<boolean>(false);
 
-
   const secondary = useColorModeValue(theme.colors.secondary.ml, theme.colors.secondary.md);
+
+  const getArtworksData = async (): Promise<ArtworkData | null> => {
+    const interactor = new ArtworkInteractor();
+
+    if (typeof artworks_id === typeof "string") {
+      const artworkData: ArtworkData | null = await interactor.get(artworks_id as string);
+      if (artworkData) {
+        console.log(artworkData);
+        return artworkData;
+      }
+    }
+    console.log(`${artworks_id}を取得できませんでした`);
+    return null;
+  };
+
+  getArtworksData();
 
   return (
     <Container maxW='container.lg' p={5}>
@@ -62,34 +79,29 @@ const ArtworkDetailPage = () => {
           </HStack>
           <Button>参考アップロード</Button>
           <Box p={3} rounded='md' bg={secondary}>
-            <Accordion  allowToggle>
+            <Accordion allowToggle>
               <AccordionItem>
                 <h2>
                   <AccordionButton>
-                    <Box as="span" flex='1' textAlign='left'>
+                    <Box as='span' flex='1' textAlign='left'>
                       コメント
                     </Box>
                     <AccordionIcon />
                   </AccordionButton>
                 </h2>
                 <AccordionPanel pb={4}>
-                <CommentBox icon_url='https://bit.ly/dan-abramov' username='andrew' text='Good!\nI like this!!' />
-              <CommentBox icon_url='https://bit.ly/dan-abramov' username='andrew' text='Good!\nI like this!!' />
-              <CommentBox icon_url='https://bit.ly/dan-abramov' username='andrew' text='Good!\nI like this!!' />
-              <CommentBox icon_url='https://bit.ly/dan-abramov' username='andrew' text='Good!\nI like this!!' />
-              <CommentBox icon_url='https://bit.ly/dan-abramov' username='andrew' text='Good!\nI like this!!' />
-              <CommentBox icon_url='https://bit.ly/dan-abramov' username='andrew' text='Good!\nI like this!!' />
-              <CommentBox icon_url='https://bit.ly/dan-abramov' username='andrew' text='Good!\nI like this!!' />
+                  <CommentBox icon_url='https://bit.ly/dan-abramov' username='andrew' text='Good!\nI like this!!' />
+                  <CommentBox icon_url='https://bit.ly/dan-abramov' username='andrew' text='Good!\nI like this!!' />
+                  <CommentBox icon_url='https://bit.ly/dan-abramov' username='andrew' text='Good!\nI like this!!' />
+                  <CommentBox icon_url='https://bit.ly/dan-abramov' username='andrew' text='Good!\nI like this!!' />
+                  <CommentBox icon_url='https://bit.ly/dan-abramov' username='andrew' text='Good!\nI like this!!' />
+                  <CommentBox icon_url='https://bit.ly/dan-abramov' username='andrew' text='Good!\nI like this!!' />
+                  <CommentBox icon_url='https://bit.ly/dan-abramov' username='andrew' text='Good!\nI like this!!' />
                 </AccordionPanel>
               </AccordionItem>
             </Accordion>
 
-            <Flex
-              mt={4}
-              direction='column'
-              gap={4}>
-
-            </Flex>
+            <Flex mt={4} direction='column' gap={4}></Flex>
           </Box>
         </Flex>
       </Flex>
