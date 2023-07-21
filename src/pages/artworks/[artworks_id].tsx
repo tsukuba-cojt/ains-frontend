@@ -19,6 +19,7 @@ import {
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import useSWR from "swr";
 
 import CommentBox from "@/components/CommentBox";
 import ArtworkInteractor from "@/interactors/Artwork/ArtworkInteractor";
@@ -48,8 +49,14 @@ const ArtworkDetailPage = () => {
     console.log(`${artworks_id}を取得できませんでした`);
     return null;
   };
+  const { data: artworks, error, isLoading } = useSWR(`/artworks/${artworks_id as string}`, getArtworksData);
+  if (artworks) {
+    console.log("いやぁぁっぁ");
+    console.log(artworks);
+  }
 
-  getArtworksData();
+  if (error || artworks === null) return <>Error!</>;
+  if (isLoading || artworks === undefined) return <>Loading!</>;
 
   return (
     <Container maxW='container.lg' p={5}>
