@@ -17,7 +17,7 @@ import {
   Flex,
   FormErrorMessage,
 } from "@chakra-ui/react";
-import { useState, ChangeEvent, useContext, useMemo, useEffect, ReactNode } from "react";
+import { useState, ChangeEvent, useContext, useMemo, useEffect, ReactNode, Fragment } from "react";
 
 import { FirebaseAuthContext } from "@/components/FirebaseAuthProvider";
 import HoverTag from "@/components/HoverTag";
@@ -65,6 +65,7 @@ const ImageUploadForm = () => {
 
   useEffect(() => {
     if (artworkFormData.file === null) return;
+
     const reader = new FileReader();
     switch (artworkFormData.type) {
       case "image": {
@@ -79,7 +80,20 @@ const ImageUploadForm = () => {
       case "text": {
         reader.onloadend = (e: ProgressEvent<FileReader>) => {
           if (e.target?.result && typeof e.target.result === "string") {
-            setFileContentElement(<p>{e.target.result}</p>);
+            const text_with_br = e.target.result.split("\n").map((t: string, i: number) => {
+              return (
+                <Fragment key={i}>
+                  {t}
+                  <br />
+                </Fragment>
+              );
+            });
+
+            setFileContentElement(
+              <Text overflowY='scroll' w='full' h='full'>
+                {text_with_br}
+              </Text>
+            );
           }
         };
         reader.readAsText(artworkFormData.file);
