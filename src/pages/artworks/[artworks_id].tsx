@@ -19,8 +19,11 @@ import {
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import useSWR from "swr";
 
 import CommentBox from "@/components/CommentBox";
+import ArtworkInteractor from "@/interactors/Artwork/ArtworkInteractor";
+import { ArtworkData } from "@/types/api/artwork";
 
 import { theme } from "../_app";
 
@@ -31,6 +34,28 @@ const ArtworkDetailPage = () => {
   const [doesExpandDescription, setDoesExpandDescription] = useState<boolean>(false);
 
   const secondary = useColorModeValue(theme.colors.secondary.ml, theme.colors.secondary.md);
+
+  const getArtworksData = async (): Promise<ArtworkData | null> => {
+    const interactor = new ArtworkInteractor();
+
+    if (typeof artworks_id === typeof "string") {
+      const artworkData: ArtworkData | null = await interactor.get(artworks_id as string);
+      if (artworkData) {
+        console.log(artworkData);
+        return artworkData;
+      }
+    }
+    console.log(`${artworks_id}を取得できませんでした`);
+    return null;
+  };
+  const { data: artworks, error, isLoading } = useSWR(`/artworks/${artworks_id as string}`, getArtworksData);
+  if (artworks) {
+    console.log("いやぁぁっぁ");
+    console.log(artworks);
+  }
+
+  if (error || artworks === null) return <>Error!</>;
+  if (isLoading || artworks === undefined) return <>Loading!</>;
 
   return (
     <Container maxW='container.lg' p={5}>
