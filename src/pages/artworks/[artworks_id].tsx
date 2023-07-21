@@ -29,8 +29,6 @@ const ArtworkDetailPage = () => {
   const { artworks_id } = router.query;
 
   const [doesExpandDescription, setDoesExpandDescription] = useState<boolean>(false);
-  const [doesExpandDescription2, setDoesExpandDescription2] = useState<boolean>(false);
-
 
   const secondary = useColorModeValue(theme.colors.secondary.ml, theme.colors.secondary.md);
 
@@ -62,34 +60,27 @@ const ArtworkDetailPage = () => {
           </HStack>
           <Button>参考アップロード</Button>
           <Box p={3} rounded='md' bg={secondary}>
-            <Accordion  allowToggle>
+            <Accordion allowToggle>
               <AccordionItem>
                 <h2>
                   <AccordionButton>
-                    <Box as="span" flex='1' textAlign='left'>
+                    <Box as='span' flex='1' textAlign='left'>
                       コメント
                     </Box>
                     <AccordionIcon />
                   </AccordionButton>
                 </h2>
                 <AccordionPanel pb={4}>
-                <CommentBox icon_url='https://bit.ly/dan-abramov' username='andrew' text='Good!\nI like this!!' />
-              <CommentBox icon_url='https://bit.ly/dan-abramov' username='andrew' text='Good!\nI like this!!' />
-              <CommentBox icon_url='https://bit.ly/dan-abramov' username='andrew' text='Good!\nI like this!!' />
-              <CommentBox icon_url='https://bit.ly/dan-abramov' username='andrew' text='Good!\nI like this!!' />
-              <CommentBox icon_url='https://bit.ly/dan-abramov' username='andrew' text='Good!\nI like this!!' />
-              <CommentBox icon_url='https://bit.ly/dan-abramov' username='andrew' text='Good!\nI like this!!' />
-              <CommentBox icon_url='https://bit.ly/dan-abramov' username='andrew' text='Good!\nI like this!!' />
+                  <CommentBox icon_url='https://bit.ly/dan-abramov' username='andrew' text='Good!\nI like this!!' />
+                  <CommentBox icon_url='https://bit.ly/dan-abramov' username='andrew' text='Good!\nI like this!!' />
+                  <CommentBox icon_url='https://bit.ly/dan-abramov' username='andrew' text='Good!\nI like this!!' />
+                  <CommentBox icon_url='https://bit.ly/dan-abramov' username='andrew' text='Good!\nI like this!!' />
+                  <CommentBox icon_url='https://bit.ly/dan-abramov' username='andrew' text='Good!\nI like this!!' />
+                  <CommentBox icon_url='https://bit.ly/dan-abramov' username='andrew' text='Good!\nI like this!!' />
+                  <CommentBox icon_url='https://bit.ly/dan-abramov' username='andrew' text='Good!\nI like this!!' />
                 </AccordionPanel>
               </AccordionItem>
             </Accordion>
-
-            <Flex
-              mt={4}
-              direction='column'
-              gap={4}>
-
-            </Flex>
           </Box>
         </Flex>
       </Flex>

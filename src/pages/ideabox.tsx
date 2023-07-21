@@ -14,7 +14,7 @@ import React from "react";
 import { useMemo, useState } from "react";
 
 import GridImage from "@/components/GridImage";
-import { ImageListData } from "@/types/api/image";
+import { ImageListData } from "@/types/index";
 
 const buttonsize = 100;
 const buttonfontsize = 40;
