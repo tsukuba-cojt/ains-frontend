@@ -58,9 +58,10 @@ const Ideabox = (props: IdeaBoxTextProps) => {
       <VStack>
         <Text fontSize='6xl'> {ideaBoxName}</Text>
 
-        <HStack h='200px'>
+        <HStack py={10}>
           <VStack>
             <IconButton
+              aria-label='アイデアの削除'
               w={buttonsize}
               h={buttonsize}
               fontSize={buttonfontsize}
@@ -71,6 +72,7 @@ const Ideabox = (props: IdeaBoxTextProps) => {
           </VStack>
           <VStack>
             <IconButton
+              aria-label='関連アイデア'
               w={buttonsize}
               h={buttonsize}
               fontSize={buttonfontsize}
@@ -81,6 +83,7 @@ const Ideabox = (props: IdeaBoxTextProps) => {
           </VStack>
           <VStack>
             <IconButton
+              aria-label='名前変更'
               w={buttonsize}
               onClick={(event) => {
                 onOpen();
@@ -101,7 +104,7 @@ const Ideabox = (props: IdeaBoxTextProps) => {
         {image_grid_items}
       </Grid>
 
-      <Modal isOpen={isOpen}>
+      <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>タイトル変更</ModalHeader>
@@ -117,7 +120,7 @@ const Ideabox = (props: IdeaBoxTextProps) => {
                 }
               }}
             />
-            {!regex.test(inputTitleText) && <Text> 特殊文字は'_~+-`以外使用しないでください</Text>}
+            {!regex.test(inputTitleText) && <Text> 特殊文字は&apos;_~+-`以外使用しないでください</Text>}
             {errorMessageFlag && <Text>タイトルは1文字以上10文字以下にしてください。</Text>}
           </ModalBody>
 
