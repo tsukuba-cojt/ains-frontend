@@ -1,4 +1,4 @@
-import { Box, Image, Text, Flex } from "@chakra-ui/react";
+import { Box, Text, Flex, Avatar } from "@chakra-ui/react";
 import { Fragment } from "react";
 
 interface Props {
@@ -19,7 +19,7 @@ const CommentBox = (props: Props) => {
 
   return (
     <Flex gap={3} my={5}>
-      <Image boxSize='2.25rem' rounded='full' src={props.icon_url} alt={props.icon_url} />
+      <Avatar size='sm' src={props.icon_url} name={props.username} />
       <Box>
         <Text as='b'>{props.username}</Text>
         <Text>{convert_to_br_text}</Text>

@@ -123,12 +123,12 @@ export default class BaseInteractor {
     }
   }
 
-  async update(collection_name: string, doc_id: string, data: DocumentData): Promise<DocumentData | null> {
+  async update(collection_name: string, doc_id: string, data: DocumentData): Promise<boolean | null> {
     try {
       const ref = doc(this.db, collection_name, doc_id);
       data = Object.assign(data, { updated_at: serverTimestamp() });
       await updateDoc(ref, data);
-      return Object.assign(data, { id: doc_id });
+      return true;
     } catch (_err) {
       return null;
     }

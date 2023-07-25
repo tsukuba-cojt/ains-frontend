@@ -72,4 +72,16 @@ export default class ArtworkInteractor {
     const artwork_data = await ArtworkMapper.mapDocDataToArtworkData(res_data);
     return artwork_data;
   }
+
+  async addComment(artwork_id: string, comment_id: string): Promise<boolean | null> {
+    const artwork_data = await this.get(artwork_id);
+    if (!artwork_data) return null;
+
+    const res_data = await this.interactor.update(this.COLLECTION_NAME, artwork_data.id, {
+      comment_ids: artwork_data.comment_ids.concat(comment_id),
+    });
+    if (!res_data) return null;
+
+    return true;
+  }
 }

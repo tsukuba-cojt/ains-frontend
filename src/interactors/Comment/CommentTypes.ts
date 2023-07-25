@@ -7,6 +7,7 @@ export interface CommentData {
 }
 
 export interface CommentCreateData {
+  artwork_id: string;
   text: string;
   author_id: string;
 }

@@ -16,36 +16,80 @@ import {
   AccordionButton,
   AccordionPanel,
   AccordionIcon,
+  Avatar,
+  Input,
+  useToast,
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useContext, ChangeEvent } from "react";
 import useSWR from "swr";
 
 import CommentBox from "@/components/CommentBox";
+import { FirebaseAuthContext } from "@/components/FirebaseAuthProvider";
 import LoadingPanel from "@/components/LoadingPanel";
 import ArtworkInteractor from "@/interactors/Artwork/ArtworkInteractor";
+import CommentInteractor from "@/interactors/Comment/CommentInteractor";
+import { CommentData } from "@/interactors/Comment/CommentTypes";
 
 import { theme } from "../_app";
 
 // TODO: 音声と画像のサムネイルを親作品の画像をスライドできるようにする
 // TODO: 親作品の一覧を表示
-// TODO: コメントのpostをやる
 
 const ArtworkDetailPage = () => {
   const router = useRouter();
+  const toast = useToast();
   const { artworks_id } = router.query;
+  const { user } = useContext(FirebaseAuthContext);
 
   const {
     data: artwork,
     error,
     isLoading,
+    mutate,
   } = useSWR(`/artworks/${artworks_id as string}`, () =>
     new ArtworkInteractor().getWithRelativeData(artworks_id as string)
   );
 
   const [doesExpandDescription, setDoesExpandDescription] = useState<boolean>(false);
+  const [commentText, setCommentText] = useState<string>("");
 
   const secondary = useColorModeValue(theme.colors.secondary.ml, theme.colors.secondary.md);
+
+  const uploadComment = async (): Promise<void> => {
+    if (commentText === "" || !artwork) return;
+    if (user === null) {
+      toast({
+        title: "ログインしてください",
+        status: "error",
+        duration: 9000,
+        isClosable: true,
+      });
+      return;
+    }
+    const new_comment = await new CommentInteractor().set({
+      artwork_id: artworks_id as string,
+      text: commentText,
+      author_id: user.id,
+    });
+    if (new_comment !== null) {
+      setCommentText("");
+      mutate({ ...artwork, comments: artwork.comments.concat(new_comment) });
+      toast({
+        title: "コメントを送信しました",
+        status: "success",
+        duration: 9000,
+        isClosable: true,
+      });
+    } else {
+      toast({
+        title: "送信に失敗しました",
+        status: "error",
+        duration: 9000,
+        isClosable: true,
+      });
+    }
+  };
 
   const tag_elements = useMemo<JSX.Element[]>(() => {
     if (!artwork) return [];
@@ -72,6 +116,12 @@ const ArtworkDetailPage = () => {
       }
     }
   }, [artwork]);
+
+  const comment_elements = useMemo(() => {
+    return artwork?.comments.map((comment: CommentData, index: number) => (
+      <CommentBox key={index} icon_url={comment.author.icon_url} username={comment.author.name} text={comment.text} />
+    ));
+  }, [artwork?.comments]);
 
   if (error || artwork === null) return <>Error!</>;
   if (isLoading || artwork === undefined) return <LoadingPanel />;
@@ -115,19 +165,30 @@ const ArtworkDetailPage = () => {
                 <h2>
                   <AccordionButton>
                     <Box as='span' flex='1' textAlign='left'>
-                      コメント
+                      コメント <span>{artwork.comments.length}件</span>
                     </Box>
                     <AccordionIcon />
                   </AccordionButton>
                 </h2>
                 <AccordionPanel pb={4}>
-                  <CommentBox icon_url='https://bit.ly/dan-abramov' username='andrew' text='Good!\nI like this!!' />
-                  <CommentBox icon_url='https://bit.ly/dan-abramov' username='andrew' text='Good!\nI like this!!' />
-                  <CommentBox icon_url='https://bit.ly/dan-abramov' username='andrew' text='Good!\nI like this!!' />
-                  <CommentBox icon_url='https://bit.ly/dan-abramov' username='andrew' text='Good!\nI like this!!' />
-                  <CommentBox icon_url='https://bit.ly/dan-abramov' username='andrew' text='Good!\nI like this!!' />
-                  <CommentBox icon_url='https://bit.ly/dan-abramov' username='andrew' text='Good!\nI like this!!' />
-                  <CommentBox icon_url='https://bit.ly/dan-abramov' username='andrew' text='Good!\nI like this!!' />
+                  <Flex alignItems='center' padding={5} gap={4} borderBottom='1px'>
+                    {user === null ? (
+                      <>コメントをするにはログインしてください</>
+                    ) : (
+                      <>
+                        <Avatar size='sm' name={user.name} borderColor='gray.800' src={user.icon_url} />
+                        <Input
+                          variant='flushed'
+                          value={commentText}
+                          onChange={(e: ChangeEvent<HTMLInputElement>) => setCommentText(e.target.value)}
+                        />
+                        <Button isDisabled={commentText === "" ? true : false} onClick={uploadComment} rounded='full'>
+                          送信
+                        </Button>
+                      </>
+                    )}
+                  </Flex>
+                  {comment_elements}
                 </AccordionPanel>
               </AccordionItem>
             </Accordion>
