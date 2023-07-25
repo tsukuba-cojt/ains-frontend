@@ -60,6 +60,11 @@ const ArtworkDetailPage = () => {
 
   const secondary = useColorModeValue(theme.colors.secondary.ml, theme.colors.secondary.md);
 
+  const jumpToUploadPageWithParentId = (): void => {
+    if (!artwork) return;
+    router.push(`/upload?parent=${artwork.id}`);
+  };
+
   const uploadComment = async (): Promise<void> => {
     if (commentText === "" || !artwork) return;
     if (user === null) {
@@ -218,7 +223,7 @@ const ArtworkDetailPage = () => {
             <Text>{artwork.author.name}</Text>
           </Flex>
           <HStack>{tag_elements}</HStack>
-          <Button>参考アップロード</Button>
+          <Button onClick={jumpToUploadPageWithParentId}>参考アップロード</Button>
           {artwork.parents.length > 0 ? (
             <Box>
               <Heading as='h4' size='md' mb={3}>

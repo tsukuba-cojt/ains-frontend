@@ -26,8 +26,8 @@ const ImageSlider = (props: Props) => {
       if (props.images.length <= images_index) break;
 
       new_items.push(
-        <Link href={props.images[images_index].href}>
-          <GridItem display='flex' flexDirection='column' alignItems='center' key={i}>
+        <Link key={i} href={props.images[images_index].href}>
+          <GridItem display='flex' flexDirection='column' alignItems='center'>
             <Image src={props.images[images_index].src} alt={props.images[images_index].title} />
             <Text>{props.images[images_index].title}</Text>
           </GridItem>
