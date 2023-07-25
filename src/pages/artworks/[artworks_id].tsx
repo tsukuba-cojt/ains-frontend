@@ -26,10 +26,12 @@ import useSWR from "swr";
 
 import CommentBox from "@/components/CommentBox";
 import { FirebaseAuthContext } from "@/components/FirebaseAuthProvider";
+import ImageSlider, { ImageItem } from "@/components/ImageSlider";
 import LoadingPanel from "@/components/LoadingPanel";
 import SoundFileIcon from "@/icons/SoundFileIcon";
 import TextFileIcon from "@/icons/TextFileIcon";
 import ArtworkInteractor from "@/interactors/Artwork/ArtworkInteractor";
+import { ArtworkData } from "@/interactors/Artwork/ArtworkTypes";
 import CommentInteractor from "@/interactors/Comment/CommentInteractor";
 import { CommentData } from "@/interactors/Comment/CommentTypes";
 
@@ -143,6 +145,23 @@ const ArtworkDetailPage = () => {
     ));
   }, [artwork?.comments]);
 
+  const image_slider_items = useMemo(() => {
+    if (!artwork) return [];
+    return artwork.parents.map<ImageItem>((parent: ArtworkData) => {
+      let thumbnail_url = "";
+      if (parent.type === "image") {
+        thumbnail_url = parent.file.url;
+      } else {
+        // 親作品からサムネイルの画像URLをとってくるようにする
+      }
+      return {
+        src: thumbnail_url,
+        href: `/artworks/${parent.id}`,
+        title: parent.name,
+      };
+    });
+  }, [artwork?.parents]);
+
   useEffect(() => {
     if (artwork?.type !== "text") {
       setTextElement(<></>);
@@ -177,9 +196,10 @@ const ArtworkDetailPage = () => {
         </VStack>
         <Flex
           flexGrow={1}
-          borderLeft='1px'
+          borderLeft={{ base: "0px", md: "1px" }}
+          borderTop={{ base: "1px", md: "0px" }}
           borderColor='gray.500'
-          paddingLeft={10}
+          paddingLeft={{ base: 0, md: 10 }}
           paddingY={5}
           direction='column'
           gap={5}
@@ -199,6 +219,12 @@ const ArtworkDetailPage = () => {
           </Flex>
           <HStack>{tag_elements}</HStack>
           <Button>参考アップロード</Button>
+          <Box>
+            <Heading as='h4' size='md' mb={3}>
+              親作品
+            </Heading>
+            <ImageSlider col={2} col_sm={1} images={image_slider_items} />
+          </Box>
           <Box p={3} rounded='md' bg={secondary}>
             <Accordion allowToggle>
               <AccordionItem>
