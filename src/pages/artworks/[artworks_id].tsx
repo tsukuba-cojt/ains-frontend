@@ -21,19 +21,20 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
-import { useState, useMemo, useContext, ChangeEvent } from "react";
+import { useState, useMemo, useContext, ChangeEvent, ReactNode, useEffect } from "react";
 import useSWR from "swr";
 
 import CommentBox from "@/components/CommentBox";
 import { FirebaseAuthContext } from "@/components/FirebaseAuthProvider";
 import LoadingPanel from "@/components/LoadingPanel";
+import SoundFileIcon from "@/icons/SoundFileIcon";
+import TextFileIcon from "@/icons/TextFileIcon";
 import ArtworkInteractor from "@/interactors/Artwork/ArtworkInteractor";
 import CommentInteractor from "@/interactors/Comment/CommentInteractor";
 import { CommentData } from "@/interactors/Comment/CommentTypes";
 
 import { theme } from "../_app";
 
-// TODO: 音声と画像のサムネイルを親作品の画像をスライドできるようにする
 // TODO: 親作品の一覧を表示
 
 const ArtworkDetailPage = () => {
@@ -53,6 +54,7 @@ const ArtworkDetailPage = () => {
 
   const [doesExpandDescription, setDoesExpandDescription] = useState<boolean>(false);
   const [commentText, setCommentText] = useState<string>("");
+  const [textElement, setTextElement] = useState<ReactNode>(<></>);
 
   const secondary = useColorModeValue(theme.colors.secondary.ml, theme.colors.secondary.md);
 
@@ -103,10 +105,28 @@ const ArtworkDetailPage = () => {
         return <Image src={artwork.file.url} alt={artwork.name} />;
       }
       case "text": {
-        return <></>;
+        if (artwork.parents.length > 0) {
+          return <Image src={artwork.parents[0].file.url} alt={artwork.parents[0].name} />;
+        } else {
+          return <TextFileIcon boxSize='xs' color='chakra-body-text' />;
+        }
       }
       case "audio": {
-        return <></>;
+        if (artwork.parents.length > 0) {
+          return (
+            <>
+              <Image src={artwork.parents[0].file.url} alt={artwork.parents[0].name} pb={2} />;
+              <audio controls src={artwork.file.url}></audio>
+            </>
+          );
+        } else {
+          return (
+            <>
+              <SoundFileIcon boxSize='xs' color='chakra-body-text' pb={2} />
+              <audio controls src={artwork.file.url}></audio>
+            </>
+          );
+        }
       }
       case "video": {
         return <video controls src={artwork.file.url} />;
@@ -123,12 +143,32 @@ const ArtworkDetailPage = () => {
     ));
   }, [artwork?.comments]);
 
+  useEffect(() => {
+    if (artwork?.type !== "text") {
+      setTextElement(<></>);
+      return;
+    }
+    const getTextFileContentFromUrl = async (url: string) => {
+      try {
+        // const res = await fetch(artwork.file.url);
+        // const content = await res.text();
+        // setTextElement(<Text>{content}</Text>);
+        setTextElement(
+          <iframe style={{ width: "80%", marginLeft: "auto", marginRight: "auto" }} src={artwork.file.url}></iframe>
+        );
+      } catch (_err) {
+        setTextElement(<></>);
+      }
+    };
+    getTextFileContentFromUrl(artwork.file.url);
+  }, [artwork?.type]);
+
   if (error || artwork === null) return <>Error!</>;
   if (isLoading || artwork === undefined) return <LoadingPanel />;
 
   return (
     <Container maxW='container.lg' p={5}>
-      <Flex justify='center' direction={{ base: "column", md: "row" }} gap={10}>
+      <Flex justify='center' direction={{ base: "column", md: "row" }} gap={10} marginBottom={5}>
         <VStack>
           <Box maxH='80vh' maxW={{ base: "80vw", md: "40vw" }}>
             {content_preview_element}
@@ -154,7 +194,7 @@ const ArtworkDetailPage = () => {
             {artwork.description ? artwork.description : ""}
           </Text>
           <Flex alignItems='center' gap={4}>
-            <Image boxSize='2.5rem' src={artwork.author.icon_url} rounded='full' alt='user icon' />
+            <Avatar size='sm' src={artwork.author.icon_url} name={artwork.author.name} />
             <Text>{artwork.author.name}</Text>
           </Flex>
           <HStack>{tag_elements}</HStack>
@@ -195,6 +235,7 @@ const ArtworkDetailPage = () => {
           </Box>
         </Flex>
       </Flex>
+      {textElement}
     </Container>
   );
 };
