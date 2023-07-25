@@ -69,6 +69,59 @@ export default class BaseInteractor {
     }
   }
 
+  async fullTextSearch(collection_name: string, limitNum: number, serchWords: Array<string>) {
+    try {
+      const ngramTokenize = (serchWord: string, n: number): string[] => {
+        let tokens = [];
+        for (let i = n - 1; i < serchWord.length; i++) {
+          tokens.push(serchWord.slice(i + 1 - n, i));
+        }
+        return tokens;
+      };
+
+      let serchTokens: Array<string> = [];
+      serchWords.forEach((aSerchWord) => {
+        serchTokens.concat(ngramTokenize(aSerchWord, 2));
+      });
+
+      const collectionRef = collection(this.db, collection_name);
+      //const queryConstraints: Array<QueryConstraint> = [limit(limitNum)];
+      let q = query(collectionRef, limit(limitNum));
+      serchTokens.forEach((aWord) => {
+        q = query(q, where(`bigramtokens_map.${aWord}`, "==", true));
+      });
+      const snapshot = await getDocs(q);
+      const res_data: Array<DocumentData> = [];
+      snapshot.forEach((doc) => {
+        // doc.data() is never undefined for query doc snapshots
+        res_data.push(Object.assign(doc.data(), { id: doc.id }));
+      });
+      return res_data;
+    } catch (_err) {
+      return null;
+    }
+  }
+
+  async getWithTags(collection_name: string, limitNum: number, tags: Array<string>) {
+    try {
+      const collectionRef = collection(this.db, collection_name);
+      //const queryConstraints: Array<QueryConstraint> = [limit(limitNum)];
+      let q = query(collectionRef, limit(limitNum));
+      tags.forEach((aTag) => {
+        q = query(q, where(`tags_map.${aTag}`, "==", true));
+      });
+      const snapshot = await getDocs(q);
+      const res_data: Array<DocumentData> = [];
+      snapshot.forEach((doc) => {
+        // doc.data() is never undefined for query doc snapshots
+        res_data.push(Object.assign(doc.data(), { id: doc.id }));
+      });
+      return res_data;
+    } catch (_err) {
+      return null;
+    }
+  }
+
   async FilterAnd(collection_name: string, args: FilterArg[]): Promise<DocumentData[] | null> {
     try {
       const ref = collection(this.db, collection_name);
