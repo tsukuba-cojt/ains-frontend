@@ -17,14 +17,15 @@ import {
   Flex,
   FormErrorMessage,
 } from "@chakra-ui/react";
+import { useRouter } from "next/router";
 import { useState, ChangeEvent, useContext, useMemo, useEffect, ReactNode, Fragment } from "react";
 
 import { FirebaseAuthContext } from "@/components/FirebaseAuthProvider";
 import HoverTag from "@/components/HoverTag";
 import UploadIcon from "@/icons/UploadIcon";
 import ArtworkInteractor from "@/interactors/Artwork/ArtworkInteractor";
+import { ArtworkFormData, ArtworkType, INITIAL_ARTWORK_FORM_DATA } from "@/interactors/Artwork/ArtworkTypes";
 import { theme } from "@/pages/_app";
-import { ArtworkFormData, ArtworkType, INITIAL_ARTWORK_FORM_DATA } from "@/types/api/artwork";
 
 interface TagInputData {
   text: string;
@@ -54,6 +55,9 @@ const INITIAL_PARENT_INPUT_DATA: ParentInputData = {
 
 const ImageUploadForm = () => {
   const { user } = useContext(FirebaseAuthContext);
+  const router = useRouter();
+  const { parent } = router.query;
+
   const [artworkFormData, setArtWorkFormData] = useState<ArtworkFormData>(INITIAL_ARTWORK_FORM_DATA);
   const [tagInputData, setTagInputData] = useState<TagInputData>(INITIAL_TAG_INPUT_DATA);
   const [parentInputData, setParentInputData] = useState<ParentInputData>(INITIAL_PARENT_INPUT_DATA);
@@ -62,6 +66,38 @@ const ImageUploadForm = () => {
   const toast = useToast();
   const secondary = useColorModeValue(theme.colors.secondary.ml, theme.colors.secondary.md);
   const icon_fill_color = useColorModeValue("gray.800", "white");
+
+  useEffect(() => {
+    const parent_id: string = parent as string;
+    if (!parent_id) return;
+    if (parent_id === "") return;
+    if (artworkFormData.parent_ids.includes(parent_id)) return;
+
+    const checkAndPushParent = async () => {
+      const parent_data = await new ArtworkInteractor().get(parent_id);
+      if (parent_data === null) {
+        setParentInputData({
+          ...parentInputData,
+          parent_id: parent_id,
+          is_error: true,
+          error_msg: "この作品は存在しません",
+        });
+        return;
+      }
+
+      setArtWorkFormData({
+        ...artworkFormData,
+        parent_ids: artworkFormData.parent_ids.concat(parent_id),
+      });
+      setParentInputData({
+        ...parentInputData,
+        parents: parentInputData.parents.concat(parent_data.name),
+        is_error: false,
+        parent_id: "",
+      });
+    };
+    checkAndPushParent();
+  }, [parent]);
 
   useEffect(() => {
     if (artworkFormData.file === null) return;
@@ -166,7 +202,7 @@ const ImageUploadForm = () => {
 
     const result = await new ArtworkInteractor().upload({
       ...artworkFormData,
-      author_id: user?.uid,
+      author_id: user?.id,
     });
     if (result) {
       toast({
@@ -251,7 +287,6 @@ const ImageUploadForm = () => {
     if (artworkFormData.parent_ids.includes(parentInputData.parent_id)) return;
 
     const parent_data = await new ArtworkInteractor().get(parentInputData.parent_id);
-    console.log(parent_data);
     if (parent_data === null) {
       setParentInputData({
         ...parentInputData,

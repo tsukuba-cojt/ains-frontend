@@ -1,19 +1,6 @@
-export interface ImageListData {
-  id: string;
-  name: string;
-  url: string;
-}
-
-export interface FileData {
-  id: string;
-  path: string;
-  url: string;
-}
-
-export interface FileCreateData {
-  path: string;
-  url: string;
-}
+import { CommentData } from "../Comment/CommentTypes";
+import { FileData } from "../File/FileTypes";
+import { UserPublicData } from "../User/UserTypes";
 
 export type ArtworkType = "image" | "text" | "audio" | "video";
 
@@ -31,6 +18,22 @@ export interface ArtworkData {
   tags: string[];
   comment_ids: string[];
   parent_ids: string[];
+}
+
+export interface ArtworkDataWithRelativeData {
+  id: string;
+  type: ArtworkType;
+  name: string;
+  description?: string;
+  file: FileData;
+  view_num: number;
+  save_num: number;
+  uploaded: Date;
+
+  author: UserPublicData;
+  tags: string[];
+  comments: CommentData[];
+  parents: ArtworkData[];
 }
 
 export const INITIAL_ARTWORK_FORM_DATA: ArtworkFormData = {
