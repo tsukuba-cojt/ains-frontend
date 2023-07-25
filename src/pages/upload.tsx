@@ -23,8 +23,8 @@ import { FirebaseAuthContext } from "@/components/FirebaseAuthProvider";
 import HoverTag from "@/components/HoverTag";
 import UploadIcon from "@/icons/UploadIcon";
 import ArtworkInteractor from "@/interactors/Artwork/ArtworkInteractor";
+import { ArtworkFormData, ArtworkType, INITIAL_ARTWORK_FORM_DATA } from "@/interactors/Artwork/ArtworkTypes";
 import { theme } from "@/pages/_app";
-import { ArtworkFormData, ArtworkType, INITIAL_ARTWORK_FORM_DATA } from "@/types/api/artwork";
 
 interface TagInputData {
   text: string;
@@ -166,7 +166,7 @@ const ImageUploadForm = () => {
 
     const result = await new ArtworkInteractor().upload({
       ...artworkFormData,
-      author_id: user?.uid,
+      author_id: user?.id,
     });
     if (result) {
       toast({

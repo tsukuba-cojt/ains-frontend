@@ -1,4 +1,9 @@
-import { ArtworkCreateData, ArtworkData, ArtworkFormData } from "@/types/api/artwork";
+import {
+  ArtworkCreateData,
+  ArtworkData,
+  ArtworkDataWithRelativeData,
+  ArtworkFormData,
+} from "@/interactors/Artwork/ArtworkTypes";
 
 import ArtworkMapper from "./ArtworkMapper";
 import BaseInteractor from "../BaseInteractor";
@@ -16,6 +21,14 @@ export default class ArtworkInteractor {
     if (!res_data) return null;
 
     const artwork_data = await ArtworkMapper.mapDocDataToArtworkData(res_data);
+    return artwork_data;
+  }
+
+  async getWithRelativeData(artwork_id: string): Promise<ArtworkDataWithRelativeData | null> {
+    const res_data = await this.interactor.get(this.COLLECTION_NAME, artwork_id);
+    if (!res_data) return null;
+
+    const artwork_data = await ArtworkMapper.mapDocDataToArtworkDataWithRelativeData(res_data);
     return artwork_data;
   }
 

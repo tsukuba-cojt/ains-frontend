@@ -4,8 +4,9 @@ import { useMemo, useState } from "react";
 import useSWR from "swr";
 
 import GridImage from "@/components/GridImage";
+import LoadingPanel from "@/components/LoadingPanel";
 import ArtworkInteractor from "@/interactors/Artwork/ArtworkInteractor";
-import { ArtworkData } from "@/types/api/artwork";
+import { ArtworkData } from "@/interactors/Artwork/ArtworkTypes";
 import { ImageListData } from "@/types/index";
 
 const IndexPage = () => {
@@ -34,7 +35,7 @@ const IndexPage = () => {
   );
 
   if (error || artworks === null) return <>Error!</>;
-  if (isLoading || artworks === undefined) return <>Loading!</>;
+  if (isLoading || artworks === undefined) return <LoadingPanel />;
 
   const grid_items = artworks.map<JSX.Element>((artwork_data: ArtworkData, index: number) => {
     switch (artwork_data.type) {
