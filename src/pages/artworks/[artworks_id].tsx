@@ -219,12 +219,14 @@ const ArtworkDetailPage = () => {
           </Flex>
           <HStack>{tag_elements}</HStack>
           <Button>参考アップロード</Button>
-          <Box>
-            <Heading as='h4' size='md' mb={3}>
-              親作品
-            </Heading>
-            <ImageSlider col={2} col_sm={1} images={image_slider_items} />
-          </Box>
+          {artwork.parents.length > 0 ? (
+            <Box>
+              <Heading as='h4' size='md' mb={3}>
+                親作品
+              </Heading>
+              <ImageSlider col={2} col_sm={1} images={image_slider_items} />
+            </Box>
+          ) : null}
           <Box p={3} rounded='md' bg={secondary}>
             <Accordion allowToggle>
               <AccordionItem>
