@@ -73,22 +73,25 @@ export default class BaseInteractor {
     try {
       const ngramTokenize = (serchWord: string, n: number): string[] => {
         let tokens = [];
-        for (let i = n - 1; i < serchWord.length; i++) {
-          tokens.push(serchWord.slice(i + 1 - n, i));
+        for (let i = n; i <= serchWord.length; i++) {
+          tokens.push(serchWord.slice(i - n, i));
         }
         return tokens;
       };
 
       let serchTokens: Array<string> = [];
       serchWords.forEach((aSerchWord) => {
-        serchTokens.concat(ngramTokenize(aSerchWord, 2));
+        //console.log(aSerchWord);
+        serchTokens.push(...ngramTokenize(aSerchWord, 2));
       });
+      //console.log(serchTokens);
 
       const collectionRef = collection(this.db, collection_name);
       //const queryConstraints: Array<QueryConstraint> = [limit(limitNum)];
       let q = query(collectionRef, limit(limitNum));
-      serchTokens.forEach((aWord) => {
-        q = query(q, where(`bigramtokens_map.${aWord}`, "==", true));
+      serchTokens.forEach((aToken) => {
+        //console.log(aToken);
+        q = query(q, where(`bigramtokens_map.${aToken}`, "==", true));
       });
       const snapshot = await getDocs(q);
       const res_data: Array<DocumentData> = [];
