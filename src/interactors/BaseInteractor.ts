@@ -56,7 +56,7 @@ export default class BaseInteractor {
   async getLatests(collection_name: string, limitNum: number): Promise<Array<DocumentData> | null> {
     try {
       const collectionRef = collection(this.db, collection_name);
-      const q = query(collectionRef, orderBy("created_at"), limit(limitNum));
+      const q = query(collectionRef, orderBy("created_at", "desc"), limit(limitNum));
       const snapshot = await getDocs(q);
       const res_data: Array<DocumentData> = [];
       snapshot.forEach((doc) => {
