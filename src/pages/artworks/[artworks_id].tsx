@@ -28,8 +28,6 @@ import CommentBox from "@/components/CommentBox";
 import { FirebaseAuthContext } from "@/components/FirebaseAuthProvider";
 import ImageSlider, { ImageItem } from "@/components/ImageSlider";
 import LoadingPanel from "@/components/LoadingPanel";
-import SoundFileIcon from "@/icons/SoundFileIcon";
-import TextFileIcon from "@/icons/TextFileIcon";
 import ArtworkInteractor from "@/interactors/Artwork/ArtworkInteractor";
 import { ArtworkData } from "@/interactors/Artwork/ArtworkTypes";
 import CommentInteractor from "@/interactors/Comment/CommentInteractor";
@@ -113,23 +111,23 @@ const ArtworkDetailPage = () => {
         if (artwork.parents.length > 0) {
           return <Image src={artwork.parents[0].file.url} alt={artwork.parents[0].name} />;
         } else {
-          return <TextFileIcon boxSize='xs' color='chakra-body-text' />;
+          return <Image src='/text_file.png' alt={artwork.name} />;
         }
       }
       case "audio": {
         if (artwork.parents.length > 0) {
           return (
-            <>
+            <Flex flexDirection='column' alignItems='center'>
               <Image src={artwork.parents[0].file.url} alt={artwork.parents[0].name} pb={2} />;
               <audio controls src={artwork.file.url}></audio>
-            </>
+            </Flex>
           );
         } else {
           return (
-            <>
-              <SoundFileIcon boxSize='xs' color='chakra-body-text' pb={2} />
+            <Flex flexDirection='column' alignItems='center'>
+              <Image src='/audio_file.png' alt={artwork.name} />
               <audio controls src={artwork.file.url}></audio>
-            </>
+            </Flex>
           );
         }
       }
