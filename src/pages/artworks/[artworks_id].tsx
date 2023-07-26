@@ -37,8 +37,6 @@ import { CommentData } from "@/interactors/Comment/CommentTypes";
 
 import { theme } from "../_app";
 
-// TODO: 親作品の一覧を表示
-
 const ArtworkDetailPage = () => {
   const router = useRouter();
   const toast = useToast();
@@ -199,7 +197,7 @@ const ArtworkDetailPage = () => {
     <Container maxW='container.lg' p={5}>
       <Flex justify='center' direction={{ base: "column", md: "row" }} gap={10} marginBottom={5}>
         <VStack>
-          <Box maxH='80vh' maxW={{ base: "80vw", md: "40vw" }}>
+          <Box maxH='80vh' minW={{ base: "80vw", md: "30vw" }} maxW={{ base: "80vw", md: "40vw" }}>
             {content_preview_element}
           </Box>
           <Spacer />
