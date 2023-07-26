@@ -118,7 +118,7 @@ const ArtworkDetailPage = () => {
         if (artwork.parents.length > 0) {
           return (
             <Flex flexDirection='column' alignItems='center'>
-              <Image src={artwork.parents[0].file.url} alt={artwork.parents[0].name} pb={2} />;
+              <Image src={artwork.parents[0].file.url} alt={artwork.parents[0].name} pb={2} />
               <audio controls src={artwork.file.url}></audio>
             </Flex>
           );
