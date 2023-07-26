@@ -3,3 +3,10 @@ export interface ImageListData {
   name: string;
   url: string;
 }
+
+export interface MusicListData {
+  id: string;
+  name: string;
+  audio_src: string;
+  thumbnail: string;
+}
