@@ -21,7 +21,7 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
-import { useState, useMemo, useContext, ChangeEvent, ReactNode, useEffect } from "react";
+import { useState, useMemo, useContext, ChangeEvent, ReactNode, useEffect, Fragment } from "react";
 import useSWR from "swr";
 
 import CommentBox from "@/components/CommentBox";
@@ -174,12 +174,17 @@ const ArtworkDetailPage = () => {
     }
     const getTextFileContentFromUrl = async (url: string) => {
       try {
-        // const res = await fetch(artwork.file.url);
-        // const content = await res.text();
-        // setTextElement(<Text>{content}</Text>);
-        setTextElement(
-          <iframe style={{ width: "80%", marginLeft: "auto", marginRight: "auto" }} src={artwork.file.url}></iframe>
-        );
+        const res = await fetch(artwork.file.url);
+        const content = await res.text();
+        const content_with_br = content.split("\n").map((t: string, i: number) => {
+          return (
+            <Fragment key={i}>
+              {t}
+              <br />
+            </Fragment>
+          );
+        });
+        setTextElement(<Text>{content_with_br}</Text>);
       } catch (_err) {
         setTextElement(<></>);
       }
