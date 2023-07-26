@@ -1,6 +1,6 @@
 import { Image, Button, Flex, Grid, GridItem, AspectRatio, Box, Text } from "@chakra-ui/react";
 
-import { ImageListData } from "@/types/api/image";
+import { ImageListData } from "@/types/image";
 
 interface Props {
   images: ImageListData[];

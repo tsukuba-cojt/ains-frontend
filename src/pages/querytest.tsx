@@ -7,8 +7,9 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 
 import { theme } from "./_app";
+import BaseInteractor from "../interactors/BaseInteractor";
 
-const FirebaseTestPage = () => {
+const QueryTestPage = () => {
   const auth = getAuth();
   const db = getFirestore();
   const { colorMode, toggleColorMode } = useColorMode();
@@ -26,19 +27,39 @@ const FirebaseTestPage = () => {
       });
   };
 
-  const LoginWithEmailAndPass = () => {
-    signInWithEmailAndPassword(auth, "toktabea@gmail.com", "xp2800ch")
+  const LoginUnverifyUser = () => {
+    signInWithEmailAndPassword(auth, "mininsyou@gmail.com", "mininsyoudesu")
       .then((userCredential) => {
         // Signed in
         const user = userCredential.user;
-        console.log("ログインしたよ");
-        console.log(user.displayName + "/" + user.email + "/" + user.uid + "/" + user.getIdToken());
+        console.log("mininsyou@gmail.comでログインしたよ");
+        console.log(auth.currentUser?.emailVerified);
         // ...
       })
       .catch((error) => {
         const errorCode = error.code;
         const errorMessage = error.message;
       });
+  };
+
+  const LoginVerifyUser = () => {
+    signInWithEmailAndPassword(auth, "tokatabea@gmail.com", "qawsedrftgyhujikolp")
+      .then((userCredential) => {
+        // Signed in
+        const user = userCredential.user;
+        console.log("tokatabea@gmail.comでログインしたよ");
+        console.log(auth.currentUser?.emailVerified);
+        // ...
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+      });
+  };
+
+  const queryTest1 = async (): Promise<void> => {
+    const interacter: BaseInteractor = new BaseInteractor();
+    console.log(await interacter.getLatests("UserWorks", 10));
   };
 
   const addData = async (): Promise<void> => {
@@ -147,10 +168,10 @@ const FirebaseTestPage = () => {
         <Image id='myimg' src='' alt='代替テキスト' />
       </Box>
       <Button>hoge</Button>
-      <Button onClick={showIsVerificated}>showVerificated</Button>
-      <Button onClick={emailVerification}>verificationdayo</Button>
-      <Button onClick={LoginWithEmailAndPass}>Logindayo</Button>
+      <Button onClick={LoginUnverifyUser}>unverifyUser</Button>
+      <Button onClick={LoginVerifyUser}>verifyUser</Button>
       <Button onClick={signoutUser}>signoutDayo</Button>
+      <Button onClick={queryTest1}>queryTest</Button>
       <Button onClick={addData}>addData</Button>
       <Button onClick={deleteData}>deleteData</Button>
       <Button onClick={getData}>GetData</Button>
@@ -172,4 +193,4 @@ const FirebaseTestPage = () => {
   );
 };
 
-export default FirebaseTestPage;
+export default QueryTestPage;

@@ -2,7 +2,7 @@ import { GridItem, AspectRatio, Image, Link, useColorModeValue } from "@chakra-u
 import NextLink from "next/link";
 
 import { theme } from "@/pages/_app";
-import { ImageListData } from "@/types/api/image";
+import { ImageListData } from "@/types/index";
 
 interface Props {
   image: ImageListData;

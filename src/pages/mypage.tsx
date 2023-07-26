@@ -6,7 +6,7 @@ import { useMemo, useState } from "react";
 
 import IdeaBoxThumbnail from "@/components/IdeaBoxThumbnail";
 import { theme } from "@/pages/_app";
-import { ImageListData } from "@/types/api/image";
+import { ImageListData } from "@/types/image";
 
 const MypagePage = () => {
   const secondary = useColorModeValue(theme.colors.secondary.ml, theme.colors.secondary.md);
