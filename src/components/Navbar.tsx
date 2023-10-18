@@ -99,7 +99,7 @@ const Navbar = () => {
           <Button colorScheme='red' onClick={() => signOut(getAuth())} size='sm'>
             ログアウト
           </Button>
-          <Button onClick={() => router.push("mypage")} size='sm'>
+          <Button onClick={() => router.push("/mypage")} size='sm'>
             <UserIcon color={icon_fill_color} boxSize='1.2rem' />
           </Button>
         </>
