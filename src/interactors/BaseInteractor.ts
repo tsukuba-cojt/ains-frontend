@@ -69,6 +69,31 @@ export default class BaseInteractor {
     }
   }
 
+  async mapsBoolFieldNameSearch(
+    collection_name: string,
+    map_name: string,
+    limitNum: number,
+    boolField_names: Array<string>
+  ) {
+    try {
+      const collectionRef = collection(this.db, collection_name);
+      //const queryConstraints: Array<QueryConstraint> = [limit(limitNum)];
+      let q = query(collectionRef, limit(limitNum));
+      boolField_names.forEach((aName) => {
+        q = query(q, where(`${map_name}.${aName}`, "==", true));
+      });
+      const snapshot = await getDocs(q);
+      const res_data: Array<DocumentData> = [];
+      snapshot.forEach((doc) => {
+        // doc.data() is never undefined for query doc snapshots
+        res_data.push(Object.assign(doc.data(), { id: doc.id }));
+      });
+      return res_data;
+    } catch (_err) {
+      return null;
+    }
+  }
+
   async fullTextSearch(collection_name: string, limitNum: number, serchWords: Array<string>) {
     try {
       const ngramTokenize = (serchWord: string, n: number): string[] => {
@@ -85,7 +110,7 @@ export default class BaseInteractor {
         serchTokens.push(...ngramTokenize(aSerchWord, 2));
       });
       //console.log(serchTokens);
-
+      /*
       const collectionRef = collection(this.db, collection_name);
       //const queryConstraints: Array<QueryConstraint> = [limit(limitNum)];
       let q = query(collectionRef, limit(limitNum));
@@ -100,6 +125,8 @@ export default class BaseInteractor {
         res_data.push(Object.assign(doc.data(), { id: doc.id }));
       });
       return res_data;
+      */
+      return await this.mapsBoolFieldNameSearch(collection_name, "bigramtokens_map", limitNum, serchTokens);
     } catch (_err) {
       return null;
     }
@@ -107,6 +134,7 @@ export default class BaseInteractor {
 
   async getWithTags(collection_name: string, limitNum: number, tags: Array<string>) {
     try {
+      /*
       const collectionRef = collection(this.db, collection_name);
       //const queryConstraints: Array<QueryConstraint> = [limit(limitNum)];
       let q = query(collectionRef, limit(limitNum));
@@ -120,6 +148,8 @@ export default class BaseInteractor {
         res_data.push(Object.assign(doc.data(), { id: doc.id }));
       });
       return res_data;
+      */
+      return await this.mapsBoolFieldNameSearch(collection_name, "tags_map", limitNum, tags);
     } catch (_err) {
       return null;
     }
