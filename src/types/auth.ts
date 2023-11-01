@@ -1,8 +1,8 @@
-import { User } from "firebase/auth";
+import { UserData } from "@/interactors/User/UserTypes";
 
 export const INITIAL_FIREBASE_CONTEXT_STATE: FirebaseAuthContextState = {
   user: null,
 };
 export interface FirebaseAuthContextState {
-  user: User | null;
+  user: UserData | null;
 }

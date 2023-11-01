@@ -5,17 +5,17 @@ import { theme } from "@/pages/_app";
 import { ImageListData } from "@/types/index";
 
 interface Props {
-  image: ImageListData;
+  image_data: ImageListData;
 }
 
 const GridImage = (props: Props) => {
   const secondary = useColorModeValue(theme.colors.secondary.ml, theme.colors.secondary.md);
 
   return (
-    <Link as={NextLink} href={`/artworks/${props.image.id}`}>
+    <Link as={NextLink} href={`/artworks/${props.image_data.id}`}>
       <GridItem bg={secondary}>
         <AspectRatio maxW='100%' ratio={1}>
-          <Image boxSize='100%' src={props.image.url} alt={props.image.name} />
+          <Image boxSize='100%' src={props.image_data.url} alt={props.image_data.name} />
         </AspectRatio>
       </GridItem>
     </Link>

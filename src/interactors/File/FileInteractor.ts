@@ -1,4 +1,4 @@
-import { FileCreateData, FileData } from "@/types/api/artwork";
+import { FileCreateData, FileData } from "@/interactors/Artwork/artwork";
 
 import FileMapper from "./FileMapper";
 import BaseInteractor from "../BaseInteractor";

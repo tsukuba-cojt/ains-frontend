@@ -14,7 +14,7 @@ import React from "react";
 import { useMemo, useState } from "react";
 
 import GridImage from "@/components/GridImage";
-import { ImageListData } from "@/types/api/image";
+import { ImageListData } from "@/types/index";
 
 const buttonsize = 100;
 const buttonfontsize = 40;
@@ -43,7 +43,7 @@ const Ideabox = (props: IdeaBoxTextProps) => {
   const image_grid_items = useMemo<JSX.Element[]>(
     () =>
       images.map<JSX.Element>(
-        (image: ImageListData, index: number): JSX.Element => <GridImage key={index} image={image} />
+        (image: ImageListData, index: number): JSX.Element => <GridImage key={index} image_data={image} />
       ),
     [images]
   );
