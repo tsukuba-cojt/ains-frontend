@@ -21,6 +21,8 @@ import { orderBy, limit } from "firebase/firestore";
 import { FirebaseStorage, getDownloadURL, getStorage, ref as storageRef, uploadBytes } from "firebase/storage";
 import { v4 as uuidv4 } from "uuid";
 
+import { ngramTokenize } from "../plugins/Utility/NGramTokenizer";
+
 export interface FilterArg {
   key: string;
   value: string | number;
@@ -96,36 +98,12 @@ export default class BaseInteractor {
 
   async fullTextSearch(collection_name: string, limitNum: number, serchWords: Array<string>) {
     try {
-      const ngramTokenize = (serchWord: string, n: number): string[] => {
-        let tokens = [];
-        for (let i = n; i <= serchWord.length; i++) {
-          tokens.push(serchWord.slice(i - n, i));
-        }
-        return tokens;
-      };
-
       let serchTokens: Array<string> = [];
       serchWords.forEach((aSerchWord) => {
         //console.log(aSerchWord);
         serchTokens.push(...ngramTokenize(aSerchWord, 2));
       });
       //console.log(serchTokens);
-      /*
-      const collectionRef = collection(this.db, collection_name);
-      //const queryConstraints: Array<QueryConstraint> = [limit(limitNum)];
-      let q = query(collectionRef, limit(limitNum));
-      serchTokens.forEach((aToken) => {
-        //console.log(aToken);
-        q = query(q, where(`bigramtokens_map.${aToken}`, "==", true));
-      });
-      const snapshot = await getDocs(q);
-      const res_data: Array<DocumentData> = [];
-      snapshot.forEach((doc) => {
-        // doc.data() is never undefined for query doc snapshots
-        res_data.push(Object.assign(doc.data(), { id: doc.id }));
-      });
-      return res_data;
-      */
       return await this.mapsBoolFieldNameSearch(collection_name, "bigramtokens_map", limitNum, serchTokens);
     } catch (_err) {
       return null;
@@ -134,21 +112,6 @@ export default class BaseInteractor {
 
   async getWithTags(collection_name: string, limitNum: number, tags: Array<string>) {
     try {
-      /*
-      const collectionRef = collection(this.db, collection_name);
-      //const queryConstraints: Array<QueryConstraint> = [limit(limitNum)];
-      let q = query(collectionRef, limit(limitNum));
-      tags.forEach((aTag) => {
-        q = query(q, where(`tags_map.${aTag}`, "==", true));
-      });
-      const snapshot = await getDocs(q);
-      const res_data: Array<DocumentData> = [];
-      snapshot.forEach((doc) => {
-        // doc.data() is never undefined for query doc snapshots
-        res_data.push(Object.assign(doc.data(), { id: doc.id }));
-      });
-      return res_data;
-      */
       return await this.mapsBoolFieldNameSearch(collection_name, "tags_map", limitNum, tags);
     } catch (_err) {
       return null;
