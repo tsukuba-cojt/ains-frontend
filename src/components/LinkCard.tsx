@@ -28,7 +28,7 @@ const LinkCard = ({ title, show_icon, icon_url, icon_type, href }: LinkCardProps
 
   return (
     <Link href={href}>
-      <Flex bg={secondary} p={5} rounded='lg' w='fit-content' direction='row' alignItems='center' gap={5}>
+      <Flex bg={secondary} p={5} rounded='lg' w='full' h='full' direction='row' alignItems='center' gap={5}>
         {show_icon && <Image w={10} h={10} src={icon_url} borderRadius={border_style} alt={title} />}
         <Text fontSize='xl'>{title}</Text>
       </Flex>
