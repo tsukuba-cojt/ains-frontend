@@ -8,6 +8,7 @@ import { useState } from "react";
 import BaseInteractor from "@/interactors/BaseInteractor";
 
 import { theme } from "./_app";
+import { nOrLessGramTokenize } from "../plugins/Utility/NGramTokenizer";
 
 const SerchTestPage = () => {
   const auth = getAuth();
@@ -44,24 +45,17 @@ const SerchTestPage = () => {
   };
 
   const onClickedKeywordSerchButton = async () => {
-    (await interactor.fullTextSearch("bigramSerchTest", 10, serchTexts.split(/\s+/)))?.forEach((aDoc) => {
+    (await interactor.fullTextSearch("norlessgramSerchTest", 10, serchTexts.split(/\s+/)))?.forEach((aDoc) => {
       console.log(aDoc.name);
     });
   };
 
   const onClickedTagsSerchButton = async () => {
-    (await interactor.getWithTags("bigramSerchTest", 10, serchTags.split(/\s+/)))?.forEach((aDoc) => {
+    (await interactor.getWithTags("norlessgramSerchTest", 10, serchTags.split(/\s+/)))?.forEach((aDoc) => {
       console.log(aDoc.name);
     });
   };
   const MakeData = async () => {
-    const ngramTokenize = (serchWord: string, n: number): string[] => {
-      let tokens = [];
-      for (let i = n; i <= serchWord.length; i++) {
-        tokens.push(serchWord.slice(i - n, i));
-      }
-      return tokens;
-    };
     let tagsMap: any = {};
     serchTags.split(/\s+/).forEach((aTag) => {
       if (aTag !== "") {
@@ -70,11 +64,11 @@ const SerchTestPage = () => {
     });
 
     let bigramtokensMap: any = {};
-    ngramTokenize(serchTexts, 2).forEach((aToken) => {
+    nOrLessGramTokenize(serchTexts, 2).forEach((aToken) => {
       bigramtokensMap[aToken] = true;
     });
 
-    const docRef = await addDoc(collection(db, "bigramSerchTest"), {
+    const docRef = await addDoc(collection(db, "norlessgramSerchTest"), {
       name: serchTexts,
       tags_map: tagsMap,
       bigramtokens_map: bigramtokensMap,

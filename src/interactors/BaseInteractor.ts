@@ -21,7 +21,7 @@ import { orderBy, limit } from "firebase/firestore";
 import { FirebaseStorage, getDownloadURL, getStorage, ref as storageRef, uploadBytes } from "firebase/storage";
 import { v4 as uuidv4 } from "uuid";
 
-import { ngramTokenize } from "../plugins/Utility/NGramTokenizer";
+import { nOrLessGramTokenize } from "../plugins/Utility/NGramTokenizer";
 
 export interface FilterArg {
   key: string;
@@ -101,7 +101,7 @@ export default class BaseInteractor {
       let serchTokens: Array<string> = [];
       serchWords.forEach((aSerchWord) => {
         //console.log(aSerchWord);
-        serchTokens.push(...ngramTokenize(aSerchWord, 2));
+        serchTokens.push(...nOrLessGramTokenize(aSerchWord, 2));
       });
       //console.log(serchTokens);
       return await this.mapsBoolFieldNameSearch(collection_name, "bigramtokens_map", limitNum, serchTokens);

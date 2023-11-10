@@ -5,12 +5,12 @@ export const ngramTokenize = (tokenizedWord: string, n: number): string[] => {
   }
   return tokens;
 };
-export const defaultnOrLessGramTokenize = (tokenizedWord: string, n: number): string[] => {
+export const nOrLessGramTokenize = (tokenizedWord: string, n: number): string[] => {
   let tokens: string[] = [];
   for (let i = 1; i <= n; i++) {
     const igramTokens = ngramTokenize(tokenizedWord, i);
     if (igramTokens != null) {
-      tokens.concat(igramTokens);
+      tokens = tokens.concat(igramTokens);
     }
   }
   return tokens;
