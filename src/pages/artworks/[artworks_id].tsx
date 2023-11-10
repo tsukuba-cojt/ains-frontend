@@ -20,6 +20,7 @@ import {
   Input,
   useToast,
 } from "@chakra-ui/react";
+import ErrorPage from "next/error";
 import { useRouter } from "next/router";
 import { useState, useMemo, useContext, ChangeEvent, ReactNode, useEffect, Fragment } from "react";
 import useSWR from "swr";
@@ -196,7 +197,7 @@ const ArtworkDetailPage = () => {
     getTextFileContentFromUrl(artwork.file.url);
   }, [artwork?.type]);
 
-  if (error || artwork === null || _error || artworks === null) return <>Error!</>;
+  if (error || artwork === null || _error || artworks === null) return <ErrorPage statusCode={404} />;
   if (isLoading || artwork === undefined || _isLoading || artworks === undefined) return <LoadingPanel />;
 
   return (
