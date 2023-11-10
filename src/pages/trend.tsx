@@ -14,7 +14,7 @@ interface ListItemData {
 type TagListItem = ListItemData & {};
 type UserListItem = ListItemData & { thumbnail_url: string };
 type CommunityListItem = ListItemData & { thumbnail_url: string };
-type ArtworkListItem = ArtworkData;
+type ArtworkListItem = Omit<ArtworkData, "uploaded"> & { uploaded: string };
 
 interface TrendPageProps {
   tags: TagListItem[];
@@ -67,7 +67,7 @@ export const getServerSideProps: GetServerSideProps<TrendPageProps> = async (_ct
         { id: "test", title: "test community", thumbnail_url: "https://placehold.jp/150x150.png" },
       ],
       artworks: ((await new ArtworkInteractor().getLatests(10)) || []).map((a) => {
-        return { ...a, uploaded: a.uploaded ? a.uploaded : new Date() };
+        return { ...a, uploaded: "" };
       }),
     },
   };
@@ -102,7 +102,9 @@ const TrendPage = ({ tags, users, communities, artworks }: TrendPageProps) => {
     </GridItem>
   ));
 
-  console.log(artworks);
+  const _artworks = artworks.map((a) => {
+    return { ...a, uploaded: new Date() };
+  });
 
   return (
     <Container maxW='container.lg' p={5}>
@@ -138,7 +140,7 @@ const TrendPage = ({ tags, users, communities, artworks }: TrendPageProps) => {
           <Heading my={5} py={3} borderBottom='1px' as='h2' size='lg'>
             作品
           </Heading>
-          <GridArtworks artworks={artworks}></GridArtworks>
+          <GridArtworks artworks={_artworks}></GridArtworks>
         </Box>
       </VStack>
     </Container>

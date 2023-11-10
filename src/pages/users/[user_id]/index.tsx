@@ -152,8 +152,6 @@ const UserProfilePage = ({ artworks, communities }: any) => {
   if (error || user === null) return <ErrorPage statusCode={404} />;
   if (isLoading || user === undefined) return <LoadingPanel />;
 
-  console.log(user);
-
   return (
     <Container maxW='container.lg' p={5}>
       <VStack gap={5}>
