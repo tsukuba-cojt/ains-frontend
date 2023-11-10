@@ -30,7 +30,7 @@ const SerchTestPage = () => {
   };
 
   const LoginWithEmailAndPass = () => {
-    signInWithEmailAndPassword(auth, "toktabea@gmail.com", "xp2800ch")
+    signInWithEmailAndPassword(auth, "tokatabea@gmail.com", "xp2800ch")
       .then((userCredential) => {
         // Signed in
         const user = userCredential.user;

@@ -6,6 +6,7 @@ import {
 } from "@/interactors/Artwork/ArtworkTypes";
 
 import ArtworkMapper from "./ArtworkMapper";
+import { nOrLessGramTokenize } from "../../plugins/Utility/NGramTokenizer";
 import BaseInteractor from "../BaseInteractor";
 import FileInteractor from "../File/FileInteractor";
 
@@ -66,7 +67,24 @@ export default class ArtworkInteractor {
       comment_ids: data.comment_ids,
       parent_ids: data.parent_ids,
     };
-    const res_data = await this.interactor.set(this.COLLECTION_NAME, doc_id, artwork_create_data);
+
+    //検索に使うマップを作成
+    const bigramtokens_map: any = {};
+    nOrLessGramTokenize(artwork_create_data.name, 2).forEach((aToken) => {
+      bigramtokens_map[aToken] = true;
+    });
+    const tags_map: any = {};
+    artwork_create_data.tags.forEach((aTag) => {
+      tags_map[aTag] = true;
+    });
+    const artwork_create_data_with_serchtoken = Object.assign(artwork_create_data, {
+      bigramtokens_map: bigramtokens_map,
+      tags_map: tags_map,
+    });
+
+    //const res_data = await this.interactor.set(this.COLLECTION_NAME, doc_id, artwork_create_data);
+    //検索用のデータ付きのオブジェクトをfirebaseに登録
+    const res_data = await this.interactor.set(this.COLLECTION_NAME, doc_id, artwork_create_data_with_serchtoken);
     if (!res_data) return null;
 
     const artwork_data = await ArtworkMapper.mapDocDataToArtworkData(res_data);
