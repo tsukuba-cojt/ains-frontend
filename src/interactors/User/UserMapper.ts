@@ -8,6 +8,8 @@ export default class UserMapper {
       id: data.id,
       name: data.name,
       icon_url: data.icon_url,
+      followers: data.followers,
+      follows: data.follows,
     };
   }
 
@@ -16,6 +18,8 @@ export default class UserMapper {
       id: data.id,
       name: data.name,
       icon_url: data.icon_url,
+      followers_count: data.followers.length,
+      follows_count: data.follows.length,
     };
   }
 }

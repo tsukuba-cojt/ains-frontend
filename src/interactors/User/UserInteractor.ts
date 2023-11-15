@@ -1,5 +1,5 @@
 import UserMapper from "./UserMapper";
-import { UserCreateData, UserPublicData, UserData } from "./UserTypes";
+import { UserPublicData, UserData, UserFormData, UserCreateData } from "./UserTypes";
 import BaseInteractor from "../BaseInteractor";
 
 export default class UserInteractor {
@@ -26,8 +26,13 @@ export default class UserInteractor {
     return user_public_data;
   }
 
-  async set(data: UserCreateData): Promise<UserData | null> {
-    const { id: {} = {}, ...body_data } = data; // ignore id property
+  async set(data: UserFormData): Promise<UserData | null> {
+    const create_data: UserCreateData = {
+      ...data,
+      followers: [],
+      follows: [],
+    };
+    const { id: {} = {}, ...body_data } = create_data; // ignore id property
     const res_data = await this.interactor.set(this.COLLECTION_NAME, data.id, body_data);
     if (!res_data) return null;
 
