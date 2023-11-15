@@ -11,6 +11,9 @@ import { theme } from "./_app";
 import { nOrLessGramTokenize } from "../plugins/Utility/NGramTokenizer";
 
 const SerchTestPage = () => {
+  //const collectionName = "norlessgramSerchTest";
+  const collectionName = "artworks";
+
   const auth = getAuth();
   const db = getFirestore();
   const { colorMode, toggleColorMode } = useColorMode();
@@ -45,14 +48,16 @@ const SerchTestPage = () => {
   };
 
   const onClickedKeywordSerchButton = async () => {
-    (await interactor.fullTextSearch("norlessgramSerchTest", 10, serchTexts.split(/\s+/)))?.forEach((aDoc) => {
+    (await interactor.fullTextSearch(collectionName, 10, serchTexts.split(/\s+/)))?.forEach((aDoc) => {
       console.log(aDoc.name);
+      //console.log(aDoc);
     });
   };
 
   const onClickedTagsSerchButton = async () => {
-    (await interactor.getWithTags("norlessgramSerchTest", 10, serchTags.split(/\s+/)))?.forEach((aDoc) => {
+    (await interactor.getWithTags(collectionName, 10, serchTags.split(/\s+/)))?.forEach((aDoc) => {
       console.log(aDoc.name);
+      //console.log(aDoc);
     });
   };
   const MakeData = async () => {
@@ -68,7 +73,7 @@ const SerchTestPage = () => {
       bigramtokensMap[aToken] = true;
     });
 
-    const docRef = await addDoc(collection(db, "norlessgramSerchTest"), {
+    const docRef = await addDoc(collection(db, collectionName), {
       name: serchTexts,
       tags_map: tagsMap,
       bigramtokens_map: bigramtokensMap,
