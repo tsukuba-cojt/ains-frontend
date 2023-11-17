@@ -241,16 +241,32 @@ const UserProfilePage = ({ artworks, communities }: any) => {
           {isEditing.description ? (
             <Button onClick={updateProfile}>保存</Button>
           ) : (
-            <IconButton
-              onClick={() => {
-                setIsEditing((current) => {
-                  return { ...current, description: true };
-                });
-              }}
-              aria-label='edit description'
-              size='md'
-              icon={<EditIcon />}
-            />
+            <>
+              {user.description ? (
+                <IconButton
+                  onClick={() => {
+                    setIsEditing((current) => {
+                      return { ...current, description: true };
+                    });
+                  }}
+                  aria-label='edit description'
+                  size='md'
+                  icon={<EditIcon />}
+                />
+              ) : (
+                <Button
+                  onClick={() => {
+                    setIsEditing((current) => {
+                      return { ...current, description: true };
+                    });
+                  }}
+                  size='sm'
+                  variant='outline'
+                >
+                  説明を追加する
+                </Button>
+              )}
+            </>
           )}
         </Flex>
         <Tabs w='full' align='center'>
