@@ -2,12 +2,12 @@ import { Box, Button, Text, useColorMode, useColorModeValue, Input } from "@chak
 import { getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { collection, addDoc } from "firebase/firestore";
+import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import useSWR from "swr";
 
 import GridArtworks from "@/components/GridArtworks";
-import LoadingPanel from "@/components/LoadingPanel";
 import ArtworkInteractor from "@/interactors/Artwork/ArtworkInteractor";
 import BaseInteractor from "@/interactors/BaseInteractor";
 
@@ -26,11 +26,19 @@ const SearchResultPage = () => {
   const secondary = useColorModeValue(theme.colors.secondary.ml, theme.colors.secondary.md);
   const interactor = new BaseInteractor();
 
+  const searchParams = useSearchParams();
+  const getKeyword = searchParams.get("keywords");
+  const searchKeyWords = getKeyword ? getKeyword : "";
+  const getTags = searchParams.get("tags");
+  const searchTags = getTags ? getTags : "";
+
   const {
     data: artworks,
     error,
     isLoading,
-  } = useSWR("/artworks/ねこ", () => new ArtworkInteractor().fullTextSearch(100, ["ねこ"]));
+  } = useSWR(`/artworks/search?keywords=${searchKeyWords}&tags=${searchTags}`, () =>
+    new ArtworkInteractor().fullTextSearch(100, searchKeyWords.split(/\s+/))
+  );
 
   const signoutUser = () => {
     signOut(auth)
@@ -96,7 +104,7 @@ const SearchResultPage = () => {
   if (error || artworks === null) {
     artworksBox = <>Error!</>;
   } else if (isLoading || artworks === undefined) {
-    artworksBox = <LoadingPanel />;
+    artworksBox = <>検索しています!</>;
   } else {
     artworksBox = <GridArtworks artworks={artworks} />;
   }
