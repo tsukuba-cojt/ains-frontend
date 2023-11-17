@@ -157,6 +157,7 @@ const UserProfilePage = ({ artworks, communities }: any) => {
       <VStack gap={5}>
         <Avatar size='2xl' name={user.name} src={user.icon_url} />
         <Heading as='h1'>{user.name}</Heading>
+
         <Flex gap={3}>
           <Link href={`/users/${user_id}/follows`}>フォロー: {user.follows_count}人</Link>
           <Link href={`/users/${user_id}/followers`}>フォロワー: {user.followers_count}人</Link>
