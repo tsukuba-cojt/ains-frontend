@@ -84,4 +84,14 @@ export default class ArtworkInteractor {
 
     return true;
   }
+
+  async update(data: any): Promise<boolean | void> {
+    // TODO
+    return false;
+  }
+
+  async delete(data: any): Promise<boolean | void> {
+    // TODO
+    return false;
+  }
 }

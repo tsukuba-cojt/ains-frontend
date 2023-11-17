@@ -277,7 +277,7 @@ const UserProfilePage = ({ artworks, communities }: any) => {
           </TabList>
           <TabPanels>
             <TabPanel>
-              <GridArtworks artworks={artworks} />
+              <GridArtworks hasOverlay artworks={artworks} />
             </TabPanel>
             <TabPanel>
               <GridArtworks artworks={artworks} />
