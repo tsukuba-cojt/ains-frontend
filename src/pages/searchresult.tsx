@@ -1,4 +1,5 @@
-import { Box, Button, Text, useColorMode, useColorModeValue } from "@chakra-ui/react";
+import { Box, useColorMode, useColorModeValue } from "@chakra-ui/react";
+import { Tabs, TabList, TabPanels, Tab, TabPanel, TabIndicator } from "@chakra-ui/react";
 import { getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { useSearchParams } from "next/navigation";
@@ -79,14 +80,20 @@ const SearchResultPage = () => {
 
   return (
     <Box>
-      <Box>
-        <p>Current color mode: {colorMode}</p>
-        <Button onClick={toggleColorMode}>Change color mode</Button>
-      </Box>
-      <Text color={secondary}>hoge</Text>
-      <Button onClick={LoginWithEmailAndPass}>Logindayo</Button>
-      <Button onClick={signoutUser}>Signoutdayo</Button>
-      {artworksBox}
+      {searchKeyWords}の検索結果
+      <Tabs align='center' defaultIndex={1}>
+        <TabList>
+          <Tab>コンテンツ</Tab>
+          <Tab>ユーザー</Tab>
+          <Tab>コミュニティ</Tab>
+        </TabList>
+        <TabIndicator mt='-1.5px' height='2px' bg='blue.500' borderRadius='1px' />
+        <TabPanels>
+          <TabPanel>{artworksBox}</TabPanel>
+          <TabPanel>{artworksBox}</TabPanel>
+          <TabPanel>{artworksBox}</TabPanel>
+        </TabPanels>
+      </Tabs>
     </Box>
   );
 };
