@@ -8,7 +8,7 @@ import GridAudio from "./GridAudio";
 import GridImage from "./GridImage";
 import GridText from "./GridText";
 import GridVideo from "./GridVideo";
-import OverlayMenu from "./OverlayMenu";
+import OverlayAdminMenu from "./OverlayAdminMenu";
 
 interface Props {
   artworks: ArtworkData[];
@@ -87,58 +87,9 @@ const GridArtworks = (props: Props) => {
 
         if (props.hasOverlay) {
           new_grid_items.push(
-            <OverlayMenu
-              key={i}
-              actions={[
-                {
-                  name: props.artworks[i].is_public ? "非公開にする" : "公開する",
-                  action: async () => {
-                    const result = await new ArtworkInteractor().update({
-                      id: props.artworks[i].id,
-                      is_public: !props.artworks[i].is_public,
-                    });
-                    if (result) {
-                      toast({
-                        title: `${props.artworks[i].is_public ? "非公開に" : "公開"}しました`,
-                        status: "success",
-                        duration: 9000,
-                        isClosable: true,
-                      });
-                    } else {
-                      toast({
-                        title: "閲覧範囲の更新に失敗しました",
-                        status: "error",
-                        duration: 9000,
-                        isClosable: true,
-                      });
-                    }
-                  },
-                },
-                {
-                  name: "削除する",
-                  action: async () => {
-                    const result = await new ArtworkInteractor().delete({ id: props.artworks[i].id });
-                    if (result) {
-                      toast({
-                        title: "削除しました",
-                        status: "success",
-                        duration: 9000,
-                        isClosable: true,
-                      });
-                    } else {
-                      toast({
-                        title: "削除に失敗しました",
-                        status: "error",
-                        duration: 9000,
-                        isClosable: true,
-                      });
-                    }
-                  },
-                },
-              ]}
-            >
+            <OverlayAdminMenu key={i} data={props.artworks[i]} interactor={new ArtworkInteractor()}>
               {new_item}
-            </OverlayMenu>
+            </OverlayAdminMenu>
           );
         } else {
           new_grid_items.push(new_item);
