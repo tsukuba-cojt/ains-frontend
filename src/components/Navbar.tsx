@@ -32,6 +32,8 @@ const Navbar = () => {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false);
   const [isSignupModalOpen, setIsSignupModalOpen] = useState<boolean>(false);
 
+  const [serchBoxTexts, setSerchBoxTexts] = useState("");
+
   const loginSignupSwitching = (): void => {
     setIsLoginModalOpen(!isLoginModalOpen);
     setIsSignupModalOpen(!isSignupModalOpen);
@@ -57,10 +59,16 @@ const Navbar = () => {
       </Button>
       <Box flexGrow={1}>
         <InputGroup>
-          <InputLeftElement pointerEvents='none'>
-            <SearchIcon color='gray.300' />
+          <InputLeftElement>
+            <IconButton
+              as='a'
+              onClick={() => console.log("nya~nn")}
+              href={`/searchresult?keywords=${serchBoxTexts}`}
+              aria-label='Search'
+              icon={<SearchIcon color='gray.300' />}
+            />
           </InputLeftElement>
-          <Input variant='filled' placeholder='検索'></Input>
+          <Input variant='filled' placeholder='検索' onChange={(event) => setSerchBoxTexts(event.target.value)}></Input>
         </InputGroup>
       </Box>
       <IconButton
