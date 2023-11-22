@@ -4,8 +4,10 @@ import { Button } from "@chakra-ui/react";
 import { Tabs, TabList, TabPanels, Tab, TabPanel, TabIndicator } from "@chakra-ui/react";
 import { useMemo, useState } from "react";
 
+import FollowingModal from "@/components/FollowingModal";
 import IdeaBoxThumbnail from "@/components/IdeaBoxThumbnail";
 import { theme } from "@/pages/_app";
+
 import { ImageListData } from "@/types/image";
 
 const MypagePage = () => {
@@ -58,12 +60,26 @@ const MypagePage = () => {
     [thumbnailImages]
   );
 
+  const [isModalOpen, setModalOpen] = useState(false);
+
+  const openModal = () => {
+    setModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+  };
+
+  const [isHovered, setIsHovered] = useState(false);
+
   return (
     <Flex flexDirection='column' align='center'>
       <Avatar size='xl' src='https://bit.ly/broken-link' />
       <Box fontSize='36px'>name</Box>
       <Box color={secondary}>UserID</Box>
-      <Box>フォロワー：4人・フォロー中：3人</Box>
+      <Button onClick={openModal} fontSize='md' variant='link' _hover={{ color: "teal.500" }}>
+        フォロー：3人・フォロワー：2人
+      </Button>
       <Flex>
         <Button mr={2}>シェア</Button>
         <Button>プロフィールを編集</Button>
@@ -88,6 +104,7 @@ const MypagePage = () => {
           </TabPanel>
         </TabPanels>
       </Tabs>
+      <FollowingModal isOpen={isModalOpen} onClose={closeModal} followers={4} following={3} />
     </Flex>
   );
 };
