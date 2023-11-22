@@ -1,7 +1,8 @@
-import { Image, Button, Flex, Grid, GridItem, AspectRatio, Box, Text } from "@chakra-ui/react";
+import { Image, Flex, Grid, GridItem, AspectRatio, Box, Text } from "@chakra-ui/react";
+import Link from "next/link";
 import { useRouter } from "next/router";
 
-import { ImageListData } from "@/types/image";
+import { ImageListData } from "@/types/index";
 
 interface Props {
   images: ImageListData[];
@@ -11,7 +12,7 @@ const IdeaBoxThumbnail = (props: Props) => {
   const router = useRouter();
 
   return (
-    <Button onClick={() => router.push("/ideabox")} h='fit-content' padding={4} variant='ghost' w='200%'>
+    <Link href='/ideabox'>
       <Flex direction='column' w='100%'>
         <Grid w='100%' templateRows='repeat(2, 1fr)' templateColumns='repeat(3, 1fr)'>
           <GridItem rowSpan={2} colSpan={2}>
@@ -35,7 +36,7 @@ const IdeaBoxThumbnail = (props: Props) => {
           <Text fontSize='0.3rem'>件数</Text>
         </Box>
       </Flex>
-    </Button>
+    </Link>
   );
 };
 

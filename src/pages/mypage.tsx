@@ -25,7 +25,10 @@ import { ChangeEvent, useContext, useEffect, useState } from "react";
 
 import { FirebaseAuthContext } from "@/components/FirebaseAuthProvider";
 import GridArtworks from "@/components/GridArtworks";
+import IdeaBoxThumbnail from "@/components/IdeaBoxThumbnail";
 import LinkCard from "@/components/LinkCard";
+import OverlayAdminMenu from "@/components/OverlayAdminMenu";
+import IdeaBoxInteractor from "@/interactors/IdeaBox/IdeaboxInteractor";
 import UserInteractor from "@/interactors/User/UserInteractor";
 
 export const getServerSideProps: GetServerSideProps = async () => {
@@ -47,6 +50,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
       tags: [],
       comment_ids: [],
       parent_ids: ["69f1247f-5afe-4da3-89d7-8f56b826d735"],
+      is_public: true,
     },
     {
       id: "69f1247f-5afe-4da3-89d7-8f56b826d735",
@@ -131,11 +135,30 @@ export const getServerSideProps: GetServerSideProps = async () => {
           title: "test community hoge fuga",
           thumbnail_url: "https://placehold.jp/150x150.png",
         },
-        { id: "test", title: "test community", thumbnail_url: "https://placehold.jp/150x150.png" },
-        { id: "test", title: "test community", thumbnail_url: "https://placehold.jp/150x150.png" },
-        { id: "test", title: "test community", thumbnail_url: "https://placehold.jp/150x150.png" },
-        { id: "test", title: "test community", thumbnail_url: "https://placehold.jp/150x150.png" },
-        { id: "test", title: "test community", thumbnail_url: "https://placehold.jp/150x150.png" },
+        ...Array.from({ length: 5 }).map(() => {
+          return { id: "test", title: "test community", thumbnail_url: "https://placehold.jp/150x150.png" };
+        }),
+      ],
+      ideaboxes: [
+        {
+          id: "test11",
+          is_public: true,
+          images: [
+            { id: "test1", name: "test1", url: "https://placehold.jp/150x150.png" },
+            { id: "test2", name: "test2", url: "https://placehold.jp/150x150.png" },
+            { id: "test3", name: "test3", url: "https://placehold.jp/150x150.png" },
+          ],
+        },
+        ...Array.from({ length: 5 }).map(() => {
+          return {
+            id: "test",
+            images: [
+              { id: "test", name: "test", url: "https://placehold.jp/150x150.png" },
+              { id: "test", name: "test", url: "https://placehold.jp/150x150.png" },
+              { id: "test", name: "test", url: "https://placehold.jp/150x150.png" },
+            ],
+          };
+        }),
       ],
     },
   };
@@ -147,7 +170,7 @@ interface FormData {
 }
 type FormFields = keyof FormData;
 
-const UserProfilePage = ({ artworks, communities }: any) => {
+const UserProfilePage = ({ artworks, communities, ideaboxes }: any) => {
   const router = useRouter();
   const { user, reload } = useContext(FirebaseAuthContext);
   const [doesExpandDescription, setDoesExpandDescription] = useState<boolean>(false);
@@ -189,6 +212,8 @@ const UserProfilePage = ({ artworks, communities }: any) => {
   }, [user]);
 
   if (!user) return <>login required</>;
+
+  console.log(ideaboxes);
 
   return (
     <Container maxW='container.lg' p={5}>
@@ -280,7 +305,15 @@ const UserProfilePage = ({ artworks, communities }: any) => {
               <GridArtworks hasOverlay artworks={artworks} />
             </TabPanel>
             <TabPanel>
-              <GridArtworks artworks={artworks} />
+              <Grid templateColumns='repeat(5, 1fr)' gap={5}>
+                {ideaboxes.map((ideabox: any, i: number) => (
+                  <GridItem key={i}>
+                    <OverlayAdminMenu data={ideabox} interactor={new IdeaBoxInteractor()}>
+                      <IdeaBoxThumbnail images={ideabox.images} />
+                    </OverlayAdminMenu>
+                  </GridItem>
+                ))}
+              </Grid>
             </TabPanel>
             <TabPanel>
               <Grid gap={5} templateColumns='repeat(3, 1fr)'>
