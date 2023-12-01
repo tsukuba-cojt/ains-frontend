@@ -16,6 +16,7 @@ import {
   DocumentSnapshot,
   or,
   serverTimestamp,
+  Query,
 } from "firebase/firestore";
 import { orderBy, limit } from "firebase/firestore";
 import { FirebaseStorage, getDownloadURL, getStorage, ref as storageRef, uploadBytes } from "firebase/storage";
@@ -78,6 +79,7 @@ export default class BaseInteractor {
     boolField_names: Array<string>
   ) {
     try {
+      /*
       const collectionRef = collection(this.db, collection_name);
       //const queryConstraints: Array<QueryConstraint> = [limit(limitNum)];
       let q = query(collectionRef, limit(limitNum));
@@ -90,7 +92,12 @@ export default class BaseInteractor {
         // doc.data() is never undefined for query doc snapshots
         res_data.push(Object.assign(doc.data(), { id: doc.id }));
       });
-      return res_data;
+      */
+      //query系を使った場合
+
+      return await this.throwQuerys(
+        this.mapsBoolFieldNameSearchQuery(this.baseQuery(collection_name, limitNum), map_name, boolField_names)
+      );
     } catch (_err) {
       return null;
     }
@@ -202,5 +209,47 @@ export default class BaseInteractor {
     } catch (_err) {
       return null;
     }
+  }
+
+  //クエリ系-------------------
+  async throwQuerys(q: Query<DocumentData>) {
+    try {
+      const snapshot = await getDocs(q);
+      const res_data: Array<DocumentData> = [];
+      snapshot.forEach((doc) => {
+        // doc.data() is never undefined for query doc snapshots
+        res_data.push(Object.assign(doc.data(), { id: doc.id }));
+      });
+      return res_data;
+    } catch (_err) {
+      return null;
+    }
+  }
+
+  baseQuery(collection_name: string, limitNum: number) {
+    const collectionRef = collection(this.db, collection_name);
+    return query(collectionRef, limit(limitNum));
+  }
+
+  mapsBoolFieldNameSearchQuery(orig_query: Query<DocumentData>, map_name: string, boolField_names: Array<string>) {
+    let q = orig_query;
+    boolField_names.forEach((aName) => {
+      q = query(q, where(`${map_name}.${aName}`, "==", true));
+    });
+    return q;
+  }
+
+  fullTextSearchQuery(orig_query: Query<DocumentData>, serchWords: Array<string>) {
+    let serchTokens: Array<string> = [];
+    serchWords.forEach((aSerchWord) => {
+      //console.log(aSerchWord);
+      serchTokens.push(...nOrLessGramTokenize(aSerchWord, 2));
+    });
+    //console.log(serchTokens);
+    return this.mapsBoolFieldNameSearchQuery(orig_query, "bigramtokens_map", serchTokens);
+  }
+
+  tagsSearchQuery(orig_query: Query<DocumentData>, searchTags: Array<string>) {
+    return this.mapsBoolFieldNameSearchQuery(orig_query, "tags_map", searchTags);
   }
 }
