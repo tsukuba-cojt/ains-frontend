@@ -38,6 +38,26 @@ const Navbar = () => {
     setIsLoginModalOpen(!isLoginModalOpen);
     setIsSignupModalOpen(!isSignupModalOpen);
   };
+  const extractSearchWords = (inputWords: string): string => {
+    let retWord = "";
+    inputWords.split(/\s+/).forEach((aWord) => {
+      if (aWord.length > 0 && aWord[0] != "#") retWord += " " + aWord;
+    });
+    if (retWord.length > 0) {
+      retWord = retWord.substring(1);
+    }
+    return retWord;
+  };
+  const extractTagWords = (inputWords: string): string => {
+    let retWord = "";
+    inputWords.split(/\s+/).forEach((aWord) => {
+      if (aWord.length > 0 && aWord[0] == "#") retWord += " " + aWord.substring(1);
+    });
+    if (retWord.length > 0) {
+      retWord = retWord.substring(1);
+    }
+    return retWord;
+  };
 
   return (
     <Flex
@@ -63,7 +83,8 @@ const Navbar = () => {
             <IconButton
               as='a'
               onClick={() => console.log("nya~nn")}
-              href={`/searchresult?keywords=${serchBoxTexts}`}
+              href={`/searchresult?keywords=${extractSearchWords(serchBoxTexts)}
+              &tags=${extractTagWords(serchBoxTexts)}`}
               aria-label='Search'
               icon={<SearchIcon color='gray.300' />}
             />

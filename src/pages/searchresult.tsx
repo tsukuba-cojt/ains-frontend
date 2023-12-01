@@ -24,21 +24,17 @@ const SearchResultPage = () => {
   const interactor = new BaseInteractor();
 
   const searchParams = useSearchParams();
-  const getKeyword = searchParams.get("keywords");
-  const searchKeyWords = getKeyword ? getKeyword : "";
-  const getTags = searchParams.get("tags");
-  const searchTags = getTags ? getTags : "";
+  const KeywordParam = searchParams.get("keywords");
+  const searchKeyWords = KeywordParam ? KeywordParam : "";
+  const TagsParam = searchParams.get("tags");
+  const searchTags = TagsParam ? TagsParam : "";
 
   const {
     data: artworks,
     error,
     isLoading,
   } = useSWR(`/artworks/search?keywords=${searchKeyWords}&tags=${searchTags}`, () =>
-    searchKeyWords !== ""
-      ? new ArtworkInteractor().fullTextSearch(100, searchKeyWords.split(/\s+/))
-      : searchTags !== ""
-      ? new ArtworkInteractor().getWithTags(100, searchTags.split(/\s+/))
-      : new ArtworkInteractor().getLatests(100)
+    new ArtworkInteractor().fullTextAndTagSearch(100, searchKeyWords.split(/\s+/), searchTags.split(/\s+/))
   );
   console.log(`serach result:${artworks}`);
 

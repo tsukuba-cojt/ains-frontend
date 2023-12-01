@@ -243,7 +243,7 @@ export default class BaseInteractor {
   mapsBoolFieldNameSearchQuery(orig_query: Query<DocumentData>, map_name: string, boolField_names: Array<string>) {
     let q = orig_query;
     boolField_names.forEach((aName) => {
-      q = query(q, where(`${map_name}.${aName}`, "==", true));
+      if (aName != "") q = query(q, where(`${map_name}.${aName}`, "==", true));
     });
     return q;
   }
