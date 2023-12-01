@@ -105,13 +105,7 @@ export default class BaseInteractor {
 
   async fullTextSearch(collection_name: string, limitNum: number, serchWords: Array<string>) {
     try {
-      let serchTokens: Array<string> = [];
-      serchWords.forEach((aSerchWord) => {
-        //console.log(aSerchWord);
-        serchTokens.push(...nOrLessGramTokenize(aSerchWord, 2));
-      });
-      //console.log(serchTokens);
-      return await this.mapsBoolFieldNameSearch(collection_name, "bigramtokens_map", limitNum, serchTokens);
+      return await this.throwQuerys(this.fullTextSearchQuery(this.baseQuery(collection_name, limitNum), serchWords));
     } catch (_err) {
       return null;
     }
@@ -119,7 +113,22 @@ export default class BaseInteractor {
 
   async getWithTags(collection_name: string, limitNum: number, tags: Array<string>) {
     try {
-      return await this.mapsBoolFieldNameSearch(collection_name, "tags_map", limitNum, tags);
+      return await this.throwQuerys(this.tagsSearchQuery(this.baseQuery(collection_name, limitNum), tags));
+    } catch (_err) {
+      return null;
+    }
+  }
+
+  async fullTextAndTagSearch(
+    collection_name: string,
+    limitNum: number,
+    serchWords: Array<string>,
+    tags: Array<string>
+  ) {
+    try {
+      return await this.throwQuerys(
+        this.tagsSearchQuery(this.fullTextSearchQuery(this.baseQuery(collection_name, limitNum), serchWords), tags)
+      );
     } catch (_err) {
       return null;
     }
