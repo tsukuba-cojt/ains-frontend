@@ -44,9 +44,10 @@ export default class BaseInteractor {
   }
 
   async get(collection_name: string, doc_id: string): Promise<DocumentData | null> {
+    let snapshot;
     try {
       const ref = doc(this.db, collection_name, doc_id);
-      const snapshot = await getDoc(ref);
+      snapshot = await getDoc(ref);
       if (snapshot.exists()) {
         return Object.assign(snapshot.data(), { id: snapshot.id });
       } else {

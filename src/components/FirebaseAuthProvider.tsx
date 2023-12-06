@@ -16,12 +16,12 @@ const FirebaseAuthProvider = (props: Props) => {
   const [user, setUser] = useState<UserData | null>(null);
   const user_interactor = new UserInteractor();
 
-  useEffect(() => {
-    const setUserData = async (user_id: string): Promise<void> => {
-      const user_data = await user_interactor.get(user_id);
-      setUser(user_data);
-    };
+  const setUserData = async (user_id: string): Promise<void> => {
+    const user_data = await user_interactor.get(user_id);
+    setUser(user_data);
+  };
 
+  useEffect(() => {
     const unsubscribed = auth.onAuthStateChanged((new_user: User | null) => {
       if (new_user && new_user.emailVerified) {
         setUserData(new_user.uid);
@@ -32,7 +32,13 @@ const FirebaseAuthProvider = (props: Props) => {
     return () => unsubscribed();
   }, [auth]);
 
-  return <FirebaseAuthContext.Provider value={{ user: user }}>{props.children}</FirebaseAuthContext.Provider>;
+  return (
+    <FirebaseAuthContext.Provider
+      value={{ user: user, reload: user?.id ? () => setUserData(user.id) : async () => {} }}
+    >
+      {props.children}
+    </FirebaseAuthContext.Provider>
+  );
 };
 
 export default FirebaseAuthProvider;

@@ -1,3 +1,5 @@
+import { PartiallyIgnorePartial } from "@/types/util";
+
 import UserMapper from "./UserMapper";
 import { UserPublicData, UserData, UserFormData, UserCreateData } from "./UserTypes";
 import { nOrLessGramTokenize } from "../../plugins/Utility/NGramTokenizer";
@@ -23,7 +25,7 @@ export default class UserInteractor {
     const res_data = await this.interactor.get(this.COLLECTION_NAME, user_id);
     if (!res_data) return null;
 
-    const user_public_data = UserMapper.mapDocDataToUsePublicData(res_data);
+    const user_public_data = UserMapper.mapDocDataToUserPublicData(res_data);
     return user_public_data;
   }
 
@@ -70,5 +72,11 @@ export default class UserInteractor {
 
     const user_data = UserMapper.mapDocDataToUserData(res_data);
     return user_data;
+  }
+
+  async update(data: PartiallyIgnorePartial<UserFormData, "id">): Promise<boolean | null> {
+    const { id: {} = {}, ...update_data } = data; // ignore id property
+    const result = await this.interactor.update(this.COLLECTION_NAME, data.id, update_data);
+    return result;
   }
 }

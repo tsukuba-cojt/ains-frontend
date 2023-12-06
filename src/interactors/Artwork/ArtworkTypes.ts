@@ -13,6 +13,7 @@ export interface ArtworkData {
   view_num: number;
   save_num: number;
   uploaded: Date;
+  is_public: boolean;
 
   author_id: string;
   tags: string[];
@@ -29,6 +30,7 @@ export interface ArtworkDataWithRelativeData {
   view_num: number;
   save_num: number;
   uploaded: Date;
+  is_public: boolean;
 
   author: UserPublicData;
   tags: string[];
