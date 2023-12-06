@@ -9,6 +9,7 @@ import useSWR from "swr";
 import GridArtworks from "@/components/GridArtworks";
 import ArtworkInteractor from "@/interactors/Artwork/ArtworkInteractor";
 import BaseInteractor from "@/interactors/BaseInteractor";
+import UserInteractor from "@/interactors/User/UserInteractor";
 
 import { theme } from "./_app";
 
@@ -33,10 +34,17 @@ const SearchResultPage = () => {
     data: artworks,
     error,
     isLoading,
-  } = useSWR(`/artworks/search?keywords=${searchKeyWords}&tags=${searchTags}`, () =>
+  } = useSWR(`/artworks/search_artwork?keywords=${searchKeyWords}&tags=${searchTags}`, () =>
     new ArtworkInteractor().fullTextAndTagSearch(100, searchKeyWords.split(/\s+/), searchTags.split(/\s+/))
   );
-  console.log(`serach result:${artworks}`);
+
+  const {
+    data: users,
+    error: error_users,
+    isLoading: isLoading_users,
+  } = useSWR(`/artworks/search_user?keywords=${searchKeyWords}`, () =>
+    new UserInteractor().fullTextSearch(100, searchKeyWords.split(/\s+/))
+  );
 
   const router = useRouter();
 
@@ -49,9 +57,23 @@ const SearchResultPage = () => {
     artworksBox = <GridArtworks artworks={artworks} />;
   }
 
+  let usersBox: JSX.Element = <>な〜ん</>;
+  if (error_users || users === null) {
+    usersBox = <>Errorだよ〜</>;
+  } else if (isLoading_users || users === undefined) {
+    usersBox = <>検索しています!</>;
+  } else {
+    usersBox = <>な〜ん</>;
+    let ary: JSX.Element[] = [];
+    users.forEach((aUser) => {
+      ary.push(<>{aUser.name + "/"}</>);
+    });
+    usersBox = <>{ary}</>;
+  }
+
   return (
     <Box>
-      {searchKeyWords}の検索結果
+      {searchKeyWords + " #" + searchTags}の検索結果
       <Tabs align='center' defaultIndex={1}>
         <TabList>
           <Tab>コンテンツ</Tab>
@@ -61,7 +83,7 @@ const SearchResultPage = () => {
         <TabIndicator mt='-1.5px' height='2px' bg='blue.500' borderRadius='1px' />
         <TabPanels>
           <TabPanel>{artworksBox}</TabPanel>
-          <TabPanel>{artworksBox}</TabPanel>
+          <TabPanel>{usersBox}</TabPanel>
           <TabPanel>{artworksBox}</TabPanel>
         </TabPanels>
       </Tabs>
