@@ -1,6 +1,6 @@
 import { Box, useColorMode, useColorModeValue } from "@chakra-ui/react";
 import { Tabs, TabList, TabPanels, Tab, TabPanel, TabIndicator } from "@chakra-ui/react";
-import { getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
@@ -37,31 +37,6 @@ const SearchResultPage = () => {
     new ArtworkInteractor().fullTextAndTagSearch(100, searchKeyWords.split(/\s+/), searchTags.split(/\s+/))
   );
   console.log(`serach result:${artworks}`);
-
-  const signoutUser = () => {
-    signOut(auth)
-      .then(() => {
-        console.log("サインアウトしたよ~");
-      })
-      .catch((error) => {
-        // An error happened.
-      });
-  };
-
-  const LoginWithEmailAndPass = () => {
-    signInWithEmailAndPassword(auth, "tokatabea@gmail.com", "xp2800ch")
-      .then((userCredential) => {
-        // Signed in
-        const user = userCredential.user;
-        console.log("ログインしたよ");
-        console.log(user.displayName + "/" + user.email + "/" + user.uid + "/" + user.getIdToken());
-        // ...
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-      });
-  };
 
   const router = useRouter();
 
