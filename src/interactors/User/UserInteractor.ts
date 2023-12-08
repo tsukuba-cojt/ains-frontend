@@ -35,7 +35,7 @@ export default class UserInteractor {
 
     const user_data_list: UserPublicData[] = [];
     for (let i = 0; i < res_data.length; i++) {
-      const new_user_data = await UserMapper.mapDocDataToUsePublicData(res_data[i]);
+      const new_user_data = await UserMapper.mapDocDataToUserPublicData(res_data[i]);
       if (new_user_data !== null) user_data_list.push(new_user_data);
     }
 

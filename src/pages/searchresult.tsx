@@ -1,15 +1,18 @@
 import { Box, useColorMode, useColorModeValue } from "@chakra-ui/react";
 import { Tabs, TabList, TabPanels, Tab, TabPanel, TabIndicator } from "@chakra-ui/react";
+import { Text, Flex, Avatar, Link } from "@chakra-ui/react";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
 import useSWR from "swr";
 
+import CommentBox from "@/components/CommentBox";
 import GridArtworks from "@/components/GridArtworks";
 import ArtworkInteractor from "@/interactors/Artwork/ArtworkInteractor";
 import BaseInteractor from "@/interactors/BaseInteractor";
 import UserInteractor from "@/interactors/User/UserInteractor";
+import { UserPublicData } from "@/interactors/User/UserTypes";
 
 import { theme } from "./_app";
 
@@ -48,6 +51,42 @@ const SearchResultPage = () => {
 
   const router = useRouter();
 
+  const getUserBox = (
+    userName: string,
+    userDescription: string,
+    iconURL: string,
+    userPubData: UserPublicData
+  ): JSX.Element => {
+    return (
+      <Box h='80px' marginBottom='5px' bgColor='black'>
+        <Flex gap={3} my={5} h='20px'>
+          <Avatar size='sm' src={iconURL} name={userName} />
+          <Link onClick={() => router.push(`/users/${userPubData.id}`)}>
+            <Text as='b' fontSize='20px'>
+              {userName}
+            </Text>
+          </Link>
+        </Flex>
+        <Flex>
+          <Text marginLeft='10px' textAlign={["start"]}>
+            {userDescription}
+          </Text>
+        </Flex>
+      </Box>
+    );
+    return <CommentBox key={0} icon_url={iconURL} username={userName} text={userDescription} />;
+  };
+
+  const getUserBoxes = (userPubDatas: Array<UserPublicData>) => {
+    return (
+      <>
+        {userPubDatas.map((aData) => {
+          return getUserBox(aData.name, aData.description ? aData.description : "", aData.icon_url, aData);
+        })}
+      </>
+    );
+  };
+
   let artworksBox: JSX.Element = <>Error!</>;
   if (error || artworks === null) {
     artworksBox = <>Errorだよ〜</>;
@@ -64,16 +103,19 @@ const SearchResultPage = () => {
     usersBox = <>検索しています!</>;
   } else {
     usersBox = <>な〜ん</>;
-    let ary: JSX.Element[] = [];
-    users.forEach((aUser) => {
-      ary.push(<>{aUser.name + "/"}</>);
-    });
-    usersBox = <>{ary}</>;
+    usersBox = <>{getUserBoxes(users)}</>;
   }
 
   return (
     <Box>
-      {searchKeyWords + " #" + searchTags}の検索結果
+      {searchKeyWords +
+        searchTags
+          .split(/\s+/)
+          .map((aData) => {
+            return aData.trim() ? " #" + aData : "";
+          })
+          .join()}
+      の検索結果
       <Tabs align='center' defaultIndex={1}>
         <TabList>
           <Tab>コンテンツ</Tab>
