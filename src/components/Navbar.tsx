@@ -11,10 +11,12 @@ import {
   useColorMode,
   useColorModeValue,
 } from "@chakra-ui/react";
+import Link from "next/link";
 import { useState, useContext } from "react";
 
 import UserIcon from "@/icons/UserIcon";
 
+import DMModal from "./DMModal";
 import { FirebaseAuthContext } from "./FirebaseAuthProvider";
 import LoginModal from "./LoginModal";
 import SignupModal from "./SignupModal";
@@ -24,9 +26,10 @@ const Navbar = () => {
   const icon_fill_color = useColorModeValue("white", "gray.800");
   const { user } = useContext(FirebaseAuthContext);
 
-  const [isHome, setIsHome] = useState<boolean>(false);
+  const [isHome, setIsHome] = useState<boolean>(true);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false);
   const [isSignupModalOpen, setIsSignupModalOpen] = useState<boolean>(false);
+  const [isDMModalOpen, setIsDMModalOpen] = useState<boolean>(false);
 
   const loginSignupSwitching = (): void => {
     setIsLoginModalOpen(!isLoginModalOpen);
@@ -55,9 +58,13 @@ const Navbar = () => {
           ホームじゃない
         </Button>
       ) : (
-        <Button size='sm'>ホーム</Button>
+        <Link href='/'>
+          <Button size='sm'>ホーム</Button>
+        </Link>
       )}
-      <Button size='sm'>生成</Button>
+      <Link href='/upload'>
+        <Button size='sm'>投稿</Button>
+      </Link>
       <Box flexGrow={1}>
         <InputGroup>
           <InputLeftElement pointerEvents='none'>
@@ -75,9 +82,10 @@ const Navbar = () => {
       <Button variant='ghost' leftIcon={<BellIcon />} size='sm'>
         通知
       </Button>
-      <Button variant='ghost' leftIcon={<ChatIcon />} size='sm'>
+      <Button variant='ghost' onClick={() => setIsDMModalOpen(!isDMModalOpen)} leftIcon={<ChatIcon />} size='sm'>
         メッセージ
       </Button>
+      <DMModal isOpen={isDMModalOpen} onClose={() => setIsDMModalOpen(false)} />
       {user === null ? (
         <>
           <Button onClick={() => setIsLoginModalOpen(true)} size='sm'>
@@ -98,9 +106,11 @@ const Navbar = () => {
           />
         </>
       ) : (
-        <Button size='sm'>
-          <UserIcon color={icon_fill_color} boxSize='1.2rem' />
-        </Button>
+        <Link href='/mypage'>
+          <Button size='sm'>
+            <UserIcon color={icon_fill_color} boxSize='1.2rem' />
+          </Button>
+        </Link>
       )}
     </Flex>
   );
