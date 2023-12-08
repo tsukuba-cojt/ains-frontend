@@ -7,7 +7,6 @@ import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
 import useSWR from "swr";
 
-import CommentBox from "@/components/CommentBox";
 import GridArtworks from "@/components/GridArtworks";
 import ArtworkInteractor from "@/interactors/Artwork/ArtworkInteractor";
 import BaseInteractor from "@/interactors/BaseInteractor";
@@ -74,7 +73,6 @@ const SearchResultPage = () => {
         </Flex>
       </Box>
     );
-    return <CommentBox key={0} icon_url={iconURL} username={userName} text={userDescription} />;
   };
 
   const getUserBoxes = (userPubDatas: Array<UserPublicData>) => {
