@@ -3,6 +3,8 @@ import { PartiallyIgnorePartial } from "@/types/util";
 import UserMapper from "./UserMapper";
 import { UserPublicData, UserData, UserFormData, UserCreateData } from "./UserTypes";
 import BaseInteractor from "../BaseInteractor";
+import FileInteractor from "../File/FileInteractor";
+import { FileData } from "../File/FileTypes";
 
 export default class UserInteractor {
   readonly interactor: BaseInteractor;
@@ -29,8 +31,14 @@ export default class UserInteractor {
   }
 
   async set(data: UserFormData): Promise<UserData | null> {
+    let file: FileData | null = null;
+    if (data.icon) {
+      file = await new FileInteractor().upload(data.icon);
+    }
+
     const create_data: UserCreateData = {
       ...data,
+      icon: file?.url || undefined,
       followers: [],
       follows: [],
     };
@@ -43,8 +51,17 @@ export default class UserInteractor {
   }
 
   async update(data: PartiallyIgnorePartial<UserFormData, "id">): Promise<boolean | null> {
-    const { id: {} = {}, ...update_data } = data; // ignore id property
-    const result = await this.interactor.update(this.COLLECTION_NAME, data.id, update_data);
+    let file: FileData | null = null;
+    if (data.icon) {
+      file = await new FileInteractor().upload(data.icon);
+    }
+
+    const update_data = {
+      ...data,
+      icon: file?.id || undefined,
+    };
+    const { id: {} = {}, ...no_id_update_data } = update_data; // ignore id property
+    const result = await this.interactor.update(this.COLLECTION_NAME, data.id, no_id_update_data);
     return result;
   }
 }

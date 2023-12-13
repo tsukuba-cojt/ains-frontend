@@ -85,7 +85,7 @@ const TrendPage = ({ tags, users, communities, artworks }: TrendPageProps) => {
         title={user.title}
         show_icon
         icon_type='circle'
-        icon_url={user.thumbnail_url}
+        icon={user.thumbnail_url}
         href={`/search?user=${user.id}`}
       />
     </GridItem>
@@ -96,7 +96,7 @@ const TrendPage = ({ tags, users, communities, artworks }: TrendPageProps) => {
         title={community.title}
         show_icon
         icon_type='square'
-        icon_url={community.thumbnail_url}
+        icon={community.thumbnail_url}
         href={`/search?community=${community.id}`}
       />
     </GridItem>

@@ -155,7 +155,7 @@ const UserProfilePage = ({ artworks, communities }: any) => {
   return (
     <Container maxW='container.lg' p={5}>
       <VStack gap={5}>
-        <Avatar size='2xl' name={user.name} src={user.icon_url} />
+        <Avatar size='2xl' name={user.name} src={user.icon} />
         <Heading as='h1'>{user.name}</Heading>
 
         <Flex gap={3}>
@@ -189,7 +189,7 @@ const UserProfilePage = ({ artworks, communities }: any) => {
                       title={community.title}
                       show_icon
                       icon_type='square'
-                      icon_url={community.thumbnail_url}
+                      icon={community.thumbnail_url}
                       href={`/search?community=${community.id}`}
                     />
                   </GridItem>
