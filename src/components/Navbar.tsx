@@ -32,9 +32,31 @@ const Navbar = () => {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false);
   const [isSignupModalOpen, setIsSignupModalOpen] = useState<boolean>(false);
 
+  const [serchBoxTexts, setSerchBoxTexts] = useState("");
+
   const loginSignupSwitching = (): void => {
     setIsLoginModalOpen(!isLoginModalOpen);
     setIsSignupModalOpen(!isSignupModalOpen);
+  };
+  const extractSearchWords = (inputWords: string): string => {
+    let retWord = "";
+    inputWords.split(/\s+/).forEach((aWord) => {
+      if (aWord.length > 0 && aWord[0] != "#") retWord += " " + aWord;
+    });
+    if (retWord.length > 0) {
+      retWord = retWord.substring(1);
+    }
+    return retWord;
+  };
+  const extractTagWords = (inputWords: string): string => {
+    let retWord = "";
+    inputWords.split(/\s+/).forEach((aWord) => {
+      if (aWord.length > 0 && aWord[0] == "#") retWord += " " + aWord.substring(1);
+    });
+    if (retWord.length > 0) {
+      retWord = retWord.substring(1);
+    }
+    return retWord;
   };
 
   return (
@@ -57,10 +79,17 @@ const Navbar = () => {
       </Button>
       <Box flexGrow={1}>
         <InputGroup>
-          <InputLeftElement pointerEvents='none'>
-            <SearchIcon color='gray.300' />
+          <InputLeftElement>
+            <IconButton
+              as='a'
+              onClick={() => console.log("nya~nn")}
+              href={`/searchresult?keywords=${extractSearchWords(serchBoxTexts)}
+              &tags=${extractTagWords(serchBoxTexts)}`}
+              aria-label='Search'
+              icon={<SearchIcon color='gray.300' />}
+            />
           </InputLeftElement>
-          <Input variant='filled' placeholder='検索'></Input>
+          <Input variant='filled' placeholder='検索' onChange={(event) => setSerchBoxTexts(event.target.value)}></Input>
         </InputGroup>
       </Box>
       <IconButton

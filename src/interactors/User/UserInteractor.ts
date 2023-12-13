@@ -2,6 +2,7 @@ import { PartiallyIgnorePartial } from "@/types/util";
 
 import UserMapper from "./UserMapper";
 import { UserPublicData, UserData, UserFormData, UserCreateData } from "./UserTypes";
+import { nOrLessGramTokenize } from "../../plugins/Utility/NGramTokenizer";
 import BaseInteractor from "../BaseInteractor";
 import FileInteractor from "../File/FileInteractor";
 import { FileData } from "../File/FileTypes";
@@ -30,6 +31,19 @@ export default class UserInteractor {
     return user_public_data;
   }
 
+  async fullTextSearch(limitNum: number, serchWords: Array<string>) {
+    const res_data = await this.interactor.fullTextSearch(this.COLLECTION_NAME, limitNum, serchWords);
+    if (!res_data) return null;
+
+    const user_data_list: UserPublicData[] = [];
+    for (let i = 0; i < res_data.length; i++) {
+      const new_user_data = await UserMapper.mapDocDataToUserPublicData(res_data[i]);
+      if (new_user_data !== null) user_data_list.push(new_user_data);
+    }
+
+    return user_data_list;
+  }
+
   async set(data: UserFormData): Promise<UserData | null> {
     let file: FileData | null = null;
     if (data.icon) {
@@ -43,7 +57,25 @@ export default class UserInteractor {
       follows: [],
     };
     const { id: {} = {}, ...body_data } = create_data; // ignore id property
-    const res_data = await this.interactor.set(this.COLLECTION_NAME, data.id, body_data);
+
+    //検索に使うマップを作成
+    const bigramtokens_map: any = {};
+    nOrLessGramTokenize(body_data.name, 2).forEach((aToken) => {
+      bigramtokens_map[aToken] = true;
+    });
+
+    const tags_map: any = {};
+    /*
+    body_data.tags.forEach((aTag) => {
+      tags_map[aTag] = true;
+    });
+    */
+    const body_data_with_serchtoken = Object.assign(body_data, {
+      bigramtokens_map: bigramtokens_map,
+      tags_map: tags_map,
+    });
+
+    const res_data = await this.interactor.set(this.COLLECTION_NAME, data.id, body_data_with_serchtoken);
     if (!res_data) return null;
 
     const user_data = UserMapper.mapDocDataToUserData(res_data);
