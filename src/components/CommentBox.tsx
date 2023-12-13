@@ -2,7 +2,7 @@ import { Box, Text, Flex, Avatar } from "@chakra-ui/react";
 import { Fragment } from "react";
 
 interface Props {
-  icon_url: string;
+  icon: string;
   username: string;
   text: string;
 }
@@ -19,7 +19,7 @@ const CommentBox = (props: Props) => {
 
   return (
     <Flex gap={3} my={5}>
-      <Avatar size='sm' src={props.icon_url} name={props.username} />
+      <Avatar size='sm' src={props.icon} name={props.username} />
       <Box>
         <Text as='b'>{props.username}</Text>
         <Text>{convert_to_br_text}</Text>

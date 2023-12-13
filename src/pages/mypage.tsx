@@ -1,4 +1,4 @@
-import { EditIcon } from "@chakra-ui/icons";
+import { AddIcon, DownloadIcon, EditIcon } from "@chakra-ui/icons";
 import {
   Avatar,
   Container,
@@ -17,8 +17,17 @@ import {
   IconButton,
   Button,
   Textarea,
+  Box,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+  ModalFooter,
+  useToast,
 } from "@chakra-ui/react";
 import { GetServerSideProps } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { ChangeEvent, useContext, useEffect, useState } from "react";
@@ -28,7 +37,7 @@ import GridArtworks from "@/components/GridArtworks";
 import IdeaBoxThumbnail from "@/components/IdeaBoxThumbnail";
 import LinkCard from "@/components/LinkCard";
 import OverlayAdminMenu from "@/components/OverlayAdminMenu";
-import IdeaBoxInteractor from "@/interactors/IdeaBox/IdeaboxInteractor";
+import IdeaBoxInteractor from "@/interactors/IdeaBox/IdeaBoxInteractor";
 import UserInteractor from "@/interactors/User/UserInteractor";
 
 export const getServerSideProps: GetServerSideProps = async () => {
@@ -172,6 +181,7 @@ type FormFields = keyof FormData;
 
 const UserProfilePage = ({ artworks, communities, ideaboxes }: any) => {
   const router = useRouter();
+  const toast = useToast();
   const { user, reload } = useContext(FirebaseAuthContext);
   const [doesExpandDescription, setDoesExpandDescription] = useState<boolean>(false);
   const [isEditing, setIsEditing] = useState<Record<FormFields, boolean>>({
@@ -182,6 +192,9 @@ const UserProfilePage = ({ artworks, communities, ideaboxes }: any) => {
     name: user?.name ?? "",
     description: user?.description ?? "",
   });
+  const [iconFile, setIconFile] = useState<{ file: File; url: string } | null>(null);
+  const [showIconOverlay, setShowIconOverlay] = useState<boolean>(false);
+  const [showUploadModal, setShowUploadModal] = useState<boolean>(false);
 
   const handleOnChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData((current) => {
@@ -194,13 +207,41 @@ const UserProfilePage = ({ artworks, communities, ideaboxes }: any) => {
 
   const updateProfile = async () => {
     if (!user) return;
-    await new UserInteractor().update({
+    const result = await new UserInteractor().update({
       id: user.id,
       name: formData.name !== user.name ? formData.name : undefined,
       description: formData.description !== user.description ? formData.description : undefined,
+      icon: iconFile ? iconFile.file : undefined,
     });
+    if (result) {
+      toast({
+        title: "プロフィールが更新されました",
+        status: "success",
+        duration: 9000,
+        isClosable: true,
+      });
+    } else {
+      toast({
+        title: "更新に失敗しました",
+        status: "error",
+        duration: 9000,
+        isClosable: true,
+      });
+    }
     await reload();
     setIsEditing({ name: false, description: false });
+    setIconFile(null);
+  };
+
+  const readAndSetFile = (file: File) => {
+    const reader = new FileReader();
+    reader.addEventListener("load", (e) => {
+      setIconFile({
+        file: file,
+        url: !(reader.result instanceof ArrayBuffer) ? reader.result ?? "" : "",
+      });
+    });
+    reader.readAsDataURL(file);
   };
 
   useEffect(() => {
@@ -213,12 +254,98 @@ const UserProfilePage = ({ artworks, communities, ideaboxes }: any) => {
 
   if (!user) return <>login required</>;
 
-  console.log(ideaboxes);
-
   return (
     <Container maxW='container.lg' p={5}>
+      <Modal
+        isOpen={showUploadModal}
+        isCentered
+        onClose={() => {
+          setShowUploadModal(false);
+          setIconFile(null);
+        }}
+      >
+        <ModalContent>
+          <ModalHeader>アイコン画像のアップロード</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <label
+              style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}
+              htmlFor='icon_file'
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                e.dataTransfer.dropEffect = "copy";
+              }}
+              onDrop={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                const files = e.dataTransfer.files;
+                if (files.length < 1) {
+                  setIconFile(null);
+                } else {
+                  readAndSetFile(files[0]);
+                }
+              }}
+            >
+              {iconFile ? (
+                <Image width='256' height='256' src={iconFile.url} alt='' />
+              ) : (
+                <VStack py={10} gap={5}>
+                  <DownloadIcon boxSize={16} />
+                  <>ファイルを選択、またはドラッグ&ドロップ</>
+                </VStack>
+              )}
+            </label>
+            <input
+              style={{ display: "none" }}
+              id='icon_file'
+              type='file'
+              accept='image/*'
+              onChange={(e) => {
+                const files = e.target.files;
+                if (!files || files.length < 1) {
+                  setIconFile(null);
+                } else {
+                  readAndSetFile(files[0]);
+                }
+              }}
+            />
+          </ModalBody>
+          <ModalFooter>
+            <Button onClick={updateProfile} w='full'>
+              アップロードする
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
       <VStack gap={5}>
-        <Avatar size='2xl' name={user.name} src={user.icon_url} />
+        <Box
+          w='fit-content'
+          h='fit-content'
+          position='relative'
+          onMouseEnter={() => setShowIconOverlay(true)}
+          onMouseLeave={() => setShowIconOverlay(false)}
+        >
+          <Box
+            position='absolute'
+            top='0'
+            left='0'
+            rounded='full'
+            w='full'
+            h='full'
+            backgroundColor='black'
+            opacity={`${showIconOverlay ? "0.7" : "0"}`}
+            zIndex='2'
+            transition='opacity 200ms 0ms ease'
+            onClick={() => setShowUploadModal(true)}
+            display='flex'
+            alignItems='center'
+            justifyContent='center'
+          >
+            <AddIcon boxSize={10} />
+          </Box>
+          <Avatar size='2xl' name={user.name} src={user.icon} />
+        </Box>
         <Flex alignItems='center' gap={3}>
           {isEditing.name ? (
             <Input
@@ -323,7 +450,7 @@ const UserProfilePage = ({ artworks, communities, ideaboxes }: any) => {
                       title={community.title}
                       show_icon
                       icon_type='square'
-                      icon_url={community.thumbnail_url}
+                      icon={community.thumbnail_url}
                       href={`/search?community=${community.id}`}
                     />
                   </GridItem>
