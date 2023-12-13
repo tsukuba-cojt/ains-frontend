@@ -197,8 +197,6 @@ const ArtworkDetailPage = () => {
     getTextFileContentFromUrl(artwork.file.url);
   }, [artwork?.type]);
 
-  console.log(error, artwork, _error, artworks);
-
   if (error || artwork === null || _error || artworks === null) return <ErrorPage statusCode={404} />;
   if (isLoading || artwork === undefined || _isLoading || artworks === undefined) return <LoadingPanel />;
 
