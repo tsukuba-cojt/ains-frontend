@@ -3,15 +3,16 @@ import {
   Button,
   IconButton,
   Flex,
-  Image,
   Box,
   Input,
   InputGroup,
   InputLeftElement,
   useColorMode,
   useColorModeValue,
+  Image,
 } from "@chakra-ui/react";
-import Link from "next/link";
+import { getAuth, signOut } from "firebase/auth";
+import { useRouter } from "next/router";
 import { useState, useContext } from "react";
 
 import UserIcon from "@/icons/UserIcon";
@@ -19,17 +20,21 @@ import UserIcon from "@/icons/UserIcon";
 import DMModal from "./DMModal";
 import { FirebaseAuthContext } from "./FirebaseAuthProvider";
 import LoginModal from "./LoginModal";
+import NoticeModal from "./NoticeModal";
 import SignupModal from "./SignupModal";
 
 const Navbar = () => {
   const { colorMode, toggleColorMode } = useColorMode();
   const icon_fill_color = useColorModeValue("white", "gray.800");
   const { user } = useContext(FirebaseAuthContext);
+  const router = useRouter();
+  const logo_url = useColorModeValue("/logo.png", "/logo-white.png");
 
   const [isHome, setIsHome] = useState<boolean>(true);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false);
   const [isSignupModalOpen, setIsSignupModalOpen] = useState<boolean>(false);
   const [isDMModalOpen, setIsDMModalOpen] = useState<boolean>(false);
+  const [isNoticeModalOpen, setIsNoticeModalOpen] = useState<boolean>(false);
 
   const loginSignupSwitching = (): void => {
     setIsLoginModalOpen(!isLoginModalOpen);
@@ -50,21 +55,10 @@ const Navbar = () => {
       h='60px'
       p={4}
     >
-      <Button size='sm'>
-        <Image borderRadius='full' boxSize='30px' src='https://bit.ly/dan-abramov' alt='Dan Abramov' />
+      <Image mr='5' w='100px' alt='logo' onClick={() => router.push("/")} src={logo_url} />
+      <Button onClick={() => router.push("/upload")} size='sm'>
+        アップロード
       </Button>
-      {isHome == false ? (
-        <Button variant='outline' size='sm'>
-          ホームじゃない
-        </Button>
-      ) : (
-        <Link href='/'>
-          <Button size='sm'>ホーム</Button>
-        </Link>
-      )}
-      <Link href='/upload'>
-        <Button size='sm'>投稿</Button>
-      </Link>
       <Box flexGrow={1}>
         <InputGroup>
           <InputLeftElement pointerEvents='none'>
@@ -79,9 +73,15 @@ const Navbar = () => {
         onClick={toggleColorMode}
         icon={colorMode === "light" ? <SunIcon /> : <MoonIcon />}
       ></IconButton>
-      <Button variant='ghost' leftIcon={<BellIcon />} size='sm'>
+      <Button
+        variant='ghost'
+        onClick={() => setIsNoticeModalOpen(!isNoticeModalOpen)}
+        leftIcon={<BellIcon />}
+        size='sm'
+      >
         通知
       </Button>
+      <NoticeModal isOpen={isNoticeModalOpen} onClose={() => setIsNoticeModalOpen(false)} />
       <Button variant='ghost' onClick={() => setIsDMModalOpen(!isDMModalOpen)} leftIcon={<ChatIcon />} size='sm'>
         メッセージ
       </Button>
@@ -106,11 +106,14 @@ const Navbar = () => {
           />
         </>
       ) : (
-        <Link href='/mypage'>
-          <Button size='sm'>
+        <>
+          <Button colorScheme='red' onClick={() => signOut(getAuth())} size='sm'>
+            ログアウト
+          </Button>
+          <Button onClick={() => router.push("/mypage")} size='sm'>
             <UserIcon color={icon_fill_color} boxSize='1.2rem' />
           </Button>
-        </Link>
+        </>
       )}
     </Flex>
   );

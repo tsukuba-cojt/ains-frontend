@@ -20,6 +20,7 @@ export default class ArtworkMapper {
       view_num: data.view_num,
       save_num: data.save_num,
       uploaded: new Date(data.uploaded),
+      is_public: data.is_public || false, // TODO: 無理やり設定するのをやめる
 
       author_id: data.author_id,
       tags: data.tags,
@@ -58,6 +59,7 @@ export default class ArtworkMapper {
       view_num: data.view_num,
       save_num: data.save_num,
       uploaded: new Date(data.uploaded),
+      is_public: data.is_public || false, // TODO: 無理やり設定するのをやめる
 
       author: user_data,
       tags: data.tags,

@@ -20,12 +20,14 @@ import {
   Input,
   useToast,
 } from "@chakra-ui/react";
+import ErrorPage from "next/error";
 import { useRouter } from "next/router";
 import { useState, useMemo, useContext, ChangeEvent, ReactNode, useEffect, Fragment } from "react";
 import useSWR from "swr";
 
 import CommentBox from "@/components/CommentBox";
 import { FirebaseAuthContext } from "@/components/FirebaseAuthProvider";
+import GridArtworks from "@/components/GridArtworks";
 import ImageSlider, { ImageItem } from "@/components/ImageSlider";
 import LoadingPanel from "@/components/LoadingPanel";
 import ArtworkInteractor from "@/interactors/Artwork/ArtworkInteractor";
@@ -49,6 +51,13 @@ const ArtworkDetailPage = () => {
   } = useSWR(`/artworks/${artworks_id as string}`, () =>
     new ArtworkInteractor().getWithRelativeData(artworks_id as string)
   );
+  // とりあえず最新のを順番に取ってくるようにしている
+  // 作品に関連するものを取ってくるよう要修正
+  const {
+    data: artworks,
+    error: _error,
+    isLoading: _isLoading,
+  } = useSWR("/artworks/latest", () => new ArtworkInteractor().getLatests(100));
 
   const [doesExpandDescription, setDoesExpandDescription] = useState<boolean>(false);
   const [commentText, setCommentText] = useState<string>("");
@@ -188,14 +197,16 @@ const ArtworkDetailPage = () => {
     getTextFileContentFromUrl(artwork.file.url);
   }, [artwork?.type]);
 
-  if (error || artwork === null) return <>Error!</>;
-  if (isLoading || artwork === undefined) return <LoadingPanel />;
+  console.log(error, artwork, _error, artworks);
+
+  if (error || artwork === null || _error || artworks === null) return <ErrorPage statusCode={404} />;
+  if (isLoading || artwork === undefined || _isLoading || artworks === undefined) return <LoadingPanel />;
 
   return (
     <Container maxW='container.lg' p={5}>
       <Flex justify='center' direction={{ base: "column", md: "row" }} gap={10} marginBottom={5}>
         <VStack>
-          <Box maxH='80vh' minW={{ base: "80vw", md: "30vw" }} maxW={{ base: "80vw", md: "40vw" }}>
+          <Box minW={{ base: "80vw", md: "30vw" }} maxW={{ base: "80vw", md: "40vw" }}>
             {content_preview_element}
           </Box>
           <Spacer />
@@ -270,6 +281,8 @@ const ArtworkDetailPage = () => {
         </Flex>
       </Flex>
       {textElement}
+      <Box mt={10} />
+      <GridArtworks artworks={artworks} />
     </Container>
   );
 };

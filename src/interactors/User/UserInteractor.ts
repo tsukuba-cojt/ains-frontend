@@ -1,5 +1,7 @@
+import { PartiallyIgnorePartial } from "@/types/util";
+
 import UserMapper from "./UserMapper";
-import { UserCreateData, UserPublicData, UserData } from "./UserTypes";
+import { UserPublicData, UserData, UserFormData, UserCreateData } from "./UserTypes";
 import BaseInteractor from "../BaseInteractor";
 
 export default class UserInteractor {
@@ -22,16 +24,27 @@ export default class UserInteractor {
     const res_data = await this.interactor.get(this.COLLECTION_NAME, user_id);
     if (!res_data) return null;
 
-    const user_public_data = UserMapper.mapDocDataToUsePublicData(res_data);
+    const user_public_data = UserMapper.mapDocDataToUserPublicData(res_data);
     return user_public_data;
   }
 
-  async set(data: UserCreateData): Promise<UserData | null> {
-    const { id: {} = {}, ...body_data } = data; // ignore id property
+  async set(data: UserFormData): Promise<UserData | null> {
+    const create_data: UserCreateData = {
+      ...data,
+      followers: [],
+      follows: [],
+    };
+    const { id: {} = {}, ...body_data } = create_data; // ignore id property
     const res_data = await this.interactor.set(this.COLLECTION_NAME, data.id, body_data);
     if (!res_data) return null;
 
     const user_data = UserMapper.mapDocDataToUserData(res_data);
     return user_data;
+  }
+
+  async update(data: PartiallyIgnorePartial<UserFormData, "id">): Promise<boolean | null> {
+    const { id: {} = {}, ...update_data } = data; // ignore id property
+    const result = await this.interactor.update(this.COLLECTION_NAME, data.id, update_data);
+    return result;
   }
 }
