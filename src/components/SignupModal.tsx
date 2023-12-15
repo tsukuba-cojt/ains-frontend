@@ -32,7 +32,7 @@ const SignupModal = (props: Props) => {
       .then(async (userCredential) => {
         // Signed in
         const user = userCredential.user;
-        const user_data = await new UserInteractor().set({ id: user.uid, name: username, icon_url: "" });
+        const user_data = await new UserInteractor().set({ id: user.uid, name: username, icon: "" });
         if (!user_data) {
           await user.delete();
           throw new Error();

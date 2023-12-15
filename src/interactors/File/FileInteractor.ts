@@ -1,6 +1,5 @@
-import { FileCreateData, FileData } from "@/interactors/Artwork/artwork";
-
 import FileMapper from "./FileMapper";
+import { FileCreateData, FileData } from "./FileTypes";
 import BaseInteractor from "../BaseInteractor";
 
 export default class FileInteractor {
