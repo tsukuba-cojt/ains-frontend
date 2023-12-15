@@ -39,7 +39,6 @@
     "@types/react": "17.0.40"
   },
   "devDependencies": {
-    "@types/jquery": "^3.5.29",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-unused-imports": "^2.0.0",

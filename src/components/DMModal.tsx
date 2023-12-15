@@ -13,7 +13,7 @@ import {
   Image,
 } from "@chakra-ui/react";
 import { AnimatePresence, motion } from "framer-motion";
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { useState } from "react";
 
 interface Props {
@@ -45,6 +45,8 @@ const DMModal = (props: Props) => {
 
   const [changeUserID, setChangeUserID] = useState<boolean>(false);
 
+  const chatAreaRef = useRef<HTMLDivElement | null>(null);
+
   const [messages, setMessages] = useState<Message["contents"][]>([]); // メッセージのリスト
   const [newMessage, setNewMessage] = useState(""); // 新しいメッセージの入力値
   // 新しいメッセージを送信する関数
@@ -58,13 +60,15 @@ const DMModal = (props: Props) => {
   const handleKeyPress = (event: KeyboardEvent) => {
     if (event.key === "Enter") {
       sendMessage();
-      setTimeout(function () {
-        let chatArea = document.getElementById("chat-Area"),
-          chatAreaHeight = chatArea.scrollHeight;
-        chatArea.scrollTop = chatAreaHeight;
-      }, 100);
     }
   };
+
+  useEffect(() => {
+    if (chatAreaRef.current) {
+      const chatAreaHeight = chatAreaRef.current.scrollHeight;
+      chatAreaRef.current.scrollTop = chatAreaHeight;
+    }
+  }, [messages]);
 
   return (
     <Box overflowY='auto' position='fixed' top='50px' right='0px' h='calc(100vh - 50px)' bg='green'>
@@ -179,12 +183,12 @@ const DMModal = (props: Props) => {
           <CloseButton onClick={() => setIsMessageOpen(false)} />
           <Text fontSize='3xl'>user name</Text>
           <Flex direction='column' h='100%'>
-            <Stack flex={0.85} overflowY='scroll' id='chat-Area'>
+            <Stack flex={0.85} overflowY='scroll' ref={chatAreaRef}>
               <>
                 {changeUserID == true ? (
                   <Box borderWidth='1px'>
                     {messages.map((message, index) => (
-                      <Flex justify='right' p='1'>
+                      <Flex key={index} justify='right' p='1'>
                         <Text bg='blue.100' p='2' borderRadius='md' w='60%'>
                           {message}
                         </Text>
@@ -201,7 +205,7 @@ const DMModal = (props: Props) => {
                 ) : (
                   <Box borderWidth='1px'>
                     {messages.map((message, index) => (
-                      <Flex justify='left' p='1'>
+                      <Flex key={index} justify='left' p='1'>
                         <Image
                           p='1'
                           borderRadius='full'
