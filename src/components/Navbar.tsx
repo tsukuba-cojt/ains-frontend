@@ -46,6 +46,7 @@ const Navbar = () => {
     if (retWord.length > 0) {
       retWord = retWord.substring(1);
     }
+    console.log(retWord + "|");
     return retWord;
   };
   const extractTagWords = (inputWords: string): string => {

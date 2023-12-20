@@ -53,6 +53,7 @@ export default function App() {
       disableCreateItem={true}
       inputStyleProps={{ bg: "white.100", pt: "4" }}
       listStyleProps={{ bg: "black.100", pt: "4" }}
+      listItemStyleProps={{ bg: "black.100", pt: "4", textColor: "red" }}
       onSelectedItemsChange={(changes) => handleSelectedItemsChange(changes.selectedItems)}
     />
   );
