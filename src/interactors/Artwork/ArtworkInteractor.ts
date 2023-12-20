@@ -6,6 +6,7 @@ import {
 } from "@/interactors/Artwork/ArtworkTypes";
 
 import ArtworkMapper from "./ArtworkMapper";
+import { nOrLessGramTokenize } from "../../plugins/Utility/NGramTokenizer";
 import BaseInteractor from "../BaseInteractor";
 import FileInteractor from "../File/FileInteractor";
 
@@ -45,6 +46,45 @@ export default class ArtworkInteractor {
     return artwork_data_list;
   }
 
+  async fullTextSearch(limitNum: number, serchWords: Array<string>) {
+    const res_data = await this.interactor.fullTextSearch(this.COLLECTION_NAME, limitNum, serchWords);
+    if (!res_data) return null;
+
+    const artwork_data_list: ArtworkData[] = [];
+    for (let i = 0; i < res_data.length; i++) {
+      const new_artwork_data = await ArtworkMapper.mapDocDataToArtworkData(res_data[i]);
+      if (new_artwork_data !== null) artwork_data_list.push(new_artwork_data);
+    }
+    return artwork_data_list;
+  }
+  async getWithTags(limitNum: number, tags: Array<string>) {
+    const res_data = await this.interactor.getWithTags(this.COLLECTION_NAME, limitNum, tags);
+    if (!res_data) {
+      return null;
+    }
+
+    const artwork_data_list: ArtworkData[] = [];
+    for (let i = 0; i < res_data.length; i++) {
+      const new_artwork_data = await ArtworkMapper.mapDocDataToArtworkData(res_data[i]);
+      if (new_artwork_data !== null) artwork_data_list.push(new_artwork_data);
+    }
+    return artwork_data_list;
+  }
+
+  async fullTextAndTagSearch(limitNum: number, serchWords: Array<string>, tags: Array<string>) {
+    const res_data = await this.interactor.fullTextAndTagSearch(this.COLLECTION_NAME, limitNum, serchWords, tags);
+    if (!res_data) {
+      return null;
+    }
+
+    const artwork_data_list: ArtworkData[] = [];
+    for (let i = 0; i < res_data.length; i++) {
+      const new_artwork_data = await ArtworkMapper.mapDocDataToArtworkData(res_data[i]);
+      if (new_artwork_data !== null) artwork_data_list.push(new_artwork_data);
+    }
+    return artwork_data_list;
+  }
+
   async upload(data: ArtworkFormData): Promise<ArtworkData | null> {
     if (!data.file) return null;
 
@@ -66,7 +106,24 @@ export default class ArtworkInteractor {
       comment_ids: data.comment_ids,
       parent_ids: data.parent_ids,
     };
-    const res_data = await this.interactor.set(this.COLLECTION_NAME, doc_id, artwork_create_data);
+
+    //検索に使うマップを作成
+    const bigramtokens_map: any = {};
+    nOrLessGramTokenize(artwork_create_data.name + " " + artwork_create_data.description, 2).forEach((aToken) => {
+      bigramtokens_map[aToken] = true;
+    });
+    const tags_map: any = {};
+    artwork_create_data.tags.forEach((aTag) => {
+      tags_map[aTag] = true;
+    });
+    const artwork_create_data_with_serchtoken = Object.assign(artwork_create_data, {
+      bigramtokens_map: bigramtokens_map,
+      tags_map: tags_map,
+    });
+
+    //const res_data = await this.interactor.set(this.COLLECTION_NAME, doc_id, artwork_create_data);
+    //検索用のデータ付きのオブジェクトをfirebaseに登録
+    const res_data = await this.interactor.set(this.COLLECTION_NAME, doc_id, artwork_create_data_with_serchtoken);
     if (!res_data) return null;
 
     const artwork_data = await ArtworkMapper.mapDocDataToArtworkData(res_data);

@@ -17,6 +17,7 @@ import { useState, useContext } from "react";
 
 import UserIcon from "@/icons/UserIcon";
 
+import DMModal from "./DMModal";
 import { FirebaseAuthContext } from "./FirebaseAuthProvider";
 import LoginModal from "./LoginModal";
 import SignupModal from "./SignupModal";
@@ -28,13 +29,36 @@ const Navbar = () => {
   const router = useRouter();
   const logo_url = useColorModeValue("/logo.png", "/logo-white.png");
 
-  const [isHome, setIsHome] = useState<boolean>(false);
+  const [isHome, setIsHome] = useState<boolean>(true);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false);
   const [isSignupModalOpen, setIsSignupModalOpen] = useState<boolean>(false);
+  const [isDMModalOpen, setIsDMModalOpen] = useState<boolean>(false);
+
+  const [serchBoxTexts, setSerchBoxTexts] = useState("");
 
   const loginSignupSwitching = (): void => {
     setIsLoginModalOpen(!isLoginModalOpen);
     setIsSignupModalOpen(!isSignupModalOpen);
+  };
+  const extractSearchWords = (inputWords: string): string => {
+    let retWord = "";
+    inputWords.split(/\s+/).forEach((aWord) => {
+      if (aWord.length > 0 && aWord[0] != "#") retWord += " " + aWord;
+    });
+    if (retWord.length > 0) {
+      retWord = retWord.substring(1);
+    }
+    return retWord;
+  };
+  const extractTagWords = (inputWords: string): string => {
+    let retWord = "";
+    inputWords.split(/\s+/).forEach((aWord) => {
+      if (aWord.length > 0 && aWord[0] == "#") retWord += " " + aWord.substring(1);
+    });
+    if (retWord.length > 0) {
+      retWord = retWord.substring(1);
+    }
+    return retWord;
   };
 
   return (
@@ -57,10 +81,18 @@ const Navbar = () => {
       </Button>
       <Box flexGrow={1}>
         <InputGroup>
-          <InputLeftElement pointerEvents='none'>
-            <SearchIcon color='gray.300' />
+          <InputLeftElement>
+            <IconButton
+              as='a'
+              onClick={() => console.log("nya~nn")}
+              href={`/searchresult?keywords=${extractSearchWords(serchBoxTexts)}&tags=${extractTagWords(
+                serchBoxTexts
+              )}`}
+              aria-label='Search'
+              icon={<SearchIcon color='gray.300' />}
+            />
           </InputLeftElement>
-          <Input variant='filled' placeholder='検索'></Input>
+          <Input variant='filled' placeholder='検索' onChange={(event) => setSerchBoxTexts(event.target.value)}></Input>
         </InputGroup>
       </Box>
       <IconButton
@@ -72,9 +104,10 @@ const Navbar = () => {
       <Button variant='ghost' leftIcon={<BellIcon />} size='sm'>
         通知
       </Button>
-      <Button variant='ghost' leftIcon={<ChatIcon />} size='sm'>
+      <Button variant='ghost' onClick={() => setIsDMModalOpen(!isDMModalOpen)} leftIcon={<ChatIcon />} size='sm'>
         メッセージ
       </Button>
+      <DMModal isOpen={isDMModalOpen} onClose={() => setIsDMModalOpen(false)} />
       {user === null ? (
         <>
           <Button onClick={() => setIsLoginModalOpen(true)} size='sm'>

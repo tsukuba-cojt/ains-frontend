@@ -151,7 +151,7 @@ const ArtworkDetailPage = () => {
 
   const comment_elements = useMemo(() => {
     return artwork?.comments.map((comment: CommentData, index: number) => (
-      <CommentBox key={index} icon_url={comment.author.icon_url} username={comment.author.name} text={comment.text} />
+      <CommentBox key={index} icon={comment.author.icon} username={comment.author.name} text={comment.text} />
     ));
   }, [artwork?.comments]);
 
@@ -197,8 +197,6 @@ const ArtworkDetailPage = () => {
     getTextFileContentFromUrl(artwork.file.url);
   }, [artwork?.type]);
 
-  console.log(error, artwork, _error, artworks);
-
   if (error || artwork === null || _error || artworks === null) return <ErrorPage statusCode={404} />;
   if (isLoading || artwork === undefined || _isLoading || artworks === undefined) return <LoadingPanel />;
 
@@ -231,7 +229,7 @@ const ArtworkDetailPage = () => {
             {artwork.description ? artwork.description : ""}
           </Text>
           <Flex alignItems='center' gap={4}>
-            <Avatar size='sm' src={artwork.author.icon_url} name={artwork.author.name} />
+            <Avatar size='sm' src={artwork.author.icon} name={artwork.author.name} />
             <Text>{artwork.author.name}</Text>
           </Flex>
           <HStack>{tag_elements}</HStack>
@@ -261,7 +259,7 @@ const ArtworkDetailPage = () => {
                       <>コメントをするにはログインしてください</>
                     ) : (
                       <>
-                        <Avatar size='sm' name={user.name} borderColor='gray.800' src={user.icon_url} />
+                        <Avatar size='sm' name={user.name} borderColor='gray.800' src={user.icon} />
                         <Input
                           variant='flushed'
                           value={commentText}
