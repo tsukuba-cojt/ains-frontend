@@ -49,6 +49,7 @@ export const INITIAL_ARTWORK_FORM_DATA: ArtworkFormData = {
   comment_ids: [],
   parent_ids: [],
 };
+
 export interface ArtworkFormData {
   type: ArtworkType;
   name: string;
