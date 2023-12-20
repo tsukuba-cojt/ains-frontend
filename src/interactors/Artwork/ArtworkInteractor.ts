@@ -45,6 +45,7 @@ export default class ArtworkInteractor {
 
     return artwork_data_list;
   }
+
   async fullTextSearch(limitNum: number, serchWords: Array<string>) {
     const res_data = await this.interactor.fullTextSearch(this.COLLECTION_NAME, limitNum, serchWords);
     if (!res_data) return null;
@@ -54,7 +55,6 @@ export default class ArtworkInteractor {
       const new_artwork_data = await ArtworkMapper.mapDocDataToArtworkData(res_data[i]);
       if (new_artwork_data !== null) artwork_data_list.push(new_artwork_data);
     }
-
     return artwork_data_list;
   }
   async getWithTags(limitNum: number, tags: Array<string>) {

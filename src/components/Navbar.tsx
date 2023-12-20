@@ -17,6 +17,7 @@ import { useState, useContext } from "react";
 
 import UserIcon from "@/icons/UserIcon";
 
+import DMModal from "./DMModal";
 import { FirebaseAuthContext } from "./FirebaseAuthProvider";
 import LoginModal from "./LoginModal";
 import SignupModal from "./SignupModal";
@@ -28,9 +29,10 @@ const Navbar = () => {
   const router = useRouter();
   const logo_url = useColorModeValue("/logo.png", "/logo-white.png");
 
-  const [isHome, setIsHome] = useState<boolean>(false);
+  const [isHome, setIsHome] = useState<boolean>(true);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false);
   const [isSignupModalOpen, setIsSignupModalOpen] = useState<boolean>(false);
+  const [isDMModalOpen, setIsDMModalOpen] = useState<boolean>(false);
 
   const [serchBoxTexts, setSerchBoxTexts] = useState("");
 
@@ -84,8 +86,9 @@ const Navbar = () => {
             <IconButton
               as='a'
               onClick={() => console.log("nya~nn")}
-              href={`/searchresult?keywords=${extractSearchWords(serchBoxTexts)}
-              &tags=${extractTagWords(serchBoxTexts)}`}
+              href={`/searchresult?keywords=${extractSearchWords(serchBoxTexts)}&tags=${extractTagWords(
+                serchBoxTexts
+              )}`}
               aria-label='Search'
               icon={<SearchIcon color='gray.300' />}
             />
@@ -102,9 +105,10 @@ const Navbar = () => {
       <Button variant='ghost' leftIcon={<BellIcon />} size='sm'>
         通知
       </Button>
-      <Button variant='ghost' leftIcon={<ChatIcon />} size='sm'>
+      <Button variant='ghost' onClick={() => setIsDMModalOpen(!isDMModalOpen)} leftIcon={<ChatIcon />} size='sm'>
         メッセージ
       </Button>
+      <DMModal isOpen={isDMModalOpen} onClose={() => setIsDMModalOpen(false)} />
       {user === null ? (
         <>
           <Button onClick={() => setIsLoginModalOpen(true)} size='sm'>
