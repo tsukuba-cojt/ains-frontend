@@ -104,17 +104,27 @@ export default class BaseInteractor {
     }
   }
 
-  async fullTextSearch(collection_name: string, limitNum: number, serchWords: Array<string>) {
+  async fullTextSearch(collection_name: string, limitNum: number, searchWords: Array<string>) {
+    const validSearchWords = !searchWords ? [] : searchWords.filter((aWord) => aWord != "");
+    if (validSearchWords.length <= 0) {
+      return [];
+    }
     try {
-      return await this.throwQuerys(this.fullTextSearchQuery(this.baseQuery(collection_name, limitNum), serchWords));
+      return await this.throwQuerys(
+        this.fullTextSearchQuery(this.baseQuery(collection_name, limitNum), validSearchWords)
+      );
     } catch (_err) {
       return null;
     }
   }
 
   async getWithTags(collection_name: string, limitNum: number, tags: Array<string>) {
+    const validtags = !tags ? [] : tags.filter((aWord) => aWord != "");
+    if (validtags.length <= 0) {
+      return [];
+    }
     try {
-      return await this.throwQuerys(this.tagsSearchQuery(this.baseQuery(collection_name, limitNum), tags));
+      return await this.throwQuerys(this.tagsSearchQuery(this.baseQuery(collection_name, limitNum), validtags));
     } catch (_err) {
       return null;
     }
@@ -123,12 +133,20 @@ export default class BaseInteractor {
   async fullTextAndTagSearch(
     collection_name: string,
     limitNum: number,
-    serchWords: Array<string>,
+    searchWords: Array<string>,
     tags: Array<string>
   ) {
+    const validtags = !tags ? [] : tags.filter((aWord) => aWord != "");
+    const validSearchWords = !searchWords ? [] : searchWords.filter((aWord) => aWord != "");
+    if (validtags.length <= 0 && validSearchWords.length <= 0) {
+      return [];
+    }
     try {
       return await this.throwQuerys(
-        this.tagsSearchQuery(this.fullTextSearchQuery(this.baseQuery(collection_name, limitNum), serchWords), tags)
+        this.tagsSearchQuery(
+          this.fullTextSearchQuery(this.baseQuery(collection_name, limitNum), validSearchWords),
+          validtags
+        )
       );
     } catch (_err) {
       return null;
@@ -244,7 +262,7 @@ export default class BaseInteractor {
   mapsBoolFieldNameSearchQuery(orig_query: Query<DocumentData>, map_name: string, boolField_names: Array<string>) {
     let q = orig_query;
     boolField_names.forEach((aName) => {
-      if (aName != "") q = query(q, where(`${map_name}.${aName}`, "==", true));
+      /*if (aName != "") */ q = query(q, where(`${map_name}.${aName}`, "==", true));
     });
     return q;
   }

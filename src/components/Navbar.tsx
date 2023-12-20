@@ -83,8 +83,9 @@ const Navbar = () => {
             <IconButton
               as='a'
               onClick={() => console.log("nya~nn")}
-              href={`/searchresult?keywords=${extractSearchWords(serchBoxTexts)}
-              &tags=${extractTagWords(serchBoxTexts)}`}
+              href={`/searchresult?keywords=${extractSearchWords(serchBoxTexts)}&tags=${extractTagWords(
+                serchBoxTexts
+              )}`}
               aria-label='Search'
               icon={<SearchIcon color='gray.300' />}
             />
