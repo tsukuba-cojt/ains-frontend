@@ -1,6 +1,6 @@
 import { DocumentData } from "@firebase/firestore";
 
-import { FileData } from "@/interactors/Artwork/artwork";
+import { FileData } from "@/interactors/File/FileTypes";
 
 export default class FileMapper {
   static mapDocDataToFileData(data: DocumentData): FileData {
