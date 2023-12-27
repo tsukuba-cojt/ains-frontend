@@ -29,13 +29,15 @@ export default function App() {
     error,
     isLoading,
   } = useSWR(`/artworks/search_artwork?keywords=${searchKeyWords}`, () =>
-    new ArtworkInteractor().fullTextSearch(100, searchKeyWords.split(/\s+/))
+    new ArtworkInteractor().fullTextSearch(10, searchKeyWords.split(/\s+/))
   );
+  let pickerItems2: Array<Item> = [];
 
-  const handleCreateItem = (item: Item) => {
-    setPickerItems((curr) => [...curr, item]);
-    setSelectedItems((curr) => [...curr, item]);
-  };
+  if (error || artworks === null) {
+  } else if (isLoading || artworks === undefined) {
+  } else {
+    pickerItems2 = artworks.map((aData) => ({ value: aData.id, label: aData.name }));
+  }
 
   const handleSelectedItemsChange = (selectedItems?: Item[]) => {
     if (selectedItems) {
@@ -47,8 +49,7 @@ export default function App() {
     <CUIAutoComplete
       label='Choose preferred work locations'
       placeholder='Type a Country'
-      onCreateItem={handleCreateItem}
-      items={pickerItems}
+      items={pickerItems2}
       selectedItems={selectedItems}
       disableCreateItem={true}
       inputStyleProps={{ bg: "white.100", pt: "4" }}
