@@ -1,5 +1,5 @@
 import { CheckCircleIcon } from "@chakra-ui/icons";
-import { Input, Box, Flex, Avatar, Text, Image, Link } from "@chakra-ui/react";
+import { Input, Box, Flex, Text, Image } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import React from "react";
 import { useState } from "react";
@@ -26,27 +26,6 @@ export default function App() {
     new ArtworkInteractor().fullTextSearch(10, serchBoxTexts.split(/\s+/))
   );
 
-  const getArtworkBox = (artworkData: ArtworkData): JSX.Element => {
-    if (artworkData.type != "image") {
-      return <></>;
-    }
-    return (
-      <Box h='80px' marginBottom='5px' bgColor='black'>
-        <Flex gap={3} my={5} h='20px'>
-          <Avatar size='sm' src={artworkData.file.url} name={artworkData.name} />
-          <Text as='b' fontSize='20px'>
-            {artworkData.name}
-          </Text>
-        </Flex>
-        <Flex>
-          <Text marginLeft='10px' textAlign={["start"]}>
-            {artworkData.description}
-          </Text>
-        </Flex>
-      </Box>
-    );
-  };
-
   let artworksBox: JSX.Element = <>検索中…</>;
   if (!error && artworks !== null && artworks !== undefined) {
     if (artworks.length == 0 && serchBoxTexts.length > 0) {
@@ -57,7 +36,8 @@ export default function App() {
           {artworks.map((aData: ArtworkData) => {
             return (
               <>
-                <Link
+                <Box
+                  _hover={{ bg: "black" }}
                   onClick={() => {
                     console.log(`${aData.id}(${aData.name})`);
                     if (selectedParentWorks.find((aAryData) => aAryData.value === aData.id)) {
@@ -70,7 +50,11 @@ export default function App() {
                   }}
                 >
                   <Flex align='center'>
-                    {selectedParentWorks.find((aAryData) => aAryData.value === aData.id) && <CheckCircleIcon />}
+                    {selectedParentWorks.find((aAryData) => aAryData.value === aData.id) ? (
+                      <CheckCircleIcon boxSize='16px' />
+                    ) : (
+                      <Box boxSize='16px' />
+                    )}
                     {aData.type === "image" ? (
                       <Image src={aData.file.url} boxSize='20px' alt='image' marginRight='10px' marginLeft='10px' />
                     ) : (
@@ -78,7 +62,7 @@ export default function App() {
                     )}
                     <Text textAlign={["left", "center"]}>{aData.name}</Text>
                   </Flex>
-                </Link>
+                </Box>
               </>
             );
           })}
