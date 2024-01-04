@@ -1,8 +1,5 @@
 import { CUIAutoComplete } from "chakra-ui-autocomplete";
 import React from "react";
-import useSWR from "swr";
-
-import ArtworkInteractor from "@/interactors/Artwork/ArtworkInteractor";
 
 export interface Item {
   label: string;
@@ -19,10 +16,12 @@ const countries = [
 ];
 
 export default function App() {
-  const [pickerItems, setPickerItems] = React.useState(countries);
   const [selectedItems, setSelectedItems] = React.useState<Item[]>([]);
 
-  const searchKeyWords = "";
+  /*
+  const [pickerItems, setPickerItems] = React.useState(countries);
+
+  const searchKeyWords = "かわいい";
 
   const {
     data: artworks,
@@ -36,8 +35,13 @@ export default function App() {
   if (error || artworks === null) {
   } else if (isLoading || artworks === undefined) {
   } else {
+    artworks.forEach((d) => {
+      console.log(d.name);
+    });
+    console.log("おわり");
     pickerItems2 = artworks.map((aData) => ({ value: aData.id, label: aData.name }));
   }
+  */
 
   const handleSelectedItemsChange = (selectedItems?: Item[]) => {
     if (selectedItems) {
@@ -49,7 +53,7 @@ export default function App() {
     <CUIAutoComplete
       label='Choose preferred work locations'
       placeholder='Type a Country'
-      items={pickerItems2}
+      items={countries}
       selectedItems={selectedItems}
       disableCreateItem={true}
       inputStyleProps={{ bg: "white.100", pt: "4" }}
