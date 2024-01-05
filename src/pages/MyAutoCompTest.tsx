@@ -6,26 +6,23 @@ import { useState } from "react";
 import useSWR from "swr";
 
 import HoverTag from "@/components/HoverTag";
-import ThumbnailImage2 from "@/components/ThumbnailImage";
 import ArtworkInteractor from "@/interactors/Artwork/ArtworkInteractor";
 import { ArtworkData } from "@/interactors/Artwork/ArtworkTypes";
 
-export interface Item {
-  label: string;
-  value: string;
+interface Props {
+  artworkData: ArtworkData;
 }
-
-function ThumbnailImage(artworkData: ArtworkData) {
+function ThumbnailImage(props: Props) {
   const {
     data: imgURL,
     error,
     isLoading,
-  } = useSWR(`/thumbnail/${artworkData.id}`, async () => {
+  } = useSWR(`/thumbnail/${props.artworkData.id}`, async () => {
     let thumbnail_url = "/text_file.png";
-    if (artworkData.type === "image") {
-      thumbnail_url = artworkData.file.url;
+    if (props.artworkData.type === "image") {
+      thumbnail_url = props.artworkData.file.url;
     } else {
-      switch (artworkData.type) {
+      switch (props.artworkData.type) {
         case "text": {
           thumbnail_url = "/text_file.png";
           break;
@@ -39,9 +36,12 @@ function ThumbnailImage(artworkData: ArtworkData) {
           break;
         }
       }
-      if (artworkData.parent_ids.length > 0) {
-        const parent_artwork = await new ArtworkInteractor().get(artworkData.parent_ids[0]);
-        if (parent_artwork !== null && parent_artwork.type === "image") thumbnail_url = parent_artwork.file.url;
+      for (let i = 0; i < props.artworkData.parent_ids.length; i++) {
+        const parent_artwork = await new ArtworkInteractor().get(props.artworkData.parent_ids[0]);
+        if (parent_artwork !== null && parent_artwork.type === "image") {
+          thumbnail_url = parent_artwork.file.url;
+          break;
+        }
       }
     }
     return thumbnail_url;
@@ -51,6 +51,11 @@ function ThumbnailImage(artworkData: ArtworkData) {
   } else {
     return <SpinnerIcon boxSize='20px' marginRight='10px' marginLeft='10px' />;
   }
+}
+
+interface Item {
+  label: string;
+  value: string;
 }
 
 export default function App() {
@@ -72,31 +77,27 @@ export default function App() {
       //検索ワードが入力されているが、ヒットした作品がない。
       artworksSelection = <>検索結果なし</>;
     } else {
+      //検索ワードが入力されていて。ヒットした作品がある
       artworksSelection = (
         <>
           {artworks.map((aData: ArtworkData) => {
+            const aDataIsSelected = selectedParentWorks.find((aAryData) => aAryData.value === aData.id);
             return (
               <>
                 <Flex
                   align='center'
+                  align='center'
                   _hover={{ bg: "black" }}
                   onClick={() => {
-                    console.log(`${aData.id}(${aData.name})`);
-                    if (selectedParentWorks.find((aAryData) => aAryData.value === aData.id)) {
-                      setSelectedParentWorks(
-                        selectedParentWorks.filter((aAryData, index) => aAryData.value !== aData.id)
-                      );
-                    } else {
-                      setSelectedParentWorks([...selectedParentWorks, { label: aData.name, value: aData.id }]);
-                    }
+                    setSelectedParentWorks(
+                      aDataIsSelected
+                        ? selectedParentWorks.filter((aAryData, index) => aAryData.value !== aData.id)
+                        : [...selectedParentWorks, { label: aData.name, value: aData.id }]
+                    );
                   }}
                 >
-                  {selectedParentWorks.find((aAryData) => aAryData.value === aData.id) ? (
-                    <CheckCircleIcon boxSize='16px' />
-                  ) : (
-                    <Box boxSize='16px' />
-                  )}
-                  <ThumbnailImage2 artworkData={aData} />
+                  {aDataIsSelected ? <CheckCircleIcon boxSize='16px' /> : <Box boxSize='16px' />}
+                  <ThumbnailImage artworkData={aData} />
                   <Text textAlign={["left", "center"]}>{aData.name}</Text>
                 </Flex>
               </>
@@ -126,12 +127,12 @@ export default function App() {
   //console.log(serchBoxTexts);
 
   return (
-    <>
-      <Box paddingLeft='20px' maxH='300px' overflowY='scroll'>
-        <Input variant='filled' placeholder='検索' onChange={(event) => setSerchBoxTexts(event.target.value)}></Input>
+    <Box width='500px'>
+      <Input variant='filled' placeholder='検索' onChange={(event) => setSerchBoxTexts(event.target.value)}></Input>
+      <Box paddingLeft='20px' maxH='180px' overflowY='scroll'>
         {artworksSelection}
       </Box>
       {selectedArtWorks}
-    </>
+    </Box>
   );
 }
