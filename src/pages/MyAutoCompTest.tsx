@@ -53,13 +53,6 @@ function ThumbnailImage(props: Props) {
   }
 }
 
-function SuggestionBox(props: Props) {}
-
-interface Item {
-  label: string;
-  value: string;
-}
-
 export default function App() {
   const [serchBoxTexts, setSerchBoxTexts] = useState("");
   const [selectedParentWorks, setSelectedParentWorks] = useState<Array<ArtworkData>>([]);
@@ -72,6 +65,54 @@ export default function App() {
     new ArtworkInteractor().fullTextSearch(10, serchBoxTexts.split(/\s+/))
   );
 
+  const suggestionBox = (artworkData: ArtworkData): JSX.Element => {
+    const aDataIsSelected = selectedParentWorks.find((aAryData) => aAryData.id === artworkData.id);
+    return (
+      <>
+        <LinkBox _hover={{ bg: "black" }}>
+          <LinkOverlay
+            onClick={() => {
+              setSelectedParentWorks(
+                aDataIsSelected
+                  ? selectedParentWorks.filter((aAryData, index) => aAryData.id !== artworkData.id)
+                  : [...selectedParentWorks, artworkData]
+              );
+            }}
+          ></LinkOverlay>
+          <Flex align='center'>
+            {aDataIsSelected ? (
+              <CheckCircleIcon boxSize='16px' marginLeft='5px' marginRight='5px' />
+            ) : (
+              <Box boxSize='16px' marginLeft='5px' marginRight='5px' />
+            )}
+            <ThumbnailImage artworkData={artworkData} />
+            <Text textAlign={["left", "center"]} marginLeft='10px'>
+              {artworkData.name}
+            </Text>
+            <Link isExternal={true} marginLeft='auto' marginRight='10px' href={`/artworks/${artworkData.id}`}>
+              作品ページへ
+            </Link>
+          </Flex>
+        </LinkBox>
+      </>
+    );
+  };
+
+  const selectedArtwork = (artworkData: ArtworkData): JSX.Element => (
+    <>
+      <HoverTag
+        onClick={() =>
+          setSelectedParentWorks(
+            selectedParentWorks.filter((aDataInArray, index) => aDataInArray.id !== artworkData.id)
+          )
+        }
+      >
+        <ThumbnailImage artworkData={artworkData} />
+        <Text marginLeft='5px'>{artworkData.name}</Text>
+      </HoverTag>
+    </>
+  );
+
   let artworksSelection: JSX.Element = <>検索中…</>;
   if (!error && artworks !== null && artworks !== undefined) {
     //検索結果が取得できている
@@ -80,61 +121,11 @@ export default function App() {
       artworksSelection = <>検索結果なし</>;
     } else {
       //検索ワードが入力されていて。ヒットした作品がある
-      artworksSelection = (
-        <>
-          {artworks.map((aData: ArtworkData) => {
-            const aDataIsSelected = selectedParentWorks.find((aAryData) => aAryData.id === aData.id);
-            return (
-              <>
-                <LinkBox _hover={{ bg: "black" }}>
-                  <LinkOverlay
-                    onClick={() => {
-                      setSelectedParentWorks(
-                        aDataIsSelected
-                          ? selectedParentWorks.filter((aAryData, index) => aAryData.id !== aData.id)
-                          : [...selectedParentWorks, aData]
-                      );
-                    }}
-                  ></LinkOverlay>
-                  <Flex align='center'>
-                    {aDataIsSelected ? (
-                      <CheckCircleIcon boxSize='16px' marginLeft='5px' marginRight='5px' />
-                    ) : (
-                      <Box boxSize='16px' marginLeft='5px' marginRight='5px' />
-                    )}
-                    <ThumbnailImage artworkData={aData} />
-                    <Text textAlign={["left", "center"]} marginLeft='10px'>
-                      {aData.name}
-                    </Text>
-                    <Link isExternal={true} marginLeft='auto' marginRight='10px' href={`/artworks/${aData.id}`}>
-                      作品ページへ
-                    </Link>
-                  </Flex>
-                </LinkBox>
-              </>
-            );
-          })}
-        </>
-      );
+      artworksSelection = <>{artworks.map((aData: ArtworkData) => suggestionBox(aData))}</>;
     }
   }
 
-  let selectedArtWorks = selectedParentWorks.map((aData) => {
-    return (
-      <>
-        <HoverTag
-          onClick={() =>
-            setSelectedParentWorks(selectedParentWorks.filter((aDataInArray, index) => aDataInArray.id !== aData.id))
-          }
-        >
-          <ThumbnailImage artworkData={aData} />
-          <Text marginLeft='5px'>{aData.name}</Text>
-        </HoverTag>
-      </>
-    );
-  });
-
-  //console.log(serchBoxTexts);
+  let selectedArtWorks = selectedParentWorks.map((aData) => selectedArtwork(aData));
 
   return (
     <Box width='500px'>
