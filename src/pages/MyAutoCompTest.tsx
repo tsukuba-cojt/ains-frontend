@@ -1,5 +1,5 @@
 import { CheckCircleIcon, SpinnerIcon } from "@chakra-ui/icons";
-import { Input, Box, Flex, Text, Image, LinkBox, LinkOverlay, Button } from "@chakra-ui/react";
+import { Input, Box, Flex, Text, Image, LinkBox, LinkOverlay, Link } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import React from "react";
 import { useState } from "react";
@@ -47,11 +47,13 @@ function ThumbnailImage(props: Props) {
     return thumbnail_url;
   });
   if (imgURL !== null || imgURL !== undefined) {
-    return <Image src={imgURL} boxSize='20px' alt='image' marginRight='10px' marginLeft='10px' />;
+    return <Image src={imgURL} boxSize='20px' alt='image' />;
   } else {
-    return <SpinnerIcon boxSize='20px' marginRight='10px' marginLeft='10px' />;
+    return <SpinnerIcon boxSize='20px' />;
   }
 }
+
+function SuggestionBox(props: Props) {}
 
 interface Item {
   label: string;
@@ -60,7 +62,7 @@ interface Item {
 
 export default function App() {
   const [serchBoxTexts, setSerchBoxTexts] = useState("");
-  const [selectedParentWorks, setSelectedParentWorks] = useState<Array<Item>>([]);
+  const [selectedParentWorks, setSelectedParentWorks] = useState<Array<ArtworkData>>([]);
   const router = useRouter();
   const {
     data: artworks,
@@ -81,7 +83,7 @@ export default function App() {
       artworksSelection = (
         <>
           {artworks.map((aData: ArtworkData) => {
-            const aDataIsSelected = selectedParentWorks.find((aAryData) => aAryData.value === aData.id);
+            const aDataIsSelected = selectedParentWorks.find((aAryData) => aAryData.id === aData.id);
             return (
               <>
                 <LinkBox _hover={{ bg: "black" }}>
@@ -89,25 +91,24 @@ export default function App() {
                     onClick={() => {
                       setSelectedParentWorks(
                         aDataIsSelected
-                          ? selectedParentWorks.filter((aAryData, index) => aAryData.value !== aData.id)
-                          : [...selectedParentWorks, { label: aData.name, value: aData.id }]
+                          ? selectedParentWorks.filter((aAryData, index) => aAryData.id !== aData.id)
+                          : [...selectedParentWorks, aData]
                       );
                     }}
                   ></LinkOverlay>
                   <Flex align='center'>
-                    {aDataIsSelected ? <CheckCircleIcon boxSize='16px' /> : <Box boxSize='16px' />}
+                    {aDataIsSelected ? (
+                      <CheckCircleIcon boxSize='16px' marginLeft='5px' marginRight='5px' />
+                    ) : (
+                      <Box boxSize='16px' marginLeft='5px' marginRight='5px' />
+                    )}
                     <ThumbnailImage artworkData={aData} />
-                    <Text textAlign={["left", "center"]}>{aData.name}</Text>
-                    <Button
-                      height='25px'
-                      marginLeft='auto'
-                      marginRight='10px'
-                      onClick={() => {
-                        router.push(`/artworks/${aData.id}`);
-                      }}
-                    >
+                    <Text textAlign={["left", "center"]} marginLeft='10px'>
+                      {aData.name}
+                    </Text>
+                    <Link isExternal={true} marginLeft='auto' marginRight='10px' href={`/artworks/${aData.id}`}>
                       作品ページへ
-                    </Button>
+                    </Link>
                   </Flex>
                 </LinkBox>
               </>
@@ -123,12 +124,11 @@ export default function App() {
       <>
         <HoverTag
           onClick={() =>
-            setSelectedParentWorks(
-              selectedParentWorks.filter((aDataInArray, index) => aDataInArray.value !== aData.value)
-            )
+            setSelectedParentWorks(selectedParentWorks.filter((aDataInArray, index) => aDataInArray.id !== aData.id))
           }
         >
-          {aData.label}
+          <ThumbnailImage artworkData={aData} />
+          <Text marginLeft='5px'>{aData.name}</Text>
         </HoverTag>
       </>
     );
@@ -139,7 +139,7 @@ export default function App() {
   return (
     <Box width='500px'>
       <Input variant='filled' placeholder='検索' onChange={(event) => setSerchBoxTexts(event.target.value)}></Input>
-      <Box paddingLeft='20px' maxH='180px' overflowY='scroll'>
+      <Box maxH='180px' overflowY='scroll'>
         {artworksSelection}
       </Box>
       {selectedArtWorks}
