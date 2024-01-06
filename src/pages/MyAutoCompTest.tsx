@@ -1,5 +1,5 @@
 import { CheckCircleIcon, SpinnerIcon } from "@chakra-ui/icons";
-import { Input, Box, Flex, Text, Image } from "@chakra-ui/react";
+import { Input, Box, Flex, Text, Image, LinkBox, LinkOverlay, Button } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import React from "react";
 import { useState } from "react";
@@ -84,22 +84,32 @@ export default function App() {
             const aDataIsSelected = selectedParentWorks.find((aAryData) => aAryData.value === aData.id);
             return (
               <>
-                <Flex
-                  align='center'
-                  align='center'
-                  _hover={{ bg: "black" }}
-                  onClick={() => {
-                    setSelectedParentWorks(
-                      aDataIsSelected
-                        ? selectedParentWorks.filter((aAryData, index) => aAryData.value !== aData.id)
-                        : [...selectedParentWorks, { label: aData.name, value: aData.id }]
-                    );
-                  }}
-                >
-                  {aDataIsSelected ? <CheckCircleIcon boxSize='16px' /> : <Box boxSize='16px' />}
-                  <ThumbnailImage artworkData={aData} />
-                  <Text textAlign={["left", "center"]}>{aData.name}</Text>
-                </Flex>
+                <LinkBox _hover={{ bg: "black" }}>
+                  <LinkOverlay
+                    onClick={() => {
+                      setSelectedParentWorks(
+                        aDataIsSelected
+                          ? selectedParentWorks.filter((aAryData, index) => aAryData.value !== aData.id)
+                          : [...selectedParentWorks, { label: aData.name, value: aData.id }]
+                      );
+                    }}
+                  ></LinkOverlay>
+                  <Flex align='center'>
+                    {aDataIsSelected ? <CheckCircleIcon boxSize='16px' /> : <Box boxSize='16px' />}
+                    <ThumbnailImage artworkData={aData} />
+                    <Text textAlign={["left", "center"]}>{aData.name}</Text>
+                    <Button
+                      height='25px'
+                      marginLeft='auto'
+                      marginRight='10px'
+                      onClick={() => {
+                        router.push(`/artworks/${aData.id}`);
+                      }}
+                    >
+                      作品ページへ
+                    </Button>
+                  </Flex>
+                </LinkBox>
               </>
             );
           })}
