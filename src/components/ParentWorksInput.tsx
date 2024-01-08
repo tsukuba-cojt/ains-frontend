@@ -95,7 +95,12 @@ function UserAvaterAndName(props: Props_UserID) {
   }
 }
 
-export default function App() {
+interface Props_StrAryHook {
+  selectedParentsID: Array<string>;
+  setSelectedParentsID: (setValue: Array<string>) => void;
+}
+
+export default function ParentWorksInput(props: Props_StrAryHook) {
   const [serchBoxTexts, setSerchBoxTexts] = useState("");
   const [selectedParentWorks, setSelectedParentWorks] = useState<Array<ArtworkData>>([]);
   const router = useRouter();
@@ -119,6 +124,7 @@ export default function App() {
                   ? selectedParentWorks.filter((aAryData, index) => aAryData.id !== artworkData.id)
                   : [...selectedParentWorks, artworkData]
               );
+              props.setSelectedParentsID(selectedParentWorks.map((aAryData) => aAryData.id));
             }}
           ></LinkOverlay>
           <Flex align='center' height='35px'>
@@ -146,11 +152,12 @@ export default function App() {
   const selectedArtwork = (artworkData: ArtworkData): JSX.Element => (
     <>
       <HoverTag
-        onClick={() =>
+        onClick={() => {
           setSelectedParentWorks(
             selectedParentWorks.filter((aDataInArray, index) => aDataInArray.id !== artworkData.id)
-          )
-        }
+          );
+          props.setSelectedParentsID(selectedParentWorks.map((aAryData) => aAryData.id));
+        }}
       >
         <ThumbnailImage artworkData={artworkData} />
         <Text marginLeft='5px'>{artworkData.name}</Text>
@@ -173,9 +180,14 @@ export default function App() {
   let selectedArtWorks = selectedParentWorks.map((aData) => selectedArtwork(aData));
 
   return (
-    <Box>
-      <Input variant='filled' placeholder='検索' onChange={(event) => setSerchBoxTexts(event.target.value)}></Input>
-      <Box maxH='180px' overflowY='scroll'>
+    <Box height='40px' width='100%' marginBottom='10px' overflowY='visible'>
+      <Input
+        height='40px'
+        variant='filled'
+        placeholder='検索'
+        onChange={(event) => setSerchBoxTexts(event.target.value)}
+      ></Input>
+      <Box position='absolute' maxH='180px' overflowY='scroll'>
         {artworksSelection}
       </Box>
       {selectedArtWorks}

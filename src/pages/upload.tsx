@@ -22,6 +22,7 @@ import { useState, ChangeEvent, useContext, useMemo, useEffect, ReactNode, Fragm
 
 import { FirebaseAuthContext } from "@/components/FirebaseAuthProvider";
 import HoverTag from "@/components/HoverTag";
+import ParentWorksInput from "@/components/ParentWorksInput";
 import UploadIcon from "@/icons/UploadIcon";
 import ArtworkInteractor from "@/interactors/Artwork/ArtworkInteractor";
 import { ArtworkFormData, ArtworkType, INITIAL_ARTWORK_FORM_DATA } from "@/interactors/Artwork/ArtworkTypes";
@@ -61,6 +62,7 @@ const ImageUploadForm = () => {
   const [artworkFormData, setArtWorkFormData] = useState<ArtworkFormData>(INITIAL_ARTWORK_FORM_DATA);
   const [tagInputData, setTagInputData] = useState<TagInputData>(INITIAL_TAG_INPUT_DATA);
   const [parentInputData, setParentInputData] = useState<ParentInputData>(INITIAL_PARENT_INPUT_DATA);
+  const [parentIDs, setParentIDs] = useState<Array<string>>([]);
   const [fileContentElement, setFileContentElement] = useState<ReactNode>(<></>);
 
   const toast = useToast();
@@ -406,29 +408,7 @@ const ImageUploadForm = () => {
                   {artworkFormData.tags.length}/10
                 </Text>
               </FormControl>
-              <FormControl isInvalid={parentInputData.is_error}>
-                <FormLabel>親作品</FormLabel>
-                <Flex gap={5}>
-                  <Input
-                    value={parentInputData.parent_id}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                      setParentInputData({
-                        ...parentInputData,
-                        parent_id: e.target.value,
-                      })
-                    }
-                    type='text'
-                  />
-                  <Button onClick={addParent}>追加</Button>
-                </Flex>
-                <FormErrorMessage>{parentInputData.error_msg}</FormErrorMessage>
-                <Flex mt={3} wrap='wrap' gap={3}>
-                  {parent_tag_elements}
-                </Flex>
-                <Text mt={2} textAlign='right' color={parentInputData.parents.length >= 10 ? "red.500" : ""}>
-                  {parentInputData.parents.length}/10
-                </Text>
-              </FormControl>
+              <ParentWorksInput selectedParentsID={parentIDs} setSelectedParentsID={setParentIDs} />
               <Button w='full' onClick={handleUpload}>
                 アップロード
               </Button>
