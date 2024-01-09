@@ -1,5 +1,5 @@
 import { CheckCircleIcon, SpinnerIcon } from "@chakra-ui/icons";
-import { Input, Box, Flex, Text, Image, LinkBox, LinkOverlay, Link, Avatar } from "@chakra-ui/react";
+import { Input, Box, Flex, Text, Image, LinkBox, LinkOverlay, Link, Avatar, Button } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import React from "react";
 import { useState } from "react";
@@ -103,6 +103,9 @@ interface Props_StrAryHook {
 export default function ParentWorksInput(props: Props_StrAryHook) {
   const [serchBoxTexts, setSerchBoxTexts] = useState("");
   const [selectedParentWorks, setSelectedParentWorks] = useState<Array<ArtworkData>>([]);
+
+  //const [onInputFocused, setOnInputFocused] = useState<boolean>(false);
+  const [isSuggestionEnable, setIsSuggestionEnable] = useState<boolean>(false);
   const router = useRouter();
   const {
     data: artworks,
@@ -122,7 +125,9 @@ export default function ParentWorksInput(props: Props_StrAryHook) {
               setSelectedParentWorks(
                 aDataIsSelected
                   ? selectedParentWorks.filter((aAryData, index) => aAryData.id !== artworkData.id)
-                  : [...selectedParentWorks, artworkData]
+                  : selectedParentWorks.length < 10
+                  ? [...selectedParentWorks, artworkData]
+                  : selectedParentWorks
               );
               props.setSelectedParentsID(selectedParentWorks.map((aAryData) => aAryData.id));
             }}
@@ -170,7 +175,9 @@ export default function ParentWorksInput(props: Props_StrAryHook) {
       検索中…
     </Box>
   );
-  if (!error && artworks !== null && artworks !== undefined) {
+  if (!isSuggestionEnable) {
+    artworksSelection = <></>;
+  } else if (!error && artworks !== null && artworks !== undefined) {
     //検索結果が取得できている
     if (artworks.length == 0 && serchBoxTexts.length > 0) {
       //検索ワードが入力されているが、ヒットした作品がない。
@@ -196,10 +203,16 @@ export default function ParentWorksInput(props: Props_StrAryHook) {
           variant='filled'
           placeholder='検索'
           onChange={(event) => setSerchBoxTexts(event.target.value)}
+          onFocus={() => setIsSuggestionEnable(true)}
         ></Input>
-        <Box maxH='180px' overflowY='scroll'>
+        <Box maxH='150px' overflowY='scroll'>
           {artworksSelection}
         </Box>
+        {isSuggestionEnable && (
+          <Button height='30px' onClick={() => setIsSuggestionEnable(false)} width='100%'>
+            閉じる
+          </Button>
+        )}
       </Box>
       {selectedArtWorks}
       <Text mt={2} textAlign='right' color={selectedParentWorks.length >= 10 ? "red.500" : ""}>
