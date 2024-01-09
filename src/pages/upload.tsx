@@ -408,7 +408,13 @@ const ImageUploadForm = () => {
                   {artworkFormData.tags.length}/10
                 </Text>
               </FormControl>
-              <ParentWorksInput selectedParentsID={parentIDs} setSelectedParentsID={setParentIDs} />
+              <ParentWorksInput
+                selectedParentsID={parentIDs}
+                setSelectedParentsID={(aAry) => {
+                  setParentIDs(aAry);
+                }}
+              />
+
               <Button w='full' onClick={handleUpload}>
                 アップロード
               </Button>

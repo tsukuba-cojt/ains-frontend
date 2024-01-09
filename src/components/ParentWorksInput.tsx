@@ -116,7 +116,7 @@ export default function ParentWorksInput(props: Props_StrAryHook) {
     const aDataIsSelected = selectedParentWorks.find((aAryData) => aAryData.id === artworkData.id);
     return (
       <>
-        <LinkBox _hover={{ bg: "black" }}>
+        <LinkBox bg='red' _hover={{ bg: "black" }}>
           <LinkOverlay
             onClick={() => {
               setSelectedParentWorks(
@@ -165,12 +165,20 @@ export default function ParentWorksInput(props: Props_StrAryHook) {
     </>
   );
 
-  let artworksSelection: JSX.Element = <>検索中…</>;
+  let artworksSelection: JSX.Element = (
+    <Box bg='red' zIndex={10}>
+      検索中…
+    </Box>
+  );
   if (!error && artworks !== null && artworks !== undefined) {
     //検索結果が取得できている
     if (artworks.length == 0 && serchBoxTexts.length > 0) {
       //検索ワードが入力されているが、ヒットした作品がない。
-      artworksSelection = <>検索結果なし</>;
+      artworksSelection = (
+        <Box bg='red' zIndex={10}>
+          検索結果なし
+        </Box>
+      );
     } else {
       //検索ワードが入力されていて。ヒットした作品がある
       artworksSelection = <>{artworks.map((aData: ArtworkData) => suggestionBox(aData))}</>;
@@ -180,17 +188,23 @@ export default function ParentWorksInput(props: Props_StrAryHook) {
   let selectedArtWorks = selectedParentWorks.map((aData) => selectedArtwork(aData));
 
   return (
-    <Box height='40px' width='100%' marginBottom='10px' overflowY='visible'>
-      <Input
-        height='40px'
-        variant='filled'
-        placeholder='検索'
-        onChange={(event) => setSerchBoxTexts(event.target.value)}
-      ></Input>
-      <Box position='absolute' maxH='180px' overflowY='scroll'>
-        {artworksSelection}
+    <Box height='230px' width='100%'>
+      <Text>親作品</Text>
+      <Box height='40px' marginBottom='10px' overflowY='visible'>
+        <Input
+          height='40px'
+          variant='filled'
+          placeholder='検索'
+          onChange={(event) => setSerchBoxTexts(event.target.value)}
+        ></Input>
+        <Box maxH='180px' overflowY='scroll'>
+          {artworksSelection}
+        </Box>
       </Box>
       {selectedArtWorks}
+      <Text mt={2} textAlign='right' color={selectedParentWorks.length >= 10 ? "red.500" : ""}>
+        {selectedParentWorks.length}/10
+      </Text>
     </Box>
   );
 }
