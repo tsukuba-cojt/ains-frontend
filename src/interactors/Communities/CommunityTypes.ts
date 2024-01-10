@@ -23,7 +23,10 @@ export interface CommunityFormData {
   owner: string;
 }
 
-export type CommunityCreateData = Omit<CommunityData, "id">;
+export type CommunityCreateData = Omit<CommunityData, "id" | "banner" | "icon"> & {
+  banner?: string;
+  icon?: string;
+};
 
 export interface PostData {
   id: string;

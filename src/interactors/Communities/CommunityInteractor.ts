@@ -19,14 +19,27 @@ export default class CommunityInteractor {
     return community;
   }
 
+  async getLatests(limit: number): Promise<CommunityData[] | null> {
+    const res_data = await this.interactor.getLatests(this.COLLECTION_NAME, limit);
+    if (!res_data) return null;
+
+    const community_data_list: CommunityData[] = [];
+    for (let i = 0; i < res_data.length; i++) {
+      const new_community_data = await CommunityMapper.mapDocDataToCommunityData(res_data[i]);
+      if (new_community_data !== null) community_data_list.push(new_community_data);
+    }
+
+    return community_data_list;
+  }
+
   async set(data: CommunityFormData): Promise<CommunityData | null> {
     const fileInteractor = new FileInteractor();
     const banner = data.banner && (await fileInteractor.upload(data.banner));
     const icon = data.icon && (await fileInteractor.upload(data.icon));
     const createData: CommunityCreateData = {
       ...data,
-      banner: banner || undefined,
-      icon: icon || undefined,
+      banner: banner?.id || undefined,
+      icon: icon?.id || undefined,
       admins: [],
       members: [],
     };

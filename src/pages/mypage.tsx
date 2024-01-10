@@ -1,4 +1,4 @@
-import { AddIcon, DownloadIcon, EditIcon } from "@chakra-ui/icons";
+import { AddIcon, EditIcon } from "@chakra-ui/icons";
 import {
   Avatar,
   Container,
@@ -27,7 +27,6 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { GetServerSideProps } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { ChangeEvent, useContext, useEffect, useState } from "react";
@@ -35,6 +34,7 @@ import { ChangeEvent, useContext, useEffect, useState } from "react";
 import { FirebaseAuthContext } from "@/components/FirebaseAuthProvider";
 import GridArtworks from "@/components/GridArtworks";
 import IdeaBoxThumbnail from "@/components/IdeaBoxThumbnail";
+import ImageFileInput from "@/components/ImageFileInput";
 import LinkCard from "@/components/LinkCard";
 import OverlayAdminMenu from "@/components/OverlayAdminMenu";
 import IdeaBoxInteractor from "@/interactors/IdeaBox/IdeaBoxInteractor";
@@ -192,7 +192,7 @@ const UserProfilePage = ({ artworks, communities, ideaboxes }: any) => {
     name: user?.name ?? "",
     description: user?.description ?? "",
   });
-  const [iconFile, setIconFile] = useState<{ file: File; url: string } | null>(null);
+  const [iconFile, setIconFile] = useState<File | null>(null);
   const [showIconOverlay, setShowIconOverlay] = useState<boolean>(false);
   const [showUploadModal, setShowUploadModal] = useState<boolean>(false);
 
@@ -211,7 +211,7 @@ const UserProfilePage = ({ artworks, communities, ideaboxes }: any) => {
       id: user.id,
       name: formData.name !== user.name ? formData.name : undefined,
       description: formData.description !== user.description ? formData.description : undefined,
-      icon: iconFile ? iconFile.file : undefined,
+      icon: iconFile || undefined,
     });
     if (result) {
       toast({
@@ -231,17 +231,6 @@ const UserProfilePage = ({ artworks, communities, ideaboxes }: any) => {
     await reload();
     setIsEditing({ name: false, description: false });
     setIconFile(null);
-  };
-
-  const readAndSetFile = (file: File) => {
-    const reader = new FileReader();
-    reader.addEventListener("load", (e) => {
-      setIconFile({
-        file: file,
-        url: !(reader.result instanceof ArrayBuffer) ? reader.result ?? "" : "",
-      });
-    });
-    reader.readAsDataURL(file);
   };
 
   useEffect(() => {
@@ -268,48 +257,7 @@ const UserProfilePage = ({ artworks, communities, ideaboxes }: any) => {
           <ModalHeader>アイコン画像のアップロード</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <label
-              style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}
-              htmlFor='icon_file'
-              onDragOver={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                e.dataTransfer.dropEffect = "copy";
-              }}
-              onDrop={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                const files = e.dataTransfer.files;
-                if (files.length < 1) {
-                  setIconFile(null);
-                } else {
-                  readAndSetFile(files[0]);
-                }
-              }}
-            >
-              {iconFile ? (
-                <Image width='256' height='256' src={iconFile.url} alt='' />
-              ) : (
-                <VStack py={10} gap={5}>
-                  <DownloadIcon boxSize={16} />
-                  <>ファイルを選択、またはドラッグ&ドロップ</>
-                </VStack>
-              )}
-            </label>
-            <input
-              style={{ display: "none" }}
-              id='icon_file'
-              type='file'
-              accept='image/*'
-              onChange={(e) => {
-                const files = e.target.files;
-                if (!files || files.length < 1) {
-                  setIconFile(null);
-                } else {
-                  readAndSetFile(files[0]);
-                }
-              }}
-            />
+            <ImageFileInput dispatch={setIconFile} />
           </ModalBody>
           <ModalFooter>
             <Button onClick={updateProfile} w='full'>
