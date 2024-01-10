@@ -151,7 +151,7 @@ const ArtworkDetailPage = () => {
 
   const comment_elements = useMemo(() => {
     return artwork?.comments.map((comment: CommentData, index: number) => (
-      <CommentBox key={index} icon={comment.author.icon} username={comment.author.name} text={comment.text} />
+      <CommentBox key={index} icon={comment.author.icon || ""} username={comment.author.name} text={comment.text} />
     ));
   }, [artwork?.comments]);
 
