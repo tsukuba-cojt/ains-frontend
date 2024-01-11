@@ -1,3 +1,4 @@
+import { SpinnerIcon } from "@chakra-ui/icons";
 import {
   Image,
   Container,
@@ -16,52 +17,61 @@ import {
   Button,
   Flex,
   FormErrorMessage,
+  Avatar,
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { useState, ChangeEvent, useContext, useMemo, useEffect, ReactNode, Fragment } from "react";
+import useSWR from "swr";
 
 import { FirebaseAuthContext } from "@/components/FirebaseAuthProvider";
 import HoverTag from "@/components/HoverTag";
 import ParentWorksInput from "@/components/ParentWorksInput";
 import UploadIcon from "@/icons/UploadIcon";
 import ArtworkInteractor from "@/interactors/Artwork/ArtworkInteractor";
-import { ArtworkFormData, ArtworkType, INITIAL_ARTWORK_FORM_DATA } from "@/interactors/Artwork/ArtworkTypes";
+import { ArtworkType } from "@/interactors/Artwork/ArtworkTypes";
+import UserInteractor from "@/interactors/User/UserInteractor";
 import { theme } from "@/pages/_app";
 
-interface TagInputData {
-  text: string;
-  is_error: boolean;
-  error_msg: string;
+function textOmission(text: string, maxLen: number): string {
+  if (text.length > maxLen) {
+    return text.substring(0, maxLen - 1) + "…";
+  } else {
+    return text;
+  }
 }
 
-interface ParentInputData {
-  parent_id: string;
-  is_error: boolean;
-  error_msg: string;
-  parents: string[];
+interface Props_UserID {
+  userID: string;
 }
 
-const INITIAL_TAG_INPUT_DATA: TagInputData = {
-  text: "",
-  is_error: false,
-  error_msg: "error!",
-};
+function UserAvaterAndName(props: Props_UserID) {
+  const {
+    data: userPubData,
+    error,
+    isLoading,
+  } = useSWR(`/user/${props.userID}`, () => new UserInteractor().getPublicData(props.userID));
 
-const INITIAL_PARENT_INPUT_DATA: ParentInputData = {
-  parent_id: "",
-  is_error: false,
-  error_msg: "error!",
-  parents: [],
-};
+  if (userPubData !== null && userPubData !== undefined) {
+    return (
+      <>
+        <Avatar src={userPubData.icon} boxSize='20px' marginLeft='auto' marginRight='5px'></Avatar>
+        <Text marginRight='10px'>{textOmission(userPubData.name, 15)}</Text>
+      </>
+    );
+  } else {
+    return (
+      <>
+        <SpinnerIcon boxSize='20px' marginLeft='auto' marginRight='5px' />
+        <Text marginRight='10px'>Loading…</Text>
+      </>
+    );
+  }
+}
 
 const ImageUploadForm = () => {
   const { user } = useContext(FirebaseAuthContext);
   const router = useRouter();
   const { parent } = router.query;
-
-  const [artworkFormData, setArtWorkFormData] = useState<ArtworkFormData>(INITIAL_ARTWORK_FORM_DATA);
-  const [tagInputData, setTagInputData] = useState<TagInputData>(INITIAL_TAG_INPUT_DATA);
-  const [parentInputData, setParentInputData] = useState<ParentInputData>(INITIAL_PARENT_INPUT_DATA);
 
   const [fileContentElement, setFileContentElement] = useState<ReactNode>(<></>);
 
@@ -78,48 +88,14 @@ const ImageUploadForm = () => {
   const icon_fill_color = useColorModeValue("gray.800", "white");
 
   useEffect(() => {
-    const parent_id: string = parent as string;
-    if (!parent_id) return;
-    if (parent_id === "") return;
-    if (artworkFormData.parent_ids.includes(parent_id)) return;
-
-    const checkAndPushParent = async () => {
-      const parent_data = await new ArtworkInteractor().get(parent_id);
-      if (parent_data === null) {
-        setParentInputData({
-          ...parentInputData,
-          parent_id: parent_id,
-          is_error: true,
-          error_msg: "この作品は存在しません",
-        });
-        return;
-      }
-
-      setArtWorkFormData({
-        ...artworkFormData,
-        parent_ids: artworkFormData.parent_ids.concat(parent_id),
-      });
-      setParentInputData({
-        ...parentInputData,
-        parents: parentInputData.parents.concat(parent_data.name),
-        is_error: false,
-        parent_id: "",
-      });
-    };
-    checkAndPushParent();
-  }, [parent]);
-
-  useEffect(() => {
     if (inputFile === null || inputFileType === null) return;
 
     const reader = new FileReader();
     switch (inputFileType) {
       case "image": {
-        console.log("じゃああああああ");
         reader.onloadend = (e: ProgressEvent<FileReader>) => {
           if (e.target?.result && typeof e.target.result === "string") {
             setFileContentElement(<Image src={e.target.result} alt='アップロードした画像' />);
-            console.log(e.target.result);
           }
         };
         reader.readAsDataURL(inputFile);
@@ -171,117 +147,6 @@ const ImageUploadForm = () => {
     }
   }, [inputFile, inputFileType]);
 
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
-    if (e.target.type === "file") {
-      if (!("files" in e.target) || !e.target.files || e.target.files[0] === undefined) return;
-
-      const new_file = e.target.files[0];
-      const file_type = new_file.type.split("/")[0];
-      if (!["image", "text", "audio", "video"].includes(file_type)) {
-        toast({
-          title: "対応していないファイルです",
-          status: "error",
-          duration: 9000,
-          isClosable: true,
-        });
-        return;
-      }
-      const artwork_type: ArtworkType = file_type as ArtworkType;
-
-      setArtWorkFormData({
-        ...artworkFormData,
-        type: artwork_type,
-        file: new_file,
-      });
-    } else {
-      setArtWorkFormData({
-        ...artworkFormData,
-        [e.target.id]: e.target.value,
-      });
-    }
-  };
-
-  const handleUpload = async () => {
-    if (!user) {
-      toast({
-        title: "ログインしてください",
-        status: "error",
-        duration: 9000,
-        isClosable: true,
-      });
-      return;
-    }
-
-    const result = await new ArtworkInteractor().upload({
-      ...artworkFormData,
-      author_id: user?.id,
-    });
-    if (result) {
-      toast({
-        title: "アップロードに成功しました",
-        status: "success",
-        duration: 9000,
-        isClosable: true,
-      });
-      setArtWorkFormData(INITIAL_ARTWORK_FORM_DATA);
-      setTagInputData(INITIAL_TAG_INPUT_DATA);
-      setParentInputData(INITIAL_PARENT_INPUT_DATA);
-    } else {
-      toast({
-        title: "アップロードに失敗しました",
-        status: "error",
-        duration: 9000,
-        isClosable: true,
-      });
-    }
-  };
-
-  const addTag = () => {
-    setTagInputData({
-      ...tagInputData,
-      is_error: false,
-    });
-    if (tagInputData.text === "") return;
-    if (artworkFormData.tags.length >= 10) return;
-
-    if (tagInputData.text.match(/([&$\+,:;=\?@#\s<>\[\]\{\}[\/]|\\\^%])+/) !== null) {
-      setTagInputData({
-        ...tagInputData,
-        is_error: true,
-        error_msg: "使用できない記号が含まれています",
-      });
-      return;
-    }
-
-    if (artworkFormData.tags.includes(tagInputData.text)) {
-      setTagInputData({
-        ...tagInputData,
-        is_error: true,
-        error_msg: "すでに追加されています",
-      });
-      return;
-    }
-
-    setArtWorkFormData({
-      ...artworkFormData,
-      tags: artworkFormData.tags.concat(tagInputData.text),
-    });
-    setTagInputData({
-      ...tagInputData,
-      is_error: false,
-      text: "",
-    });
-  };
-
-  const removeTag = (index: number) => {
-    const new_tags = [...artworkFormData.tags];
-    new_tags.splice(index, 1);
-    setArtWorkFormData({
-      ...artworkFormData,
-      tags: new_tags,
-    });
-  };
-
   const tag_elements = useMemo(() => {
     return artworkTags.map<JSX.Element>((aTag: string, index: number) => (
       <HoverTag
@@ -298,59 +163,6 @@ const ImageUploadForm = () => {
       </HoverTag>
     ));
   }, [artworkTags]);
-
-  const addParent = async () => {
-    setParentInputData({
-      ...parentInputData,
-      is_error: false,
-    });
-    if (parentInputData.parent_id === "") return;
-    if (artworkFormData.parent_ids.includes(parentInputData.parent_id)) return;
-
-    const parent_data = await new ArtworkInteractor().get(parentInputData.parent_id);
-    if (parent_data === null) {
-      setParentInputData({
-        ...parentInputData,
-        is_error: true,
-        error_msg: "この作品は存在しません",
-      });
-      return;
-    }
-
-    setArtWorkFormData({
-      ...artworkFormData,
-      parent_ids: artworkFormData.parent_ids.concat(parentInputData.parent_id),
-    });
-    setParentInputData({
-      ...parentInputData,
-      parents: parentInputData.parents.concat(parent_data.name),
-      is_error: false,
-      parent_id: "",
-    });
-  };
-
-  const removeParent = (index: number) => {
-    const new_parents = [...parentInputData.parents];
-    const new_parent_ids = [...artworkFormData.parent_ids];
-    new_parents.splice(index, 1);
-    new_parent_ids.splice(index, 1);
-    setParentInputData({
-      ...parentInputData,
-      parents: new_parents,
-    });
-    setArtWorkFormData({
-      ...artworkFormData,
-      parent_ids: new_parent_ids,
-    });
-  };
-
-  const parent_tag_elements = useMemo(() => {
-    return parentInputData.parents.map<JSX.Element>((name: string, index: number) => (
-      <HoverTag key={index} onClick={() => removeParent(index)}>
-        {name}
-      </HoverTag>
-    ));
-  }, [parentInputData.parents]);
 
   const uploadArtwork = async () => {
     if (!user) {
@@ -400,9 +212,14 @@ const ImageUploadForm = () => {
         duration: 9000,
         isClosable: true,
       });
-      setArtWorkFormData(INITIAL_ARTWORK_FORM_DATA);
-      setTagInputData(INITIAL_TAG_INPUT_DATA);
-      setParentInputData(INITIAL_PARENT_INPUT_DATA);
+      //初期値を代入
+      setInputFile(null);
+      setInputFileType(null);
+      setInputWorkName("");
+      setDescription("");
+      setArtworkTags([]);
+      setParentIDs([]);
+      setArtworkTagInput("");
     } else {
       toast({
         title: "アップロードに失敗しました",
@@ -412,6 +229,16 @@ const ImageUploadForm = () => {
       });
     }
   };
+
+  let tagErrorMessage: string = "お兄ちゃん、エラーだよ!";
+  let tagIsError: boolean = false;
+  if (artworkTagInput.match(/([&$\+,:;=\?@#\s<>\[\]\{\}[\/]|\\\^%])+/) !== null) {
+    tagErrorMessage = "使用できない記号が含まれています";
+    tagIsError = true;
+  } else if (artworkTags.includes(artworkTagInput)) {
+    tagErrorMessage = "すでに追加されています";
+    tagIsError = true;
+  }
 
   return (
     <Container maxW={{ base: "container.sm", md: "container.md", lg: "container.lg" }} p={5}>
@@ -485,6 +312,7 @@ const ImageUploadForm = () => {
                 <Input
                   id='name'
                   type='text'
+                  value={inputWorkName}
                   onChange={(e) => {
                     setInputWorkName(e.target.value);
                   }}
@@ -494,12 +322,13 @@ const ImageUploadForm = () => {
                 <FormLabel>概要</FormLabel>
                 <Textarea
                   id='description'
+                  value={description}
                   onChange={(e) => {
                     setDescription(e.target.value);
                   }}
                 />
               </FormControl>
-              <FormControl isInvalid={tagInputData.is_error}>
+              <FormControl isInvalid={tagIsError}>
                 <FormLabel>タグ</FormLabel>
                 <Flex gap={5}>
                   <Input
@@ -530,7 +359,7 @@ const ImageUploadForm = () => {
                     追加
                   </Button>
                 </Flex>
-                <FormErrorMessage>{tagInputData.error_msg}</FormErrorMessage>
+                <FormErrorMessage>{tagErrorMessage}</FormErrorMessage>
                 <Flex mt={3} wrap='wrap' gap={3}>
                   {tag_elements}
                 </Flex>

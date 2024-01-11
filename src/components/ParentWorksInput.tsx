@@ -1,6 +1,5 @@
 import { CheckCircleIcon, SpinnerIcon } from "@chakra-ui/icons";
-import { Input, Box, Flex, Text, Image, LinkBox, LinkOverlay, Link, Avatar, Button } from "@chakra-ui/react";
-import { useRouter } from "next/router";
+import { Input, Box, Flex, Text, LinkBox, LinkOverlay, Link, Avatar, Button } from "@chakra-ui/react";
 import React from "react";
 import { useState } from "react";
 import useSWR from "swr";
@@ -10,56 +9,13 @@ import ArtworkInteractor from "@/interactors/Artwork/ArtworkInteractor";
 import { ArtworkData } from "@/interactors/Artwork/ArtworkTypes";
 import UserInteractor from "@/interactors/User/UserInteractor";
 
-interface Props_ArtworkData {
-  artworkData: ArtworkData;
-}
+import ThumbnailImage from "./ThumbnailImage";
 
 function textOmission(text: string, maxLen: number): string {
   if (text.length > maxLen) {
     return text.substring(0, maxLen - 1) + "…";
   } else {
     return text;
-  }
-}
-
-function ThumbnailImage(props: Props_ArtworkData) {
-  const {
-    data: imgURL,
-    error,
-    isLoading,
-  } = useSWR(`/thumbnail/${props.artworkData.id}`, async () => {
-    let thumbnail_url = "/text_file.png";
-    if (props.artworkData.type === "image") {
-      thumbnail_url = props.artworkData.file.url;
-    } else {
-      switch (props.artworkData.type) {
-        case "text": {
-          thumbnail_url = "/text_file.png";
-          break;
-        }
-        case "audio": {
-          thumbnail_url = "/audio_file.png";
-          break;
-        }
-        case "video": {
-          thumbnail_url = "/text_file.png";
-          break;
-        }
-      }
-      for (let i = 0; i < props.artworkData.parent_ids.length; i++) {
-        const parent_artwork = await new ArtworkInteractor().get(props.artworkData.parent_ids[0]);
-        if (parent_artwork !== null && parent_artwork.type === "image") {
-          thumbnail_url = parent_artwork.file.url;
-          break;
-        }
-      }
-    }
-    return thumbnail_url;
-  });
-  if (imgURL !== null || imgURL !== undefined) {
-    return <Image src={imgURL} boxSize='20px' alt='image' />;
-  } else {
-    return <SpinnerIcon boxSize='20px' />;
   }
 }
 
@@ -78,18 +34,14 @@ function UserAvaterAndName(props: Props_UserID) {
     return (
       <>
         <Avatar src={userPubData.icon} boxSize='20px' marginLeft='auto' marginRight='5px'></Avatar>
-        <Link isExternal={true} href={`mypage`} marginRight='10px'>
-          {textOmission(userPubData.name, 15)}
-        </Link>
+        <Text marginRight='10px'>{textOmission(userPubData.name, 15)}</Text>
       </>
     );
   } else {
     return (
       <>
         <SpinnerIcon boxSize='20px' marginLeft='auto' marginRight='5px' />
-        <Link isExternal={true} marginRight='10px'>
-          Loading…
-        </Link>
+        <Text marginRight='10px'>Loading…</Text>
       </>
     );
   }
@@ -104,9 +56,7 @@ export default function ParentWorksInput(props: Props_StrAryHook) {
   const [serchBoxTexts, setSerchBoxTexts] = useState("");
   const [selectedParentWorks, setSelectedParentWorks] = useState<Array<ArtworkData>>([]);
 
-  //const [onInputFocused, setOnInputFocused] = useState<boolean>(false);
   const [isSuggestionEnable, setIsSuggestionEnable] = useState<boolean>(false);
-  const router = useRouter();
   const {
     data: artworks,
     error,
@@ -170,54 +120,60 @@ export default function ParentWorksInput(props: Props_StrAryHook) {
     </>
   );
 
-  let artworksSelection: JSX.Element = (
-    <Box bg='red' zIndex={10}>
-      検索中…
-    </Box>
-  );
+  let artworksSuggestions: JSX.Element = <Box bg='red'>検索中…</Box>;
   if (!isSuggestionEnable) {
-    artworksSelection = <></>;
+    artworksSuggestions = <></>;
   } else if (!error && artworks !== null && artworks !== undefined) {
     //検索結果が取得できている
     if (artworks.length == 0 && serchBoxTexts.length > 0) {
       //検索ワードが入力されているが、ヒットした作品がない。
-      artworksSelection = (
-        <Box bg='red' zIndex={10}>
-          検索結果なし
-        </Box>
-      );
+      artworksSuggestions = <Box bg='red'>検索結果なし</Box>;
     } else {
       //検索ワードが入力されていて。ヒットした作品がある
-      artworksSelection = <>{artworks.map((aData: ArtworkData) => suggestionBox(aData))}</>;
+      artworksSuggestions = <>{artworks.map((aData: ArtworkData) => suggestionBox(aData))}</>;
     }
   }
 
   let selectedArtWorks = selectedParentWorks.map((aData) => selectedArtwork(aData));
 
   return (
-    <Box height='230px' width='100%'>
-      <Text>親作品</Text>
-      <Box height='40px' marginBottom='10px' overflowY='visible'>
-        <Input
-          height='40px'
-          variant='filled'
-          placeholder='検索'
-          onChange={(event) => setSerchBoxTexts(event.target.value)}
-          onFocus={() => setIsSuggestionEnable(true)}
-        ></Input>
-        <Box maxH='150px' overflowY='scroll'>
-          {artworksSelection}
+    <>
+      {isSuggestionEnable && (
+        <Box
+          left={0}
+          top={0}
+          background=''
+          position='absolute'
+          width='100%'
+          height='100%'
+          zIndex='modal'
+          onClick={() => setIsSuggestionEnable(false)}
+        ></Box>
+      )}
+      <Box height='230px' width='100%' zIndex={isSuggestionEnable ? "toast" : "auto"}>
+        <Text>親作品</Text>
+        <Box height='40px' marginBottom='10px' overflowY='visible'>
+          <Input
+            height='40px'
+            variant='filled'
+            placeholder='検索'
+            onChange={(event) => setSerchBoxTexts(event.target.value)}
+            onFocus={() => setIsSuggestionEnable(true)}
+          ></Input>
+          <Box maxH='150px' overflowY='scroll' position='relative' zIndex={"toast"}>
+            {artworksSuggestions}
+          </Box>
+          {isSuggestionEnable && (
+            <Button height='30px' onClick={() => setIsSuggestionEnable(false)} width='100%'>
+              閉じる
+            </Button>
+          )}
         </Box>
-        {isSuggestionEnable && (
-          <Button height='30px' onClick={() => setIsSuggestionEnable(false)} width='100%'>
-            閉じる
-          </Button>
-        )}
+        {selectedArtWorks}
+        <Text mt={2} textAlign='right' color={selectedParentWorks.length >= 10 ? "red.500" : ""}>
+          {selectedParentWorks.length}/10
+        </Text>
       </Box>
-      {selectedArtWorks}
-      <Text mt={2} textAlign='right' color={selectedParentWorks.length >= 10 ? "red.500" : ""}>
-        {selectedParentWorks.length}/10
-      </Text>
-    </Box>
+    </>
   );
 }

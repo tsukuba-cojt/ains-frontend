@@ -7,9 +7,12 @@ import { ArtworkData } from "@/interactors/Artwork/ArtworkTypes";
 
 interface Props {
   artworkData: ArtworkData;
+  width?: string;
+  height?: string;
+  boxSize?: string;
 }
 
-export default function ThumbnailImage2(props: Props) {
+export default function ThumbnailImage(props: Props) {
   const {
     data: imgURL,
     error,
@@ -40,6 +43,9 @@ export default function ThumbnailImage2(props: Props) {
     }
     return thumbnail_url;
   });
+  const width = props.width ? props.width : props.boxSize ? props.boxSize : "20px";
+  const height = props.height ? props.height : props.boxSize ? props.boxSize : "20px";
+
   if (imgURL !== null || imgURL !== undefined) {
     return <Image src={imgURL} boxSize='20px' alt='image' marginRight='10px' marginLeft='10px' />;
   } else {
