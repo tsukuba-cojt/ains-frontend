@@ -1,4 +1,3 @@
-import { SpinnerIcon } from "@chakra-ui/icons";
 import {
   Image,
   Container,
@@ -17,56 +16,17 @@ import {
   Button,
   Flex,
   FormErrorMessage,
-  Avatar,
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { useState, ChangeEvent, useContext, useMemo, useEffect, ReactNode, Fragment } from "react";
-import useSWR from "swr";
 
 import { FirebaseAuthContext } from "@/components/FirebaseAuthProvider";
 import HoverTag from "@/components/HoverTag";
 import ParentWorksInput from "@/components/ParentWorksInput";
 import UploadIcon from "@/icons/UploadIcon";
 import ArtworkInteractor from "@/interactors/Artwork/ArtworkInteractor";
-import { ArtworkType } from "@/interactors/Artwork/ArtworkTypes";
-import UserInteractor from "@/interactors/User/UserInteractor";
+import { ArtworkType, ArtworkData } from "@/interactors/Artwork/ArtworkTypes";
 import { theme } from "@/pages/_app";
-
-function textOmission(text: string, maxLen: number): string {
-  if (text.length > maxLen) {
-    return text.substring(0, maxLen - 1) + "…";
-  } else {
-    return text;
-  }
-}
-
-interface Props_UserID {
-  userID: string;
-}
-
-function UserAvaterAndName(props: Props_UserID) {
-  const {
-    data: userPubData,
-    error,
-    isLoading,
-  } = useSWR(`/user/${props.userID}`, () => new UserInteractor().getPublicData(props.userID));
-
-  if (userPubData !== null && userPubData !== undefined) {
-    return (
-      <>
-        <Avatar src={userPubData.icon} boxSize='20px' marginLeft='auto' marginRight='5px'></Avatar>
-        <Text marginRight='10px'>{textOmission(userPubData.name, 15)}</Text>
-      </>
-    );
-  } else {
-    return (
-      <>
-        <SpinnerIcon boxSize='20px' marginLeft='auto' marginRight='5px' />
-        <Text marginRight='10px'>Loading…</Text>
-      </>
-    );
-  }
-}
 
 const ImageUploadForm = () => {
   const { user } = useContext(FirebaseAuthContext);
@@ -79,7 +39,7 @@ const ImageUploadForm = () => {
   const [inputFileType, setInputFileType] = useState<ArtworkType | null>(null);
   const [inputWorkName, setInputWorkName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
-  const [parentIDs, setParentIDs] = useState<Array<string>>([]);
+  const [parentArtworks, setParentArtworks] = useState<Array<ArtworkData>>([]);
   const [artworkTagInput, setArtworkTagInput] = useState<string>("");
   const [artworkTags, setArtworkTags] = useState<Array<string>>([]);
 
@@ -203,7 +163,7 @@ const ImageUploadForm = () => {
       author_id: user.id,
       tags: artworkTags,
       comment_ids: [],
-      parent_ids: parentIDs,
+      parent_ids: parentArtworks.map((aArtwork) => aArtwork.id),
     });
     if (result) {
       toast({
@@ -218,7 +178,7 @@ const ImageUploadForm = () => {
       setInputWorkName("");
       setDescription("");
       setArtworkTags([]);
-      setParentIDs([]);
+      setParentArtworks([]);
       setArtworkTagInput("");
     } else {
       toast({
@@ -367,12 +327,7 @@ const ImageUploadForm = () => {
                   {artworkTags.length}/10
                 </Text>
               </FormControl>
-              <ParentWorksInput
-                selectedParentsID={parentIDs}
-                setSelectedParentsID={(aAry) => {
-                  setParentIDs(aAry);
-                }}
-              />
+              <ParentWorksInput selectedParentWorks={parentArtworks} setSelectedParentWorks={setParentArtworks} />
 
               <Button w='full' onClick={uploadArtwork}>
                 アップロード

@@ -48,13 +48,13 @@ function UserAvaterAndName(props: Props_UserID) {
 }
 
 interface Props_StrAryHook {
-  selectedParentsID: Array<string>;
-  setSelectedParentsID: (setValue: Array<string>) => void;
+  selectedParentWorks: Array<ArtworkData>;
+  setSelectedParentWorks: (setValue: Array<ArtworkData>) => void;
 }
 
 export default function ParentWorksInput(props: Props_StrAryHook) {
   const [serchBoxTexts, setSerchBoxTexts] = useState("");
-  const [selectedParentWorks, setSelectedParentWorks] = useState<Array<ArtworkData>>([]);
+  const [selectedParentWorks, setSelectedParentWorks] = [props.selectedParentWorks, props.setSelectedParentWorks];
 
   const [isSuggestionEnable, setIsSuggestionEnable] = useState<boolean>(false);
   const {
@@ -79,7 +79,6 @@ export default function ParentWorksInput(props: Props_StrAryHook) {
                   ? [...selectedParentWorks, artworkData]
                   : selectedParentWorks
               );
-              props.setSelectedParentsID(selectedParentWorks.map((aAryData) => aAryData.id));
             }}
           ></LinkOverlay>
           <Flex align='center' height='35px'>
@@ -111,7 +110,6 @@ export default function ParentWorksInput(props: Props_StrAryHook) {
           setSelectedParentWorks(
             selectedParentWorks.filter((aDataInArray, index) => aDataInArray.id !== artworkData.id)
           );
-          props.setSelectedParentsID(selectedParentWorks.map((aAryData) => aAryData.id));
         }}
       >
         <ThumbnailImage artworkData={artworkData} />
