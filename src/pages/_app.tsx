@@ -16,7 +16,7 @@ export const theme = extendTheme(
       primary: baseTheme.colors.cyan,
       secondary: {
         ml: baseTheme.colors.gray[200],
-        md: baseTheme.colors.whiteAlpha[50],
+        md: baseTheme.colors.gray[700],
       },
     },
   },

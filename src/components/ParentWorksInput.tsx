@@ -1,4 +1,5 @@
 import { CheckCircleIcon, SpinnerIcon } from "@chakra-ui/icons";
+import { useColorModeValue } from "@chakra-ui/react";
 import { Input, Box, Flex, Text, LinkBox, LinkOverlay, Link, Avatar, Button } from "@chakra-ui/react";
 import React from "react";
 import { useState } from "react";
@@ -8,6 +9,7 @@ import HoverTag from "@/components/HoverTag";
 import ArtworkInteractor from "@/interactors/Artwork/ArtworkInteractor";
 import { ArtworkData } from "@/interactors/Artwork/ArtworkTypes";
 import UserInteractor from "@/interactors/User/UserInteractor";
+import { theme } from "@/pages/_app";
 
 import ThumbnailImage from "./ThumbnailImage";
 
@@ -64,12 +66,14 @@ export default function ParentWorksInput(props: Props_StrAryHook) {
   } = useSWR(`/artworks/search_artwork?keywords=${serchBoxTexts}`, () =>
     new ArtworkInteractor().fullTextSearch(10, serchBoxTexts.split(/\s+/))
   );
+  const secondary = useColorModeValue(theme.colors.secondary.ml, theme.colors.secondary.md);
+  const stressColor = useColorModeValue("gray", "black");
 
   const suggestionBox = (artworkData: ArtworkData): JSX.Element => {
     const aDataIsSelected = selectedParentWorks.find((aAryData) => aAryData.id === artworkData.id);
     return (
       <>
-        <LinkBox bg='red' _hover={{ bg: "black" }}>
+        <LinkBox bg={secondary} _hover={{ bg: stressColor }}>
           <LinkOverlay
             onClick={() => {
               setSelectedParentWorks(
@@ -118,14 +122,14 @@ export default function ParentWorksInput(props: Props_StrAryHook) {
     </>
   );
 
-  let artworksSuggestions: JSX.Element = <Box bg='red'>検索中…</Box>;
+  let artworksSuggestions: JSX.Element = <Box bg={secondary}>検索中…</Box>;
   if (!isSuggestionEnable) {
     artworksSuggestions = <></>;
   } else if (!error && artworks !== null && artworks !== undefined) {
     //検索結果が取得できている
     if (artworks.length == 0 && serchBoxTexts.length > 0) {
       //検索ワードが入力されているが、ヒットした作品がない。
-      artworksSuggestions = <Box bg='red'>検索結果なし</Box>;
+      artworksSuggestions = <Box bg={secondary}>検索結果なし</Box>;
     } else {
       //検索ワードが入力されていて。ヒットした作品がある
       artworksSuggestions = <>{artworks.map((aData: ArtworkData) => suggestionBox(aData))}</>;
@@ -158,7 +162,14 @@ export default function ParentWorksInput(props: Props_StrAryHook) {
             onChange={(event) => setSerchBoxTexts(event.target.value)}
             onFocus={() => setIsSuggestionEnable(true)}
           ></Input>
-          <Box maxH='150px' overflowY='scroll' position='relative' zIndex={"toast"}>
+          <Box
+            margin='1px'
+            boxShadow='0px 0px 1px'
+            maxH='150px'
+            overflowY='scroll'
+            position='relative'
+            zIndex={"toast"}
+          >
             {artworksSuggestions}
           </Box>
           {isSuggestionEnable && (
