@@ -34,5 +34,22 @@ export interface PostData {
 
   files?: FileData[];
   likes: string[];
+  replies: ReplyData[];
   author: UserPublicData;
+}
+export type ReplyData = Omit<PostData, "replies"> & { replies_num: number };
+
+export interface PostFormData {
+  community_id: string;
+  content: string;
+  files?: File[];
+  author: string;
+}
+export type ReplyFormData = PostFormData & { originPost: string };
+
+export interface PostCreateData {
+  content: string;
+  files?: string[];
+  likes: string[];
+  author: string;
 }

@@ -23,4 +23,11 @@ export interface UserFormData {
   icon?: File;
 }
 
+export const deletedUser: UserPublicData = {
+  id: "",
+  name: "削除済みユーザー",
+  follows_count: 0,
+  followers_count: 0,
+};
+
 export type UserCreateData = UserData;

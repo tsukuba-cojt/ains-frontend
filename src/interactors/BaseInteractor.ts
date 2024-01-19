@@ -57,6 +57,23 @@ export default class BaseInteractor {
       return null;
     }
   }
+
+  async getSubCollections(collection_name: string, ...sub_path: string[]): Promise<Array<DocumentData> | null> {
+    try {
+      const collectionRef = collection(this.db, collection_name, ...sub_path);
+      const q = query(collectionRef, orderBy("created_at", "desc"));
+      const snapshot = await getDocs(q);
+      const res_data: Array<DocumentData> = [];
+      snapshot.forEach((doc) => {
+        // doc.data() is never undefined for query doc snapshots
+        res_data.push(Object.assign(doc.data(), { id: doc.id }));
+      });
+      return res_data;
+    } catch (_err) {
+      return null;
+    }
+  }
+
   async getLatests(collection_name: string, limitNum: number): Promise<Array<DocumentData> | null> {
     try {
       const collectionRef = collection(this.db, collection_name);
@@ -197,6 +214,23 @@ export default class BaseInteractor {
   async set(collection_name: string, doc_id: string, data: DocumentData): Promise<DocumentData | null> {
     try {
       const ref = doc(this.db, collection_name, doc_id);
+      data = Object.assign(data, { created_at: serverTimestamp(), updated_at: serverTimestamp() });
+      await setDoc(ref, data).catch((_err) => {
+        return null;
+      });
+      return Object.assign(data, { id: doc_id });
+    } catch (_err) {
+      return null;
+    }
+  }
+  async setSubCollection(
+    collection_name: string,
+    sub_path: string[],
+    doc_id: string,
+    data: DocumentData
+  ): Promise<DocumentData | null> {
+    try {
+      const ref = doc(this.db, collection_name, ...sub_path, doc_id);
       data = Object.assign(data, { created_at: serverTimestamp(), updated_at: serverTimestamp() });
       await setDoc(ref, data).catch((_err) => {
         return null;

@@ -16,6 +16,7 @@ import {
   Button,
   Flex,
   FormErrorMessage,
+  Spinner,
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { useState, ChangeEvent, useContext, useMemo, useEffect, ReactNode, Fragment } from "react";
@@ -62,6 +63,7 @@ const ImageUploadForm = () => {
   const [tagInputData, setTagInputData] = useState<TagInputData>(INITIAL_TAG_INPUT_DATA);
   const [parentInputData, setParentInputData] = useState<ParentInputData>(INITIAL_PARENT_INPUT_DATA);
   const [fileContentElement, setFileContentElement] = useState<ReactNode>(<></>);
+  const [uploading, setUploading] = useState<boolean>(false);
 
   const toast = useToast();
   const secondary = useColorModeValue(theme.colors.secondary.ml, theme.colors.secondary.md);
@@ -200,6 +202,7 @@ const ImageUploadForm = () => {
       return;
     }
 
+    setUploading(true);
     const result = await new ArtworkInteractor().upload({
       ...artworkFormData,
       author_id: user?.id,
@@ -222,6 +225,7 @@ const ImageUploadForm = () => {
         isClosable: true,
       });
     }
+    setUploading(false);
   };
 
   const addTag = () => {
@@ -429,8 +433,9 @@ const ImageUploadForm = () => {
                   {parentInputData.parents.length}/10
                 </Text>
               </FormControl>
-              <Button w='full' onClick={handleUpload}>
+              <Button w='full' isDisabled={uploading} onClick={handleUpload}>
                 アップロード
+                {uploading && <Spinner ml={3} />}
               </Button>
             </VStack>
           </GridItem>
