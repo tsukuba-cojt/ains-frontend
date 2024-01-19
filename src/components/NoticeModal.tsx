@@ -10,11 +10,14 @@ import {
   HStack,
   Link,
   AspectRatio,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import { AnimatePresence, motion } from "framer-motion";
 import NextLink from "next/link";
 import React, { ReactNode } from "react";
 import { useState } from "react";
+
+import { theme } from "@/pages/_app";
 
 interface Props {
   isOpen: boolean;
@@ -33,10 +36,11 @@ interface ItemData {
 }
 
 const ComNotice = (itemData: ItemData) => {
+  const secondary = useColorModeValue(theme.colors.secondary.ml, "gray.700");
   switch (itemData.item_type) {
     case "image": {
       return (
-        <HStack w='full' bg='black' p='4' wrap='wrap' alignItems='center' gap={5}>
+        <HStack w='full' bg={secondary} p='4' wrap='wrap' alignItems='center' gap={5}>
           <Link w='30%' as={NextLink} href={itemData.item_link}>
             <AspectRatio w='100%' ratio={1}>
               <Image boxSize='100%' src={itemData.item_src} />
@@ -50,7 +54,7 @@ const ComNotice = (itemData: ItemData) => {
     }
     case "text": {
       return (
-        <HStack w='full' bg='black' p='4' wrap='wrap' alignItems='center' gap={5}>
+        <HStack w='full' bg={secondary} p='4' wrap='wrap' alignItems='center' gap={5}>
           <Link w='30%' as={NextLink} href={itemData.item_link}>
             <AspectRatio w='100%' ratio={1}>
               <Image boxSize='100%' src={itemData.item_src} />
@@ -64,7 +68,7 @@ const ComNotice = (itemData: ItemData) => {
     }
     case "audio": {
       return (
-        <HStack w='full' bg='black' p='4' wrap='wrap' alignItems='center' gap={5}>
+        <HStack w='full' bg={secondary} p='4' wrap='wrap' alignItems='center' gap={5}>
           <Link w='30%' as={NextLink} href={itemData.item_link}>
             <AspectRatio w='100%' ratio={1}>
               <Image boxSize='100%' src={itemData.item_src} />
@@ -78,7 +82,7 @@ const ComNotice = (itemData: ItemData) => {
     }
     case "video": {
       return (
-        <HStack w='full' bg='black' p='4' wrap='wrap' alignItems='center' gap={5}>
+        <HStack w='full' bg={secondary} p='4' wrap='wrap' alignItems='center' gap={5}>
           <Link w='30%' as={NextLink} href={itemData.item_link}>
             <AspectRatio w='100%' ratio={1}>
               <video boxSize='100%' src={itemData.item_src} />
@@ -97,7 +101,7 @@ const ComNotice = (itemData: ItemData) => {
         ));
       };
       return (
-        <Box w='full' bg='black' p='4' wrap='wrap' alignItems='center' gap={5}>
+        <Box w='full' bg={secondary} p='4' wrap='wrap' alignItems='center' gap={5}>
           <VStack alignItems='left'>
             <Text fontSize='md'> {itemData.user_name}にフォローされました</Text>
             <Flex>
@@ -109,14 +113,14 @@ const ComNotice = (itemData: ItemData) => {
     }
     case "notify": {
       return (
-        <Box w='full' bg='black' p='4' wrap='wrap' alignItems='center' gap={5}>
+        <Box w='full' bg={secondary} p='4' wrap='wrap' alignItems='center' gap={5}>
           <Text fontSize='xl'>{itemData.update_title}</Text>
           <Text fontSize='md'>{itemData.update_text}</Text>
         </Box>
       );
     }
     default: {
-      <HStack w='full' bg='black' p='4' wrap='wrap' alignItems='center' gap={5}>
+      <HStack w='full' bg={secondary} p='4' wrap='wrap' alignItems='center' gap={5}>
         <Box flex={1} w='70%' overflowY='auto'>
           <Text fontSize='md'>switchのtypeとかのエラー!!!!!!!!</Text>
         </Box>
@@ -128,17 +132,10 @@ const ComNotice = (itemData: ItemData) => {
 
 const NoticeModal = (props: Props) => {
   const [isNoticeOpen, setIsNoticeOpen] = useState<boolean>(false);
+  const boxbg = useColorModeValue("cyan.400", "cyan.200");
 
   return (
-    <Box
-      overflowY='auto'
-      overflowX='hidden'
-      position='fixed'
-      top='50px'
-      right='0px'
-      h='calc(100vh - 50px)'
-      bg='blue.300'
-    >
+    <Box overflowY='auto' overflowX='hidden' position='fixed' top='50px' right='0px' h='calc(100vh - 50px)' bg={boxbg}>
       <AnimatePresence>
         {props.isOpen && isNoticeOpen == false && (
           <motion.aside
