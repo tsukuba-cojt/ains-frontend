@@ -271,7 +271,7 @@ export default class BaseInteractor {
     let serchTokens: Array<string> = [];
     serchWords.forEach((aSerchWord) => {
       //console.log(aSerchWord);
-      serchTokens.push(...nOrLessGramTokenize(aSerchWord, 2));
+      serchTokens.push(...nOrLessGramTokenize(this.KatakanaToHiragana(aSerchWord.toLowerCase()), 2));
     });
     //console.log(serchTokens);
     return this.mapsBoolFieldNameSearchQuery(orig_query, "bigramtokens_map", serchTokens);
@@ -279,5 +279,11 @@ export default class BaseInteractor {
 
   tagsSearchQuery(orig_query: Query<DocumentData>, searchTags: Array<string>) {
     return this.mapsBoolFieldNameSearchQuery(orig_query, "tags_map", searchTags);
+  }
+
+  KatakanaToHiragana(word: string) {
+    return word.replace(/[\u30a1-\u30f6]/g, (aChar) => {
+      return String.fromCharCode(aChar.charCodeAt(0) - 0x60);
+    });
   }
 }
