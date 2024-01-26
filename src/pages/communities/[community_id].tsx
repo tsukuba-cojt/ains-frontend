@@ -217,8 +217,6 @@ const CommunityPage = () => {
   if (isLoading) return <LoadingPanel />;
   if (error || !community) return <ErrorPage statusCode={404} />;
 
-  console.log(postFiles);
-
   return (
     <Container maxW='container.lg'>
       <Box h={200} {...{ backgroundImage: community.banner && community.banner.url, backgroundColor: "primary.100" }}>

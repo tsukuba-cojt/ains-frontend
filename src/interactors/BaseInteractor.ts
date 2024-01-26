@@ -18,8 +18,10 @@ import {
   serverTimestamp,
   Query,
   QueryConstraint,
+  startAfter,
+  orderBy,
+  limit,
 } from "firebase/firestore";
-import { orderBy, limit, startAt } from "firebase/firestore";
 import { FirebaseStorage, getDownloadURL, getStorage, ref as storageRef, uploadBytes } from "firebase/storage";
 import { v4 as uuidv4 } from "uuid";
 
@@ -52,7 +54,6 @@ export default class BaseInteractor {
       const cacheKey = `get/${collection_name}/${doc_id}`;
       const cache = window.sessionStorage.getItem(cacheKey);
       if (cache) {
-        console.log(cacheKey, cache);
         return JSON.parse(cache);
       }
 
@@ -77,7 +78,6 @@ export default class BaseInteractor {
       const cacheKey = `getSub/${collection_name}/${sub_path.join("/")}`;
       const cache = window.sessionStorage.getItem(cacheKey);
       if (cache) {
-        console.log(cacheKey, cache);
         return JSON.parse(cache);
       }
 
@@ -104,14 +104,13 @@ export default class BaseInteractor {
       const queryConstraints: QueryConstraint[] = [orderBy("created_at", "desc"), limit(limitNum)];
       if (startId) {
         const start = await getDoc(doc(this.db, collection_name, startId));
-        if (start.exists()) queryConstraints.push(startAt(start));
+        if (start.exists()) queryConstraints.push(startAfter(start));
       }
       const q = query(collectionRef, ...queryConstraints);
 
-      const cacheKey = `getLatest/${collection_name}/${limitNum}/${startId ? startId : 0}`;
+      const cacheKey = `getLatest/${collection_name}/${limitNum}/${startId ? startId : "head"}`;
       const cache = window.sessionStorage.getItem(cacheKey);
       if (cache) {
-        console.log(cacheKey, cache);
         return JSON.parse(cache);
       }
 
@@ -122,7 +121,12 @@ export default class BaseInteractor {
         res_data.push(Object.assign(doc.data(), { id: doc.id }));
       });
       window.sessionStorage.setItem(cacheKey, JSON.stringify(res_data));
-      console.log("!", res_data);
+      if (startId) {
+        const headKey = `getLatest/${collection_name}/${limitNum}/head`;
+        const headCacheStr = window.sessionStorage.getItem(headKey);
+        const headCache = headCacheStr ? JSON.parse(headCacheStr) : [];
+        window.sessionStorage.setItem(headKey, JSON.stringify(headCache.concat(res_data)));
+      }
       return res_data;
     } catch (_err) {
       return null;
@@ -183,7 +187,6 @@ export default class BaseInteractor {
     const cacheKey = `getWithTags/${collection_name}/${tags.join("#")}/${limitNum}`;
     const cache = window.sessionStorage.getItem(cacheKey);
     if (cache) {
-      console.log(cacheKey, cache);
       return JSON.parse(cache);
     }
 
@@ -383,10 +386,8 @@ export default class BaseInteractor {
   fullTextSearchQuery(orig_query: Query<DocumentData>, serchWords: Array<string>) {
     let serchTokens: Array<string> = [];
     serchWords.forEach((aSerchWord) => {
-      //console.log(aSerchWord);
       serchTokens.push(...nOrLessGramTokenize(this.KatakanaToHiragana(aSerchWord.toLowerCase()), 2));
     });
-    //console.log(serchTokens);
     return this.mapsBoolFieldNameSearchQuery(orig_query, "bigramtokens_map", serchTokens);
   }
 
