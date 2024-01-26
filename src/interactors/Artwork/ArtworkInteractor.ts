@@ -33,8 +33,8 @@ export default class ArtworkInteractor {
     return artwork_data;
   }
 
-  async getLatests(limit: number): Promise<ArtworkData[] | null> {
-    const res_data = await this.interactor.getLatests(this.COLLECTION_NAME, limit);
+  async getLatests(limit: number, startId: string | null = null): Promise<ArtworkData[] | null> {
+    const res_data = await this.interactor.getLatests(this.COLLECTION_NAME, limit, startId);
     if (!res_data) return null;
 
     const artwork_data_list: ArtworkData[] = [];
@@ -109,7 +109,12 @@ export default class ArtworkInteractor {
 
     //検索に使うマップを作成
     const bigramtokens_map: any = {};
-    nOrLessGramTokenize(artwork_create_data.name + " " + artwork_create_data.description, 2).forEach((aToken) => {
+    nOrLessGramTokenize(
+      this.interactor
+        .KatakanaToHiragana(artwork_create_data.name + " " + artwork_create_data.description)
+        .toLowerCase(),
+      2
+    ).forEach((aToken) => {
       bigramtokens_map[aToken] = true;
     });
     const tags_map: any = {};
@@ -138,7 +143,6 @@ export default class ArtworkInteractor {
       comment_ids: artwork_data.comment_ids.concat(comment_id),
     });
     if (!res_data) return null;
-
     return true;
   }
 
