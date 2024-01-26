@@ -1,10 +1,11 @@
+import { BaseModel } from "../BaseTypes";
 import { CommentData } from "../Comment/CommentTypes";
 import { FileData } from "../File/FileTypes";
 import { UserPublicData } from "../User/UserTypes";
 
 export type ArtworkType = "image" | "text" | "audio" | "video";
 
-export interface ArtworkData {
+export interface ArtworkData extends BaseModel {
   id: string;
   type: ArtworkType;
   name: string;
@@ -21,7 +22,7 @@ export interface ArtworkData {
   parent_ids: string[];
 }
 
-export interface ArtworkDataWithRelativeData {
+export interface ArtworkDataWithRelativeData extends BaseModel {
   id: string;
   type: ArtworkType;
   name: string;
@@ -49,6 +50,7 @@ export const INITIAL_ARTWORK_FORM_DATA: ArtworkFormData = {
   comment_ids: [],
   parent_ids: [],
 };
+
 export interface ArtworkFormData {
   type: ArtworkType;
   name: string;

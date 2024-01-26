@@ -103,7 +103,6 @@ const DMModal = (props: Props) => {
       </HStack>
     );
   };
-
   return (
     <Box overflowY='scroll' position='fixed' top='50px' right='0px' h='calc(100vh - 50px)' bg={boxbg}>
       <AnimatePresence>

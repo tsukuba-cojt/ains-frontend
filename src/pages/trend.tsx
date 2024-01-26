@@ -66,7 +66,7 @@ export const getServerSideProps: GetServerSideProps<TrendPageProps> = async (_ct
         { id: "test", title: "test community", thumbnail_url: "https://placehold.jp/150x150.png" },
         { id: "test", title: "test community", thumbnail_url: "https://placehold.jp/150x150.png" },
       ],
-      artworks: ((await new ArtworkInteractor().getLatests(10)) || []).map((a) => {
+      artworks: ((await new ArtworkInteractor().getLatests(16)) || []).map((a) => {
         return { ...a, uploaded: "" };
       }),
     },
@@ -85,7 +85,7 @@ const TrendPage = ({ tags, users, communities, artworks }: TrendPageProps) => {
         title={user.title}
         show_icon
         icon_type='circle'
-        icon_url={user.thumbnail_url}
+        icon={user.thumbnail_url}
         href={`/search?user=${user.id}`}
       />
     </GridItem>
@@ -96,7 +96,7 @@ const TrendPage = ({ tags, users, communities, artworks }: TrendPageProps) => {
         title={community.title}
         show_icon
         icon_type='square'
-        icon_url={community.thumbnail_url}
+        icon={community.thumbnail_url}
         href={`/search?community=${community.id}`}
       />
     </GridItem>

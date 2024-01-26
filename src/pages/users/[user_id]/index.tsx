@@ -155,7 +155,7 @@ const UserProfilePage = ({ artworks, communities }: any) => {
   return (
     <Container maxW='container.lg' p={5}>
       <VStack gap={5}>
-        <Avatar size='2xl' name={user.name} src={user.icon_url} />
+        <Avatar size='2xl' name={user.name} src={user.icon} />
         <Heading as='h1'>{user.name}</Heading>
 
         <Flex gap={3}>
@@ -166,7 +166,7 @@ const UserProfilePage = ({ artworks, communities }: any) => {
           noOfLines={doesExpandDescription ? undefined : 3}
           onClick={() => setDoesExpandDescription(!doesExpandDescription)}
         >
-          メロスは激怒した。必ず、かの邪智暴虐じゃちぼうぎゃくの王を除かなければならぬと決意した。メロスには政治がわからぬ。メロスは、村の牧人である。笛を吹き、羊と遊んで暮して来た。けれども邪悪に対しては、人一倍に敏感であった。きょう未明メロスは村を出発し、野を越え山越え、十里はなれた此このシラクスの市にやって来た。メロスには父も、母も無い。女房も無い。十六の、内気な妹と二人暮しだ。この妹は、村の或る律気な一牧人を、近々、花婿はなむことして迎える事になっていた。結婚式も間近かなのである。メロスは、それゆえ、花嫁の衣裳やら祝宴の御馳走やらを買いに、はるばる市にやって来たのだ。先ず、その品々を買い集め、それから都の大路をぶらぶら歩いた。メロスには竹馬の友があった。セリヌンティウスである。
+          {user.description}
         </Text>
         <Tabs w='full' align='center'>
           <TabList>
@@ -189,7 +189,7 @@ const UserProfilePage = ({ artworks, communities }: any) => {
                       title={community.title}
                       show_icon
                       icon_type='square'
-                      icon_url={community.thumbnail_url}
+                      icon={community.thumbnail_url}
                       href={`/search?community=${community.id}`}
                     />
                   </GridItem>
