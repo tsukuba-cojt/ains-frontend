@@ -19,6 +19,9 @@ import {
   Avatar,
   Input,
   useToast,
+  Link,
+  LinkBox,
+  LinkOverlay,
 } from "@chakra-ui/react";
 import ErrorPage from "next/error";
 import { useRouter } from "next/router";
@@ -228,10 +231,15 @@ const ArtworkDetailPage = () => {
           >
             {artwork.description ? artwork.description : ""}
           </Text>
-          <Flex alignItems='center' gap={4}>
-            <Avatar size='sm' src={artwork.author.icon} name={artwork.author.name} />
-            <Text>{artwork.author.name}</Text>
-          </Flex>
+          <LinkBox>
+            <LinkOverlay href={`/users/${artwork.author.id}`}></LinkOverlay>
+            <Flex alignItems='center' gap={4}>
+              <Avatar size='sm' src={artwork.author.icon} name={artwork.author.name} />
+              <Link href={`/users/${artwork.author.id}`}>
+                <Text>{artwork.author.name}</Text>
+              </Link>
+            </Flex>
+          </LinkBox>
           <HStack>{tag_elements}</HStack>
           <Button onClick={jumpToUploadPageWithParentId}>参考アップロード</Button>
           {artwork.parents.length > 0 ? (
