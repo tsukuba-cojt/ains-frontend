@@ -267,6 +267,14 @@ export default class BaseInteractor {
       await setDoc(ref, data).catch((_err) => {
         return null;
       });
+      const relatedKeys = Object.keys(window.sessionStorage).filter((key: string) => {
+        if (key.startsWith("get/") || key.startsWith("getSub/")) {
+          return false;
+        } else {
+          return key.includes(collection_name);
+        }
+      });
+      relatedKeys.forEach((key: string) => window.sessionStorage.removeItem(key));
       return Object.assign(data, { id: doc_id });
     } catch (_err) {
       return null;
@@ -284,6 +292,10 @@ export default class BaseInteractor {
       await setDoc(ref, data).catch((_err) => {
         return null;
       });
+      const relatedKeys = Object.keys(window.sessionStorage).filter((key: string) => {
+        return key.includes(`getSub/${collection_name}/${sub_path.join("/")}`);
+      });
+      relatedKeys.forEach((key: string) => window.sessionStorage.removeItem(key));
       return Object.assign(data, { id: doc_id });
     } catch (_err) {
       return null;
@@ -295,6 +307,16 @@ export default class BaseInteractor {
       const ref = doc(this.db, collection_name, doc_id);
       data = Object.assign(data, { updated_at: serverTimestamp() });
       await updateDoc(ref, data);
+      const relatedKeys = Object.keys(window.sessionStorage).filter((key: string) => {
+        if (key.startsWith("get/")) {
+          return key.includes(`${collection_name}/${doc_id}`);
+        } else if (key.startsWith("getSub/")) {
+          return false;
+        } else {
+          return key.includes(collection_name);
+        }
+      });
+      relatedKeys.forEach((key: string) => window.sessionStorage.removeItem(key));
       return true;
     } catch (_err) {
       return null;
@@ -305,6 +327,14 @@ export default class BaseInteractor {
     try {
       const ref = doc(this.db, collection_name, doc_id);
       await deleteDoc(ref);
+      const relatedKeys = Object.keys(window.sessionStorage).filter((key: string) => {
+        if (key.startsWith("get/")) {
+          return key.includes(`${collection_name}/${doc_id}`);
+        } else {
+          return key.includes(collection_name);
+        }
+      });
+      relatedKeys.forEach((key: string) => window.sessionStorage.removeItem(key));
       return true;
     } catch (_err) {
       return null;
