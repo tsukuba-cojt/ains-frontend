@@ -26,6 +26,9 @@ export default class ArtworkMapper {
       tags: data.tags,
       comment_ids: data.comment_ids,
       parent_ids: data.parent_ids,
+
+      created_at: data.created_at.toDate ? new Date(data.created_at.toDate()) : new Date(),
+      updated_at: data.updated_at.toDate ? new Date(data.updated_at.toDate()) : new Date(),
     };
   }
 
@@ -65,6 +68,9 @@ export default class ArtworkMapper {
       tags: data.tags,
       comments: comment_data_list,
       parents: artwork_data_list,
+
+      created_at: data.created_at.toDate ? new Date(data.created_at.toDate()) : new Date(),
+      updated_at: data.updated_at.toDate ? new Date(data.updated_at.toDate()) : new Date(),
     };
   }
 }

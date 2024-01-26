@@ -16,6 +16,7 @@ import {
   Button,
   Flex,
   FormErrorMessage,
+  Spinner,
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { useState, ChangeEvent, useContext, useMemo, useEffect, ReactNode, Fragment } from "react";
@@ -34,6 +35,7 @@ const ImageUploadForm = () => {
   const { parent } = router.query;
 
   const [fileContentElement, setFileContentElement] = useState<ReactNode>(<></>);
+  const [uploading, setUploading] = useState<boolean>(false);
 
   const [inputFile, setInputFile] = useState<Blob | null>(null);
   const [inputFileType, setInputFileType] = useState<ArtworkType | null>(null);
@@ -135,6 +137,7 @@ const ImageUploadForm = () => {
       return;
     }
 
+    setUploading(true);
     if (!inputFile || !inputFileType) {
       toast({
         title: "コンテンツをアップロードしてください",
@@ -188,6 +191,7 @@ const ImageUploadForm = () => {
         isClosable: true,
       });
     }
+    setUploading(false);
   };
 
   let tagErrorMessage: string = "お兄ちゃん、エラーだよ!";
@@ -331,6 +335,7 @@ const ImageUploadForm = () => {
 
               <Button w='full' onClick={uploadArtwork}>
                 アップロード
+                {uploading && <Spinner ml={3} />}
               </Button>
             </VStack>
           </GridItem>

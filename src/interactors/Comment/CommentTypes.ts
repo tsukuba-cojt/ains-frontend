@@ -1,6 +1,7 @@
+import { BaseModel } from "../BaseTypes";
 import { UserPublicData } from "../User/UserTypes";
 
-export interface CommentData {
+export interface CommentData extends BaseModel {
   id: string;
   text: string;
   author: UserPublicData;

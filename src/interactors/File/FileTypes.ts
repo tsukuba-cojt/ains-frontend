@@ -1,4 +1,6 @@
-export interface FileData {
+import { BaseModel } from "../BaseTypes";
+
+export interface FileData extends BaseModel {
   id: string;
   path: string;
   url: string;

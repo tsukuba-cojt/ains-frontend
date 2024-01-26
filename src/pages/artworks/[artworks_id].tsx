@@ -57,7 +57,7 @@ const ArtworkDetailPage = () => {
     data: artworks,
     error: _error,
     isLoading: _isLoading,
-  } = useSWR("/artworks/latest", () => new ArtworkInteractor().getLatests(100));
+  } = useSWR("/artworks/latest", () => new ArtworkInteractor().getLatests(16));
 
   const [doesExpandDescription, setDoesExpandDescription] = useState<boolean>(false);
   const [commentText, setCommentText] = useState<string>("");
