@@ -12,6 +12,8 @@ export default class CommentMapper {
       id: data.id,
       text: data.text,
       author: user_data,
+      created_at: data.created_at.toDate ? new Date(data.created_at.toDate()) : new Date(),
+      updated_at: data.updated_at.toDate ? new Date(data.updated_at.toDate()) : new Date(),
     };
   }
 }

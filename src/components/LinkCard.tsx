@@ -8,12 +8,12 @@ type IconType = "circle" | "square";
 interface LinkCardProps {
   title: string;
   show_icon: boolean;
-  icon_url?: string;
+  icon?: string;
   icon_type?: IconType;
   href: string;
 }
 
-const LinkCard = ({ title, show_icon, icon_url, icon_type, href }: LinkCardProps) => {
+const LinkCard = ({ title, show_icon, icon, icon_type, href }: LinkCardProps) => {
   const secondary = useColorModeValue(theme.colors.secondary.ml, theme.colors.secondary.md);
 
   let border_style = "full";
@@ -29,7 +29,7 @@ const LinkCard = ({ title, show_icon, icon_url, icon_type, href }: LinkCardProps
   return (
     <Link href={href}>
       <Flex bg={secondary} p={5} rounded='lg' w='full' h='full' direction='row' alignItems='center' gap={5}>
-        {show_icon && <Image w={10} h={10} src={icon_url} borderRadius={border_style} alt={title} />}
+        {show_icon && <Image w={10} h={10} src={icon} borderRadius={border_style} alt={title} />}
         <Text fontSize='xl'>{title}</Text>
       </Flex>
     </Link>

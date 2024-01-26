@@ -16,101 +16,51 @@ import {
   Button,
   Flex,
   FormErrorMessage,
+  Spinner,
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { useState, ChangeEvent, useContext, useMemo, useEffect, ReactNode, Fragment } from "react";
 
 import { FirebaseAuthContext } from "@/components/FirebaseAuthProvider";
 import HoverTag from "@/components/HoverTag";
+import ParentWorksInput from "@/components/ParentWorksInput";
 import UploadIcon from "@/icons/UploadIcon";
 import ArtworkInteractor from "@/interactors/Artwork/ArtworkInteractor";
-import { ArtworkFormData, ArtworkType, INITIAL_ARTWORK_FORM_DATA } from "@/interactors/Artwork/ArtworkTypes";
+import { ArtworkType, ArtworkData } from "@/interactors/Artwork/ArtworkTypes";
 import { theme } from "@/pages/_app";
-
-interface TagInputData {
-  text: string;
-  is_error: boolean;
-  error_msg: string;
-}
-
-interface ParentInputData {
-  parent_id: string;
-  is_error: boolean;
-  error_msg: string;
-  parents: string[];
-}
-
-const INITIAL_TAG_INPUT_DATA: TagInputData = {
-  text: "",
-  is_error: false,
-  error_msg: "error!",
-};
-
-const INITIAL_PARENT_INPUT_DATA: ParentInputData = {
-  parent_id: "",
-  is_error: false,
-  error_msg: "error!",
-  parents: [],
-};
 
 const ImageUploadForm = () => {
   const { user } = useContext(FirebaseAuthContext);
   const router = useRouter();
   const { parent } = router.query;
 
-  const [artworkFormData, setArtWorkFormData] = useState<ArtworkFormData>(INITIAL_ARTWORK_FORM_DATA);
-  const [tagInputData, setTagInputData] = useState<TagInputData>(INITIAL_TAG_INPUT_DATA);
-  const [parentInputData, setParentInputData] = useState<ParentInputData>(INITIAL_PARENT_INPUT_DATA);
   const [fileContentElement, setFileContentElement] = useState<ReactNode>(<></>);
+  const [uploading, setUploading] = useState<boolean>(false);
+
+  const [inputFile, setInputFile] = useState<Blob | null>(null);
+  const [inputFileType, setInputFileType] = useState<ArtworkType | null>(null);
+  const [inputWorkName, setInputWorkName] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
+  const [parentArtworks, setParentArtworks] = useState<Array<ArtworkData>>([]);
+  const [artworkTagInput, setArtworkTagInput] = useState<string>("");
+  const [artworkTags, setArtworkTags] = useState<Array<string>>([]);
 
   const toast = useToast();
   const secondary = useColorModeValue(theme.colors.secondary.ml, theme.colors.secondary.md);
   const icon_fill_color = useColorModeValue("gray.800", "white");
 
   useEffect(() => {
-    const parent_id: string = parent as string;
-    if (!parent_id) return;
-    if (parent_id === "") return;
-    if (artworkFormData.parent_ids.includes(parent_id)) return;
-
-    const checkAndPushParent = async () => {
-      const parent_data = await new ArtworkInteractor().get(parent_id);
-      if (parent_data === null) {
-        setParentInputData({
-          ...parentInputData,
-          parent_id: parent_id,
-          is_error: true,
-          error_msg: "この作品は存在しません",
-        });
-        return;
-      }
-
-      setArtWorkFormData({
-        ...artworkFormData,
-        parent_ids: artworkFormData.parent_ids.concat(parent_id),
-      });
-      setParentInputData({
-        ...parentInputData,
-        parents: parentInputData.parents.concat(parent_data.name),
-        is_error: false,
-        parent_id: "",
-      });
-    };
-    checkAndPushParent();
-  }, [parent]);
-
-  useEffect(() => {
-    if (artworkFormData.file === null) return;
+    if (inputFile === null || inputFileType === null) return;
 
     const reader = new FileReader();
-    switch (artworkFormData.type) {
+    switch (inputFileType) {
       case "image": {
         reader.onloadend = (e: ProgressEvent<FileReader>) => {
           if (e.target?.result && typeof e.target.result === "string") {
             setFileContentElement(<Image src={e.target.result} alt='アップロードした画像' />);
           }
         };
-        reader.readAsDataURL(artworkFormData.file);
+        reader.readAsDataURL(inputFile);
         break;
       }
       case "text": {
@@ -132,7 +82,7 @@ const ImageUploadForm = () => {
             );
           }
         };
-        reader.readAsText(artworkFormData.file);
+        reader.readAsText(inputFile);
         break;
       }
       case "audio": {
@@ -141,7 +91,7 @@ const ImageUploadForm = () => {
             setFileContentElement(<audio controls src={e.target.result}></audio>);
           }
         };
-        reader.readAsDataURL(artworkFormData.file);
+        reader.readAsDataURL(inputFile);
         break;
       }
       case "video": {
@@ -150,46 +100,33 @@ const ImageUploadForm = () => {
             setFileContentElement(<video controls src={e.target.result}></video>);
           }
         };
-        reader.readAsDataURL(artworkFormData.file);
+        reader.readAsDataURL(inputFile);
         break;
       }
       default: {
         setFileContentElement(<></>);
       }
     }
-  }, [artworkFormData.file]);
+  }, [inputFile, inputFileType]);
 
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
-    if (e.target.type === "file") {
-      if (!("files" in e.target) || !e.target.files || e.target.files[0] === undefined) return;
+  const tag_elements = useMemo(() => {
+    return artworkTags.map<JSX.Element>((aTag: string, index: number) => (
+      <HoverTag
+        key={index}
+        onClick={() =>
+          setArtworkTags(
+            artworkTags.filter((aAryData) => {
+              return aAryData != aTag;
+            })
+          )
+        }
+      >
+        {aTag}
+      </HoverTag>
+    ));
+  }, [artworkTags]);
 
-      const new_file = e.target.files[0];
-      const file_type = new_file.type.split("/")[0];
-      if (!["image", "text", "audio", "video"].includes(file_type)) {
-        toast({
-          title: "対応していないファイルです",
-          status: "error",
-          duration: 9000,
-          isClosable: true,
-        });
-        return;
-      }
-      const artwork_type: ArtworkType = file_type as ArtworkType;
-
-      setArtWorkFormData({
-        ...artworkFormData,
-        type: artwork_type,
-        file: new_file,
-      });
-    } else {
-      setArtWorkFormData({
-        ...artworkFormData,
-        [e.target.id]: e.target.value,
-      });
-    }
-  };
-
-  const handleUpload = async () => {
+  const uploadArtwork = async () => {
     if (!user) {
       toast({
         title: "ログインしてください",
@@ -200,9 +137,36 @@ const ImageUploadForm = () => {
       return;
     }
 
+    setUploading(true);
+    if (!inputFile || !inputFileType) {
+      toast({
+        title: "コンテンツをアップロードしてください",
+        status: "error",
+        duration: 9000,
+        isClosable: true,
+      });
+      return;
+    }
+    if (inputWorkName == "") {
+      toast({
+        title: "作品名をつけてください",
+        status: "error",
+        duration: 9000,
+        isClosable: true,
+      });
+      return;
+    }
+
     const result = await new ArtworkInteractor().upload({
-      ...artworkFormData,
-      author_id: user?.id,
+      type: inputFileType,
+      name: inputWorkName,
+      description: description,
+      file: inputFile,
+
+      author_id: user.id,
+      tags: artworkTags,
+      comment_ids: [],
+      parent_ids: parentArtworks.map((aArtwork) => aArtwork.id),
     });
     if (result) {
       toast({
@@ -211,9 +175,14 @@ const ImageUploadForm = () => {
         duration: 9000,
         isClosable: true,
       });
-      setArtWorkFormData(INITIAL_ARTWORK_FORM_DATA);
-      setTagInputData(INITIAL_TAG_INPUT_DATA);
-      setParentInputData(INITIAL_PARENT_INPUT_DATA);
+      //初期値を代入
+      setInputFile(null);
+      setInputFileType(null);
+      setInputWorkName("");
+      setDescription("");
+      setArtworkTags([]);
+      setParentArtworks([]);
+      setArtworkTagInput("");
     } else {
       toast({
         title: "アップロードに失敗しました",
@@ -222,114 +191,18 @@ const ImageUploadForm = () => {
         isClosable: true,
       });
     }
+    setUploading(false);
   };
 
-  const addTag = () => {
-    setTagInputData({
-      ...tagInputData,
-      is_error: false,
-    });
-    if (tagInputData.text === "") return;
-    if (artworkFormData.tags.length >= 10) return;
-
-    if (tagInputData.text.match(/([&$\+,:;=\?@#\s<>\[\]\{\}[\/]|\\\^%])+/) !== null) {
-      setTagInputData({
-        ...tagInputData,
-        is_error: true,
-        error_msg: "使用できない記号が含まれています",
-      });
-      return;
-    }
-
-    if (artworkFormData.tags.includes(tagInputData.text)) {
-      setTagInputData({
-        ...tagInputData,
-        is_error: true,
-        error_msg: "すでに追加されています",
-      });
-      return;
-    }
-
-    setArtWorkFormData({
-      ...artworkFormData,
-      tags: artworkFormData.tags.concat(tagInputData.text),
-    });
-    setTagInputData({
-      ...tagInputData,
-      is_error: false,
-      text: "",
-    });
-  };
-
-  const removeTag = (index: number) => {
-    const new_tags = [...artworkFormData.tags];
-    new_tags.splice(index, 1);
-    setArtWorkFormData({
-      ...artworkFormData,
-      tags: new_tags,
-    });
-  };
-
-  const tag_elements = useMemo(() => {
-    return artworkFormData.tags.map<JSX.Element>((tag: string, index: number) => (
-      <HoverTag key={index} onClick={() => removeTag(index)}>
-        {tag}
-      </HoverTag>
-    ));
-  }, [artworkFormData.tags]);
-
-  const addParent = async () => {
-    setParentInputData({
-      ...parentInputData,
-      is_error: false,
-    });
-    if (parentInputData.parent_id === "") return;
-    if (artworkFormData.parent_ids.includes(parentInputData.parent_id)) return;
-
-    const parent_data = await new ArtworkInteractor().get(parentInputData.parent_id);
-    if (parent_data === null) {
-      setParentInputData({
-        ...parentInputData,
-        is_error: true,
-        error_msg: "この作品は存在しません",
-      });
-      return;
-    }
-
-    setArtWorkFormData({
-      ...artworkFormData,
-      parent_ids: artworkFormData.parent_ids.concat(parentInputData.parent_id),
-    });
-    setParentInputData({
-      ...parentInputData,
-      parents: parentInputData.parents.concat(parent_data.name),
-      is_error: false,
-      parent_id: "",
-    });
-  };
-
-  const removeParent = (index: number) => {
-    const new_parents = [...parentInputData.parents];
-    const new_parent_ids = [...artworkFormData.parent_ids];
-    new_parents.splice(index, 1);
-    new_parent_ids.splice(index, 1);
-    setParentInputData({
-      ...parentInputData,
-      parents: new_parents,
-    });
-    setArtWorkFormData({
-      ...artworkFormData,
-      parent_ids: new_parent_ids,
-    });
-  };
-
-  const parent_tag_elements = useMemo(() => {
-    return parentInputData.parents.map<JSX.Element>((name: string, index: number) => (
-      <HoverTag key={index} onClick={() => removeParent(index)}>
-        {name}
-      </HoverTag>
-    ));
-  }, [parentInputData.parents]);
+  let tagErrorMessage: string = "お兄ちゃん、エラーだよ!";
+  let tagIsError: boolean = false;
+  if (artworkTagInput.match(/([&$\+,:;=\?@#\s<>\[\]\{\}[\/]|\\\^%])+/) !== null) {
+    tagErrorMessage = "使用できない記号が含まれています";
+    tagIsError = true;
+  } else if (artworkTags.includes(artworkTagInput)) {
+    tagErrorMessage = "すでに追加されています";
+    tagIsError = true;
+  }
 
   return (
     <Container maxW={{ base: "container.sm", md: "container.md", lg: "container.lg" }} p={5}>
@@ -353,7 +226,7 @@ const ImageUploadForm = () => {
                 gap: ".75rem",
               }}
             >
-              {artworkFormData.file !== null ? (
+              {inputFile !== null ? (
                 <Flex
                   backgroundColor='#a1a5ad'
                   borderRadius='.75rem'
@@ -370,67 +243,99 @@ const ImageUploadForm = () => {
               ) : null}
               <UploadIcon strokeWidth={1.5} boxSize={12} color={icon_fill_color} />
               <Text>コンテンツをアップロードする</Text>
-              <input id='file' onChange={handleInputChange} type='file' hidden />
+              <input
+                id='file'
+                type='file'
+                hidden
+                onChange={(e) => {
+                  if (!e.target.files || !e.target.files[0]) {
+                    return;
+                  }
+                  const inputFile = e.target.files[0];
+                  const fileType = inputFile.type.split("/")[0];
+                  if (!["image", "text", "audio", "video"].includes(fileType)) {
+                    toast({
+                      title: "対応していないファイルです",
+                      status: "error",
+                      duration: 9000,
+                      isClosable: true,
+                    });
+                    return;
+                  } else {
+                    setInputFile(inputFile);
+                    setInputFileType(fileType as ArtworkType);
+                  }
+                }}
+              />
             </label>
           </GridItem>
           <GridItem>
             <VStack spacing={5}>
               <FormControl>
                 <FormLabel>作品名</FormLabel>
-                <Input id='name' onChange={handleInputChange} value={artworkFormData.name} type='text' />
+                <Input
+                  id='name'
+                  type='text'
+                  value={inputWorkName}
+                  onChange={(e) => {
+                    setInputWorkName(e.target.value);
+                  }}
+                />
               </FormControl>
               <FormControl>
                 <FormLabel>概要</FormLabel>
-                <Textarea id='description' value={artworkFormData.description} onChange={handleInputChange} />
+                <Textarea
+                  id='description'
+                  value={description}
+                  onChange={(e) => {
+                    setDescription(e.target.value);
+                  }}
+                />
               </FormControl>
-              <FormControl isInvalid={tagInputData.is_error}>
+              <FormControl isInvalid={tagIsError}>
                 <FormLabel>タグ</FormLabel>
                 <Flex gap={5}>
                   <Input
-                    value={tagInputData.text}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                      setTagInputData({
-                        ...tagInputData,
-                        text: e.target.value,
-                      })
-                    }
                     type='text'
+                    value={artworkTagInput}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                      setArtworkTagInput(e.target.value);
+                    }}
                   />
-                  <Button onClick={addTag}>追加</Button>
+                  <Button
+                    onClick={() => {
+                      if (artworkTagInput === "") return;
+                      if (artworkTags.length >= 10) return;
+
+                      if (artworkTagInput.match(/([&$\+,:;=\?@#\s<>\[\]\{\}[\/]|\\\^%])+/) !== null) {
+                        //使用できない記号が入っている
+                        return;
+                      }
+
+                      if (artworkTags.includes(artworkTagInput)) {
+                        //既に追加されている
+                        return;
+                      }
+                      setArtworkTagInput("");
+                      setArtworkTags([...artworkTags, artworkTagInput]);
+                    }}
+                  >
+                    追加
+                  </Button>
                 </Flex>
-                <FormErrorMessage>{tagInputData.error_msg}</FormErrorMessage>
+                <FormErrorMessage>{tagErrorMessage}</FormErrorMessage>
                 <Flex mt={3} wrap='wrap' gap={3}>
                   {tag_elements}
                 </Flex>
-                <Text mt={2} textAlign='right' color={artworkFormData.tags.length >= 10 ? "red.500" : ""}>
-                  {artworkFormData.tags.length}/10
+                <Text mt={2} textAlign='right' color={artworkTags.length >= 10 ? "red.500" : ""}>
+                  {artworkTags.length}/10
                 </Text>
               </FormControl>
-              <FormControl isInvalid={parentInputData.is_error}>
-                <FormLabel>親作品</FormLabel>
-                <Flex gap={5}>
-                  <Input
-                    value={parentInputData.parent_id}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                      setParentInputData({
-                        ...parentInputData,
-                        parent_id: e.target.value,
-                      })
-                    }
-                    type='text'
-                  />
-                  <Button onClick={addParent}>追加</Button>
-                </Flex>
-                <FormErrorMessage>{parentInputData.error_msg}</FormErrorMessage>
-                <Flex mt={3} wrap='wrap' gap={3}>
-                  {parent_tag_elements}
-                </Flex>
-                <Text mt={2} textAlign='right' color={parentInputData.parents.length >= 10 ? "red.500" : ""}>
-                  {parentInputData.parents.length}/10
-                </Text>
-              </FormControl>
-              <Button w='full' onClick={handleUpload}>
+              <ParentWorksInput selectedParentWorks={parentArtworks} setSelectedParentWorks={setParentArtworks} />
+
+              <Button w='full' onClick={uploadArtwork}>
                 アップロード
+                {uploading && <Spinner ml={3} />}
               </Button>
             </VStack>
           </GridItem>
