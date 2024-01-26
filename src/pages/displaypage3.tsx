@@ -1,5 +1,5 @@
 // DisplayPage3.js
-import React, { useEffect, useState } from "react";
+import React from "react";
 import useSWR from "swr";
 
 import GridArtworks from "@/components/GridArtworks";
@@ -8,50 +8,41 @@ import ArtworkInteractor from "@/interactors/Artwork/ArtworkInteractor";
 import { ArtworkData } from "@/interactors/Artwork/ArtworkTypes";
 
 const DisplayPage3 = () => {
-  const [pageLoadTimestamp, setPageLoadTimestamp] = useState<number | null>(null);
-
-  useEffect(() => {
-    const loadTimestamp = new Date().getTime();
-    setPageLoadTimestamp(loadTimestamp);
-  }, []);
-
+  // 最新のアートワークを取得
   const {
     data: latestArtworks,
     error,
     isLoading,
-  } = useSWR("/artworks/latest", () => new ArtworkInteractor().getLatests(10, pageLoadTimestamp || undefined), {
-    revalidateOnFocus: false,
-  });
+  } = useSWR("/artworks/latest", () => new ArtworkInteractor().getLatests(100));
 
   if (error) return <>エラーが発生しました！</>;
   if (isLoading) return <LoadingPanel />;
 
-  const allLatestArtworks: ArtworkData[] = latestArtworks || [];
+  // 新着アートワーク（最新の9作品まで）
+  const latestArtworksLimited: ArtworkData[] = latestArtworks ? latestArtworks.slice(0, 9) : [];
 
-  const newArtworks: ArtworkData[] = allLatestArtworks.filter(
-    (artwork) => artwork.uploaded.getTime() > (pageLoadTimestamp || 0)
-  );
-
-  const existingArtworks: ArtworkData[] = allLatestArtworks.filter(
-    (artwork) => artwork.uploaded.getTime() <= (pageLoadTimestamp || 0)
-  );
+  // 既存のアートワークを取得（新着でない作品、10作品目以降）
+  const existingArtworks: ArtworkData[] = latestArtworks ? latestArtworks.slice(9) : [];
 
   return (
     <div>
-      {newArtworks.length > 0 && (
-        <div>
-          <h2>新着アートワーク</h2>
-          <GridArtworks artworks={newArtworks} />
-        </div>
+      {/* 新着アートワークセクション */}
+      <h2>新着アートワーク</h2>
+      {latestArtworksLimited.length > 0 ? (
+        <GridArtworks artworks={latestArtworksLimited} />
+      ) : (
+        <p>新着アートワークが見つかりませんでした。</p>
       )}
 
+      {/* ラインセパレーター */}
       <hr style={{ margin: "20px 0" }} />
 
-      {existingArtworks.length > 0 && (
-        <div>
-          <h2>既存のアートワーク</h2>
-          <GridArtworks artworks={existingArtworks} />
-        </div>
+      {/* 既存のアートワークセクション */}
+      <h2>既存のアートワーク</h2>
+      {existingArtworks.length > 0 ? (
+        <GridArtworks artworks={existingArtworks} />
+      ) : (
+        <p>既存のアートワークが見つかりませんでした。</p>
       )}
     </div>
   );
