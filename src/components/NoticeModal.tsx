@@ -135,7 +135,15 @@ const NoticeModal = (props: Props) => {
   const boxbg = useColorModeValue("cyan.400", "cyan.200");
 
   return (
-    <Box overflowY='auto' overflowX='hidden' position='fixed' top='50px' right='0px' h='calc(100vh - 50px)' bg={boxbg}>
+    <Box
+      overflowY='scroll'
+      overflowX='hidden'
+      position='fixed'
+      top='50px'
+      right='0px'
+      h='calc(100vh - 50px)'
+      bg={boxbg}
+    >
       <AnimatePresence>
         {props.isOpen && isNoticeOpen == false && (
           <motion.aside
