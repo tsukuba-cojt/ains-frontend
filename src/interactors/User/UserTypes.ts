@@ -1,4 +1,6 @@
-export interface UserData {
+import { BaseModel } from "../BaseTypes";
+
+export interface UserData extends BaseModel {
   id: string;
   name: string;
   description?: string;
@@ -7,7 +9,7 @@ export interface UserData {
   followers: string[];
 }
 
-export interface UserPublicData {
+export interface UserPublicData extends BaseModel {
   id: string;
   name: string;
   description?: string;
@@ -28,6 +30,8 @@ export const deletedUser: UserPublicData = {
   name: "削除済みユーザー",
   follows_count: 0,
   followers_count: 0,
+  created_at: new Date(),
+  updated_at: new Date(),
 };
 
-export type UserCreateData = UserData;
+export type UserCreateData = Omit<UserData, "created_at" | "updated_at">;

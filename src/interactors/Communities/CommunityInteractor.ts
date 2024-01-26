@@ -30,8 +30,8 @@ export default class CommunityInteractor {
     return community;
   }
 
-  async getLatests(limit: number): Promise<CommunityData[] | null> {
-    const res_data = await this.interactor.getLatests(this.COLLECTION_NAME, limit);
+  async getLatests(limit: number, startId: string | null = null): Promise<CommunityData[] | null> {
+    const res_data = await this.interactor.getLatests(this.COLLECTION_NAME, limit, startId);
     if (!res_data) return null;
 
     const community_data_list: CommunityData[] = [];

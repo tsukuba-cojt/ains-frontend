@@ -17,8 +17,9 @@ import {
   or,
   serverTimestamp,
   Query,
+  QueryConstraint,
 } from "firebase/firestore";
-import { orderBy, limit } from "firebase/firestore";
+import { orderBy, limit, startAt } from "firebase/firestore";
 import { FirebaseStorage, getDownloadURL, getStorage, ref as storageRef, uploadBytes } from "firebase/storage";
 import { v4 as uuidv4 } from "uuid";
 
@@ -47,9 +48,19 @@ export default class BaseInteractor {
     let snapshot;
     try {
       const ref = doc(this.db, collection_name, doc_id);
+
+      const cacheKey = `get/${collection_name}/${doc_id}`;
+      const cache = window.sessionStorage.getItem(cacheKey);
+      if (cache) {
+        console.log(cacheKey, cache);
+        return JSON.parse(cache);
+      }
+
       snapshot = await getDoc(ref);
       if (snapshot.exists()) {
-        return Object.assign(snapshot.data(), { id: snapshot.id });
+        const result = Object.assign(snapshot.data(), { id: snapshot.id });
+        window.sessionStorage.setItem(cacheKey, JSON.stringify(result));
+        return result;
       } else {
         return null;
       }
@@ -62,28 +73,56 @@ export default class BaseInteractor {
     try {
       const collectionRef = collection(this.db, collection_name, ...sub_path);
       const q = query(collectionRef, orderBy("created_at", "desc"));
+
+      const cacheKey = `getSub/${collection_name}/${sub_path.join("/")}`;
+      const cache = window.sessionStorage.getItem(cacheKey);
+      if (cache) {
+        console.log(cacheKey, cache);
+        return JSON.parse(cache);
+      }
+
       const snapshot = await getDocs(q);
       const res_data: Array<DocumentData> = [];
       snapshot.forEach((doc) => {
         // doc.data() is never undefined for query doc snapshots
         res_data.push(Object.assign(doc.data(), { id: doc.id }));
       });
+      window.sessionStorage.setItem(cacheKey, JSON.stringify(res_data));
       return res_data;
     } catch (_err) {
       return null;
     }
   }
 
-  async getLatests(collection_name: string, limitNum: number): Promise<Array<DocumentData> | null> {
+  async getLatests(
+    collection_name: string,
+    limitNum: number,
+    startId: string | null = null
+  ): Promise<Array<DocumentData> | null> {
     try {
       const collectionRef = collection(this.db, collection_name);
-      const q = query(collectionRef, orderBy("created_at", "desc"), limit(limitNum));
+      const queryConstraints: QueryConstraint[] = [orderBy("created_at", "desc"), limit(limitNum)];
+      if (startId) {
+        const start = await getDoc(doc(this.db, collection_name, startId));
+        if (start.exists()) queryConstraints.push(startAt(start));
+      }
+      const q = query(collectionRef, ...queryConstraints);
+
+      const cacheKey = `getLatest/${collection_name}/${limitNum}/${startId ? startId : 0}`;
+      const cache = window.sessionStorage.getItem(cacheKey);
+      if (cache) {
+        console.log(cacheKey, cache);
+        return JSON.parse(cache);
+      }
+
       const snapshot = await getDocs(q);
       const res_data: Array<DocumentData> = [];
       snapshot.forEach((doc) => {
         // doc.data() is never undefined for query doc snapshots
         res_data.push(Object.assign(doc.data(), { id: doc.id }));
       });
+      window.sessionStorage.setItem(cacheKey, JSON.stringify(res_data));
+      console.log("!", res_data);
       return res_data;
     } catch (_err) {
       return null;
@@ -140,8 +179,18 @@ export default class BaseInteractor {
     if (validtags.length <= 0) {
       return [];
     }
+
+    const cacheKey = `getWithTags/${collection_name}/${tags.join("#")}/${limitNum}`;
+    const cache = window.sessionStorage.getItem(cacheKey);
+    if (cache) {
+      console.log(cacheKey, cache);
+      return JSON.parse(cache);
+    }
+
     try {
-      return await this.throwQuerys(this.tagsSearchQuery(this.baseQuery(collection_name, limitNum), validtags));
+      const result = await this.throwQuerys(this.tagsSearchQuery(this.baseQuery(collection_name, limitNum), validtags));
+      if (result !== null) window.sessionStorage.setItem(cacheKey, JSON.stringify(result));
+      return result;
     } catch (_err) {
       return null;
     }

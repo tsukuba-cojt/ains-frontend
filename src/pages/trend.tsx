@@ -66,7 +66,7 @@ export const getServerSideProps: GetServerSideProps<TrendPageProps> = async (_ct
         { id: "test", title: "test community", thumbnail_url: "https://placehold.jp/150x150.png" },
         { id: "test", title: "test community", thumbnail_url: "https://placehold.jp/150x150.png" },
       ],
-      artworks: ((await new ArtworkInteractor().getLatests(10)) || []).map((a) => {
+      artworks: ((await new ArtworkInteractor().getLatests(16)) || []).map((a) => {
         return { ...a, uploaded: "" };
       }),
     },

@@ -1,7 +1,8 @@
+import { BaseModel } from "../BaseTypes";
 import { FileData } from "../File/FileTypes";
 import { UserPublicData } from "../User/UserTypes";
 
-export interface CommunityData {
+export interface CommunityData extends BaseModel {
   id: string;
   name: string;
   description?: string;
@@ -23,12 +24,12 @@ export interface CommunityFormData {
   owner: string;
 }
 
-export type CommunityCreateData = Omit<CommunityData, "id" | "banner" | "icon"> & {
+export type CommunityCreateData = Omit<CommunityData, "id" | "banner" | "icon" | "created_at" | "updated_at"> & {
   banner?: string;
   icon?: string;
 };
 
-export interface PostData {
+export interface PostData extends BaseModel {
   id: string;
   content: string;
 
