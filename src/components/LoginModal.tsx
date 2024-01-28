@@ -40,13 +40,11 @@ const LoginModal = (props: Props) => {
         props.onClose();
         if (auth.currentUser && !auth.currentUser.emailVerified) {
           sendEmailVerification(auth.currentUser).then(() => {
-            console.log("認証メールを送りました。");
             router.push("/waitEmailVerify");
           });
         }
       })
       .catch((err) => {
-        console.log(err);
         toast({
           title: "Signin Failed",
           description: "メールアドレスかパスワードが正しいか確認してください",

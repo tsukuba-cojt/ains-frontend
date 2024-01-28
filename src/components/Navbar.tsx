@@ -84,7 +84,6 @@ const Navbar = () => {
           <InputLeftElement>
             <IconButton
               as='a'
-              onClick={() => console.log("nya~nn")}
               href={`/searchresult?keywords=${extractSearchWords(serchBoxTexts)}&tags=${extractTagWords(
                 serchBoxTexts
               )}`}

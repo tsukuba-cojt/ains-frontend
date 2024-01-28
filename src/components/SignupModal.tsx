@@ -32,7 +32,7 @@ const SignupModal = (props: Props) => {
       .then(async (userCredential) => {
         // Signed in
         const user = userCredential.user;
-        const user_data = await new UserInteractor().set({ id: user.uid, name: username, icon: "" });
+        const user_data = await new UserInteractor().set({ id: user.uid, name: username });
         if (!user_data) {
           await user.delete();
           throw new Error();
@@ -49,13 +49,11 @@ const SignupModal = (props: Props) => {
         props.onClose();
         if (auth.currentUser && !auth.currentUser.emailVerified) {
           sendEmailVerification(auth.currentUser).then(() => {
-            console.log("認証メールを送りました。");
             router.push("/waitEmailVerify");
           });
         }
       })
       .catch((err) => {
-        console.log(err);
         if (err.errorMessage == "auth/email-already-in-use") {
           toast({
             title: "email-aliready-in-use",

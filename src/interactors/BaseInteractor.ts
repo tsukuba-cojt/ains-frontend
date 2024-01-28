@@ -18,8 +18,10 @@ import {
   serverTimestamp,
   Query,
   QueryConstraint,
+  startAfter,
+  orderBy,
+  limit,
 } from "firebase/firestore";
-import { orderBy, limit, startAt } from "firebase/firestore";
 import { FirebaseStorage, getDownloadURL, getStorage, ref as storageRef, uploadBytes } from "firebase/storage";
 import { v4 as uuidv4 } from "uuid";
 
@@ -27,7 +29,7 @@ import { nOrLessGramTokenize } from "../plugins/Utility/NGramTokenizer";
 
 export interface FilterArg {
   key: string;
-  value: string | number;
+  value: string | number | null;
   operator: WhereFilterOp;
 }
 
@@ -52,7 +54,6 @@ export default class BaseInteractor {
       const cacheKey = `get/${collection_name}/${doc_id}`;
       const cache = window.sessionStorage.getItem(cacheKey);
       if (cache) {
-        console.log(cacheKey, cache);
         return JSON.parse(cache);
       }
 
@@ -69,15 +70,48 @@ export default class BaseInteractor {
     }
   }
 
-  async getSubCollections(collection_name: string, ...sub_path: string[]): Promise<Array<DocumentData> | null> {
+  async getSubCollection(collection_name: string, sub_path: string[], doc_id: string): Promise<DocumentData | null> {
+    let snapshot;
     try {
-      const collectionRef = collection(this.db, collection_name, ...sub_path);
-      const q = query(collectionRef, orderBy("created_at", "desc"));
+      const ref = doc(this.db, collection_name, ...sub_path, doc_id);
 
-      const cacheKey = `getSub/${collection_name}/${sub_path.join("/")}`;
+      const cacheKey = `getSub/${collection_name}/${sub_path.join("/")}/${doc_id}`;
       const cache = window.sessionStorage.getItem(cacheKey);
       if (cache) {
-        console.log(cacheKey, cache);
+        return JSON.parse(cache);
+      }
+
+      snapshot = await getDoc(ref);
+      if (snapshot.exists()) {
+        const result = Object.assign(snapshot.data(), { id: snapshot.id });
+        window.sessionStorage.setItem(cacheKey, JSON.stringify(result));
+        return result;
+      } else {
+        return null;
+      }
+    } catch (_err) {
+      return null;
+    }
+  }
+
+  async getSubCollections(
+    collection_name: string,
+    sub_path: string[],
+    limitNum: number,
+    startId: string | null = null
+  ): Promise<Array<DocumentData> | null> {
+    try {
+      const collectionRef = collection(this.db, collection_name, ...sub_path);
+      const queryConstraints: QueryConstraint[] = [orderBy("created_at", "desc"), limit(limitNum)];
+      if (startId) {
+        const start = await getDoc(doc(this.db, collection_name, startId));
+        if (start.exists()) queryConstraints.push(startAfter(start));
+      }
+      const q = query(collectionRef, ...queryConstraints);
+
+      const cacheKey = `getSub/${collection_name}/${sub_path.join("/")}/${limitNum}/${startId ? startId : "head"}`;
+      const cache = window.sessionStorage.getItem(cacheKey);
+      if (cache) {
         return JSON.parse(cache);
       }
 
@@ -88,6 +122,12 @@ export default class BaseInteractor {
         res_data.push(Object.assign(doc.data(), { id: doc.id }));
       });
       window.sessionStorage.setItem(cacheKey, JSON.stringify(res_data));
+      if (startId) {
+        const headKey = `getSub/${collection_name}/${sub_path.join("/")}/${limitNum}/head`;
+        const headCacheStr = window.sessionStorage.getItem(headKey);
+        const headCache = headCacheStr ? JSON.parse(headCacheStr) : [];
+        window.sessionStorage.setItem(headKey, JSON.stringify(headCache.concat(res_data)));
+      }
       return res_data;
     } catch (_err) {
       return null;
@@ -104,14 +144,13 @@ export default class BaseInteractor {
       const queryConstraints: QueryConstraint[] = [orderBy("created_at", "desc"), limit(limitNum)];
       if (startId) {
         const start = await getDoc(doc(this.db, collection_name, startId));
-        if (start.exists()) queryConstraints.push(startAt(start));
+        if (start.exists()) queryConstraints.push(startAfter(start));
       }
       const q = query(collectionRef, ...queryConstraints);
 
-      const cacheKey = `getLatest/${collection_name}/${limitNum}/${startId ? startId : 0}`;
+      const cacheKey = `getLatest/${collection_name}/${limitNum}/${startId ? startId : "head"}`;
       const cache = window.sessionStorage.getItem(cacheKey);
       if (cache) {
-        console.log(cacheKey, cache);
         return JSON.parse(cache);
       }
 
@@ -122,7 +161,12 @@ export default class BaseInteractor {
         res_data.push(Object.assign(doc.data(), { id: doc.id }));
       });
       window.sessionStorage.setItem(cacheKey, JSON.stringify(res_data));
-      console.log("!", res_data);
+      if (startId) {
+        const headKey = `getLatest/${collection_name}/${limitNum}/head`;
+        const headCacheStr = window.sessionStorage.getItem(headKey);
+        const headCache = headCacheStr ? JSON.parse(headCacheStr) : [];
+        window.sessionStorage.setItem(headKey, JSON.stringify(headCache.concat(res_data)));
+      }
       return res_data;
     } catch (_err) {
       return null;
@@ -183,7 +227,6 @@ export default class BaseInteractor {
     const cacheKey = `getWithTags/${collection_name}/${tags.join("#")}/${limitNum}`;
     const cache = window.sessionStorage.getItem(cacheKey);
     if (cache) {
-      console.log(cacheKey, cache);
       return JSON.parse(cache);
     }
 
@@ -225,6 +268,31 @@ export default class BaseInteractor {
       const where_list = args.map<QueryFieldFilterConstraint>((arg: FilterArg) => {
         return where(arg.key, arg.operator, arg.value);
       });
+      const q = query(ref, ...where_list);
+      const snapshots = await getDocs(q);
+
+      const docs: DocumentData[] = [];
+      snapshots.forEach((snap: DocumentSnapshot) => {
+        const data = snap.data();
+        if (data !== undefined) docs.push(Object.assign(data, { id: snap.id }));
+      });
+      return docs;
+    } catch (_err) {
+      return null;
+    }
+  }
+
+  async FilterAndSubCollections(
+    collection_name: string,
+    sub_path: string[],
+    args: FilterArg[]
+  ): Promise<DocumentData[] | null> {
+    try {
+      const ref = collection(this.db, collection_name, ...sub_path);
+      const where_list: QueryConstraint[] = args.map<QueryFieldFilterConstraint>((arg: FilterArg) => {
+        return where(arg.key, arg.operator, arg.value);
+      });
+      where_list.push(orderBy("created_at", "desc"));
       const q = query(ref, ...where_list);
       const snapshots = await getDocs(q);
 
@@ -323,6 +391,30 @@ export default class BaseInteractor {
     }
   }
 
+  async updateSubCollection(
+    collection_name: string,
+    sub_path: string[],
+    doc_id: string,
+    data: DocumentData
+  ): Promise<boolean | null> {
+    try {
+      const ref = doc(this.db, collection_name, ...sub_path, doc_id);
+      data = Object.assign(data, { updated_at: serverTimestamp() });
+      await updateDoc(ref, data);
+      const relatedKeys = Object.keys(window.sessionStorage).filter((key: string) => {
+        if (key.startsWith("getSub/")) {
+          return key.includes(collection_name);
+        } else {
+          return false;
+        }
+      });
+      relatedKeys.forEach((key: string) => window.sessionStorage.removeItem(key));
+      return true;
+    } catch (_err) {
+      return null;
+    }
+  }
+
   async delete(collection_name: string, doc_id: string): Promise<boolean | null> {
     try {
       const ref = doc(this.db, collection_name, doc_id);
@@ -383,10 +475,8 @@ export default class BaseInteractor {
   fullTextSearchQuery(orig_query: Query<DocumentData>, serchWords: Array<string>) {
     let serchTokens: Array<string> = [];
     serchWords.forEach((aSerchWord) => {
-      //console.log(aSerchWord);
       serchTokens.push(...nOrLessGramTokenize(this.KatakanaToHiragana(aSerchWord.toLowerCase()), 2));
     });
-    //console.log(serchTokens);
     return this.mapsBoolFieldNameSearchQuery(orig_query, "bigramtokens_map", serchTokens);
   }
 

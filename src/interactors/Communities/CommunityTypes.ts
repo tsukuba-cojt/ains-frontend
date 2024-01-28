@@ -35,22 +35,30 @@ export interface PostData extends BaseModel {
 
   files?: FileData[];
   likes: string[];
-  replies: ReplyData[];
+  originPost: PostData | null;
+  repliesAmount: number;
   author: UserPublicData;
 }
-export type ReplyData = Omit<PostData, "replies"> & { replies_num: number };
 
 export interface PostFormData {
-  community_id: string;
+  communityId: string;
   content: string;
   files?: File[];
   author: string;
 }
-export type ReplyFormData = PostFormData & { originPost: string };
 
 export interface PostCreateData {
   content: string;
   files?: string[];
   likes: string[];
+  originPost: string | null;
+  repliesAmount: number;
   author: string;
+}
+
+export interface LikePostFormData {
+  community_id: string;
+  post_id: string;
+  user_id: string;
+  remove: boolean;
 }
