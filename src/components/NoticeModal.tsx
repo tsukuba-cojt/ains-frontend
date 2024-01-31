@@ -97,18 +97,18 @@ const ComNotice = (itemData: ItemData) => {
     case "user-follw": {
       const avatarDisplay = (numbers: number): ReactNode => {
         return Array.from({ length: numbers }).map((n, i) => (
-          <Avatar name={itemData.user_name} src={itemData.user_src[i]} />
+          <Avatar key={i} name={itemData.user_name} src={itemData.user_src[i]} />
         ));
       };
       return (
-        <Box w='full' bg={secondary} p='4' wrap='wrap' alignItems='center' gap={5}>
+        <Flex w='full' bg={secondary} p='4' wrap='wrap' alignItems='center' gap={5}>
           <VStack alignItems='left'>
             <Text fontSize='md'> {itemData.user_name}にフォローされました</Text>
             <Flex>
               <AvatarGroup max={6}>{avatarDisplay(itemData.user_number)}</AvatarGroup>
             </Flex>
           </VStack>
-        </Box>
+        </Flex>
       );
     }
     case "notify": {

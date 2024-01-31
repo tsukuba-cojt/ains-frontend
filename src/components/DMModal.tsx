@@ -186,7 +186,7 @@ const DMModal = (props: Props) => {
                     </Text>
                   </Flex>
                   {messages.map((message, index) => (
-                    <Flex justify='right' p='1' color={secondary}>
+                    <Flex key={index} justify='right' p='1' color={secondary}>
                       <Text bg={boxbg} p='2' borderRadius='md' w='60%'>
                         {message}
                       </Text>
