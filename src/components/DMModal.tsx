@@ -14,7 +14,14 @@ import {
 } from "@chakra-ui/react";
 import { AnimatePresence, motion } from "framer-motion";
 import React, { useEffect, useRef } from "react";
-import { useState } from "react";
+import { useState, useContext } from "react";
+import useSWR from "swr";
+
+import DMInteractor from "@/interactors/DM/DMInteractor";
+import { DMDataWithRelativeData } from "@/interactors/DM/DMTypes";
+import { UserPublicData } from "@/interactors/User/UserTypes";
+
+import { FirebaseAuthContext } from "./FirebaseAuthProvider";
 
 interface Props {
   isOpen: boolean;
@@ -41,7 +48,25 @@ interface Message {
 }
 
 const DMModal = (props: Props) => {
+  const { user } = useContext(FirebaseAuthContext);
+
+  const interactor = new DMInteractor();
+
+  const {
+    data: MyDMDatas,
+    error,
+    isLoading,
+  } = useSWR(`/DM/${user ? user.id : "None"}`, async () => {
+    if (user) {
+      return await interactor.getWithMemberID_DM(user.id);
+    } else {
+      return [];
+    }
+  });
+
   const [isMessageOpen, setIsMessageOpen] = useState<boolean>(false);
+
+  const [OpeningDM, setOpeningDM] = useState<DMDataWithRelativeData | null>(null);
 
   const [changeUserID, setChangeUserID] = useState<boolean>(false);
 
@@ -69,6 +94,40 @@ const DMModal = (props: Props) => {
       chatAreaRef.current.scrollTop = chatAreaHeight;
     }
   }, [messages]);
+
+  const ButtonToDM = (dmData: DMDataWithRelativeData) => {
+    let MyUserID = user ? user.id : "unreachable";
+    let thumbnailURL = user ? (user.icon ? user.icon : "https://bit.ly/dan-abramov") : "unreachable";
+    let titleUserName = user ? user.name : "unreachable";
+
+    dmData.members.forEach((aMember: UserPublicData) => {
+      if (aMember.id != MyUserID && aMember.icon) {
+        thumbnailURL = aMember.icon;
+        titleUserName = aMember.name;
+      }
+    });
+
+    return (
+      <Box
+        bg='black'
+        p='4'
+        onClick={() => {
+          setIsMessageOpen(true);
+          setOpeningDM(dmData);
+        }}
+      >
+        <Flex>
+          <Image borderRadius='full' boxSize='30px' src={thumbnailURL} alt='User Icon' />
+          <Text fontSize='md'> user name</Text>
+        </Flex>
+      </Box>
+    );
+  };
+
+  let ButtonsToDM_Node = <></>;
+  if (MyDMDatas) {
+    ButtonsToDM_Node = <>{MyDMDatas.map((aData) => ButtonToDM(aData))}</>;
+  }
 
   return (
     <Box overflowY='auto' position='fixed' top='50px' right='0px' h='calc(100vh - 50px)' bg='green'>

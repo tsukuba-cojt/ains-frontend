@@ -118,7 +118,6 @@ const FirebaseTestPage = () => {
       </Flex>
 
       <Button onClick={addDMMessage}>addMessage</Button>
-      <Button onClick={GetDMMessage}>GetMessage</Button>
       <Box margin='50px'></Box>
       <Flex>
         <Text width={"200px"}>DMの名前</Text>
