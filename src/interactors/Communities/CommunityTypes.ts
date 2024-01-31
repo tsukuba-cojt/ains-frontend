@@ -9,6 +9,7 @@ export interface CommunityData extends BaseModel {
   banner?: FileData;
   icon?: FileData;
   isPublic: boolean;
+  tags: string[];
 
   admins: string[];
   members: string[];
@@ -22,6 +23,7 @@ export interface CommunityFormData {
   icon?: File;
   isPublic: boolean;
   owner: string;
+  tags: string[];
 }
 
 export type CommunityCreateData = Omit<CommunityData, "id" | "banner" | "icon" | "created_at" | "updated_at"> & {

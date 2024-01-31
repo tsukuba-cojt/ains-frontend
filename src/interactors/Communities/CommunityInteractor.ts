@@ -10,6 +10,7 @@ import {
   PostData,
   PostFormData,
 } from "./CommunityTypes";
+import { nOrLessGramTokenize } from "../../plugins/Utility/NGramTokenizer";
 import BaseInteractor from "../BaseInteractor";
 import FileInteractor from "../File/FileInteractor";
 import { FileData } from "../File/FileTypes";
@@ -41,6 +42,46 @@ export default class CommunityInteractor {
     }
 
     return community_data_list;
+  }
+
+  async getWithTags(limitNum: number, tags: Array<string>): Promise<CommunityData[] | null> {
+    const res_data = await this.interactor.getWithTags(this.COLLECTION_NAME, limitNum, tags);
+    if (!res_data) {
+      return null;
+    }
+
+    const community_data_list: CommunityData[] = [];
+    for (let i = 0; i < res_data.length; i++) {
+      const new_community_data = await CommunityMapper.mapDocDataToCommunityData(res_data[i]);
+      if (new_community_data !== null) community_data_list.push(new_community_data);
+    }
+    return community_data_list;
+  }
+
+  async fullTextSearch(limitNum: number, serchWords: Array<string>) {
+    const res_data = await this.interactor.fullTextSearch(this.COLLECTION_NAME, limitNum, serchWords);
+    if (!res_data) return null;
+
+    const community_data_list: CommunityData[] = [];
+    for (let i = 0; i < res_data.length; i++) {
+      const new_community_data = await CommunityMapper.mapDocDataToCommunityData(res_data[i]);
+      if (new_community_data !== null) community_data_list.push(new_community_data);
+    }
+    return community_data_list;
+  }
+
+  async fullTextAndTagSearch(limitNum: number, serchWords: Array<string>, tags: Array<string>) {
+    const res_data = await this.interactor.fullTextAndTagSearch(this.COLLECTION_NAME, limitNum, serchWords, tags);
+    if (!res_data) {
+      return null;
+    }
+
+    const artwork_data_list: CommunityData[] = [];
+    for (let i = 0; i < res_data.length; i++) {
+      const new_artwork_data = await CommunityMapper.mapDocDataToCommunityData(res_data[i]);
+      if (new_artwork_data !== null) artwork_data_list.push(new_artwork_data);
+    }
+    return artwork_data_list;
   }
 
   async getPost(community_id: string, post_id: string): Promise<PostData | null> {
@@ -84,6 +125,23 @@ export default class CommunityInteractor {
       admins: [],
       members: [],
     };
+
+    const bigramtokens_map: any = {};
+    nOrLessGramTokenize(
+      this.interactor.KatakanaToHiragana(createData.name + " " + createData.description).toLowerCase(),
+      2
+    ).forEach((aToken) => {
+      bigramtokens_map[aToken] = true;
+    });
+    const tags_map: any = {};
+    createData.tags.forEach((aTag) => {
+      tags_map[aTag] = true;
+    });
+    const artwork_create_data_with_serchtoken = Object.assign(createData, {
+      bigramtokens_map: bigramtokens_map,
+      tags_map: tags_map,
+    });
+
     const result = await this.interactor.set(this.COLLECTION_NAME, this.interactor.uuidv4(), createData);
     if (!result) return null;
 
