@@ -10,6 +10,12 @@ import {
   IconButton,
   Image,
   Spinner,
+  Tab,
+  TabIndicator,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
   Text,
   Textarea,
   VStack,
@@ -215,7 +221,7 @@ export const PostCard = ({ post, community_id, mutateLike }: PostCardProps) => {
   return (
     <Flex direction='column' gap={5} w='full' p={5} borderBottom='1px' borderColor={secondary}>
       <Link href={`/communities/${community_id}/${post.id}`}>
-        <Flex direction='column' gap={5} w='full'>
+        <Flex alignItems='start' direction='column' gap={5} w='full'>
           <Box w='fit-content'>
             <Flex alignItems='center' gap={5}>
               <Avatar src={post.author.icon} name={post.author.name} />
@@ -318,6 +324,8 @@ export const PostForm = ({ communityId, originPost, mutate }: PostFormProps) => 
     }
   };
 
+  if (!user) return <></>;
+
   return (
     <Flex direction='column' gap={3} py={3} position='sticky'>
       <Flex gap={5}>
@@ -373,6 +381,8 @@ const CommunityPage = () => {
   const toast = useToast();
   const { community_id } = router.query;
 
+  const { user } = useContext(FirebaseAuthContext);
+
   const {
     data: community,
     isLoading,
@@ -386,7 +396,14 @@ const CommunityPage = () => {
   } = useSWR(`/communities/${community_id as string}/posts`, () =>
     communityInteractor.getPosts(community_id as string)
   );
-  const { user } = useContext(FirebaseAuthContext);
+  const {
+    data: likedPosts,
+    isLoading: isLoadingLikedPosts,
+    error: errorLikedPosts,
+    mutate: mutateLikedPosts,
+  } = useSWR(`/communities/${community_id as string}/liked/${user?.id}`, () =>
+    communityInteractor.getLikedPosts(community_id as string, user?.id || null)
+  );
 
   const all_members = community ? [community.owner].concat(community.admins, community.members) : [];
   const [userIcons, setUserIcons] = useState<Array<ReactNode>>([]);
@@ -441,31 +458,69 @@ const CommunityPage = () => {
           if (posts) mutatePosts([result].concat(posts));
         }}
       />
-      <VStack borderTop='1px' borderColor={secondary}>
-        {isLoadingPosts ? (
-          <Spinner />
-        ) : errorPosts || !posts ? (
-          <>エラー</>
-        ) : (
-          posts.map((p, i) => (
-            <PostCard
-              key={i}
-              post={p}
-              community_id={community_id as string}
-              mutateLike={() => {
-                if (!user) return;
-                const newPosts = posts;
-                if (p.likes.find((u: string) => u === user.id) !== undefined) {
-                  newPosts[i] = { ...posts[i], ...{ likes: p.likes.filter((u: string) => u !== user.id) } };
-                } else {
-                  newPosts[i] = { ...posts[i], ...{ likes: p.likes.concat(user.id) } };
-                }
-                mutatePosts(newPosts);
-              }}
-            />
-          ))
-        )}
-      </VStack>
+      <Tabs align='center' defaultIndex={0}>
+        <TabList>
+          <Tab>投稿</Tab>
+          <Tab>いいね</Tab>
+        </TabList>
+        <TabIndicator mt='-1.5px' height='2px' bg='blue.500' borderRadius='1px' />
+        <TabPanels>
+          <TabPanel>
+            <VStack borderTop='1px' borderColor={secondary}>
+              {isLoadingPosts ? (
+                <Spinner />
+              ) : errorPosts || !posts ? (
+                <>エラー</>
+              ) : (
+                posts.map((p, i) => (
+                  <PostCard
+                    key={i}
+                    post={p}
+                    community_id={community_id as string}
+                    mutateLike={() => {
+                      if (!user) return;
+                      const newPosts = posts;
+                      if (p.likes.find((u: string) => u === user.id) !== undefined) {
+                        newPosts[i] = { ...posts[i], ...{ likes: p.likes.filter((u: string) => u !== user.id) } };
+                      } else {
+                        newPosts[i] = { ...posts[i], ...{ likes: p.likes.concat(user.id) } };
+                      }
+                      mutatePosts(newPosts);
+                    }}
+                  />
+                ))
+              )}
+            </VStack>
+          </TabPanel>
+          <TabPanel>
+            <VStack borderTop='1px' borderColor={secondary}>
+              {isLoadingLikedPosts ? (
+                <Spinner />
+              ) : errorLikedPosts || !likedPosts ? (
+                <>エラー</>
+              ) : (
+                likedPosts.map((p, i) => (
+                  <PostCard
+                    key={i}
+                    post={p}
+                    community_id={community_id as string}
+                    mutateLike={() => {
+                      if (!user) return;
+                      const newPosts = likedPosts;
+                      if (p.likes.find((u: string) => u === user.id) !== undefined) {
+                        newPosts[i] = { ...likedPosts[i], ...{ likes: p.likes.filter((u: string) => u !== user.id) } };
+                      } else {
+                        newPosts[i] = { ...likedPosts[i], ...{ likes: p.likes.concat(user.id) } };
+                      }
+                      mutateLikedPosts(newPosts);
+                    }}
+                  />
+                ))
+              )}
+            </VStack>
+          </TabPanel>
+        </TabPanels>
+      </Tabs>
     </Container>
   );
 };
