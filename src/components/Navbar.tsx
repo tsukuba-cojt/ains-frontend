@@ -20,6 +20,7 @@ import UserIcon from "@/icons/UserIcon";
 import DMModal from "./DMModal";
 import { FirebaseAuthContext } from "./FirebaseAuthProvider";
 import LoginModal from "./LoginModal";
+import NoticeModal from "./NoticeModal";
 import SignupModal from "./SignupModal";
 
 const Navbar = () => {
@@ -33,6 +34,7 @@ const Navbar = () => {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false);
   const [isSignupModalOpen, setIsSignupModalOpen] = useState<boolean>(false);
   const [isDMModalOpen, setIsDMModalOpen] = useState<boolean>(false);
+  const [isNoticeModalOpen, setIsNoticeModalOpen] = useState<boolean>(false);
 
   const [serchBoxTexts, setSerchBoxTexts] = useState("");
 
@@ -100,9 +102,15 @@ const Navbar = () => {
         onClick={toggleColorMode}
         icon={colorMode === "light" ? <SunIcon /> : <MoonIcon />}
       ></IconButton>
-      <Button variant='ghost' leftIcon={<BellIcon />} size='sm'>
+      <Button
+        variant='ghost'
+        onClick={() => setIsNoticeModalOpen(!isNoticeModalOpen)}
+        leftIcon={<BellIcon />}
+        size='sm'
+      >
         通知
       </Button>
+      <NoticeModal isOpen={isNoticeModalOpen} onClose={() => setIsNoticeModalOpen(false)} />
       <Button variant='ghost' onClick={() => setIsDMModalOpen(!isDMModalOpen)} leftIcon={<ChatIcon />} size='sm'>
         メッセージ
       </Button>
