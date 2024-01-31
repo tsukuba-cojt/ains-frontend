@@ -30,6 +30,7 @@ export default class FileInteractor {
     const file_create_data: FileCreateData = {
       path: file_path,
       url: url,
+      name: file.name,
     };
     const res_data = await this.interactor.set(this.COLLECTION_NAME, doc_id, file_create_data);
     if (!res_data) return null;
