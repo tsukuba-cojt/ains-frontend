@@ -61,6 +61,19 @@ export default class CommunityInteractor {
     return await Promise.all(data.map((d) => CommunityMapper.mapDocDataToPostData(d, community_id)));
   }
 
+  async getLikedPosts(community_id: string, user_id: string | null): Promise<PostData[] | null> {
+    if (!user_id) return [];
+    console.log(user_id);
+    const data = await this.interactor.FilterAndSubCollections(
+      this.COLLECTION_NAME,
+      [community_id, "posts"],
+      [{ key: "likes", operator: "array-contains", value: user_id }]
+    );
+    if (!data) return null;
+
+    return await Promise.all(data.map((d) => CommunityMapper.mapDocDataToPostData(d, community_id)));
+  }
+
   async set(data: CommunityFormData): Promise<CommunityData | null> {
     const fileInteractor = new FileInteractor();
     const banner = data.banner && (await fileInteractor.upload(data.banner));
