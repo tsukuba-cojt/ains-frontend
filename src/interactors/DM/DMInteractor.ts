@@ -1,5 +1,6 @@
 //import ArtworkMapper from "./ArtworkMapper";
-import { DMCreateData, DMMessageCreateData } from "./DMTypes";
+import DMMapper from "./DMMapper";
+import { DMCreateData, DMDataWithRelativeData, DMMessageCreateData, DMMessageDataWithRelativeData } from "./DMTypes";
 import { FilterArg } from "../BaseInteractor";
 import BaseInteractor from "../BaseInteractor";
 
@@ -13,40 +14,105 @@ export default class DMInteractor {
 
   //DM-----------------------------
 
-  async get_DM(DM_id: string) {
-    return await this.interactor.get(this.COLLECTION_NAME, DM_id);
+  async get_DM(DM_id: string): Promise<null | DMDataWithRelativeData> {
+    const docData = await this.interactor.get(this.COLLECTION_NAME, DM_id);
+    if (docData) {
+      return DMMapper.mapDocDataToDMDataWithRelativeData(docData);
+    } else {
+      return null;
+    }
   }
 
-  async set_DM(data: DMCreateData) {
-    await this.interactor.set(this.COLLECTION_NAME, this.interactor.uuidv4(), data);
+  async set_DM(data: DMCreateData): Promise<null | DMDataWithRelativeData> {
+    const docData = await this.interactor.set(this.COLLECTION_NAME, this.interactor.uuidv4(), data);
+    if (docData) {
+      return DMMapper.mapDocDataToDMDataWithRelativeData(docData);
+    } else {
+      return null;
+    }
   }
 
   //ユーザ-がメンバーとなっているDMを全て取得
   async getWithMemberID_DM(userId: string) {
     const filter: FilterArg = { key: "member_ids", operator: "array-contains", value: userId };
-    return await this.interactor.FilterAnd("DMs", [filter]);
+    const docDatas = await this.interactor.FilterAnd("DMs", [filter]);
+    if (docDatas) {
+      let retData: DMDataWithRelativeData[] = [];
+      for (let i = 0; i < docDatas.length; i++) {
+        const mappedData = await DMMapper.mapDocDataToDMDataWithRelativeData(docDatas[i]);
+        if (mappedData) {
+          retData.push(mappedData);
+        }
+      }
+      return retData;
+    } else {
+      return null;
+    }
   }
 
   async getLatests_DM(limit: number, startId: string | null = null) {
-    return await this.interactor.getLatests("DMs", limit, startId);
+    const docDatas = await this.interactor.getLatests("DMs", limit, startId);
+    if (docDatas) {
+      let retData: DMDataWithRelativeData[] = [];
+      for (let i = 0; i < docDatas.length; i++) {
+        const mappedData = await DMMapper.mapDocDataToDMDataWithRelativeData(docDatas[i]);
+        if (mappedData) {
+          retData.push(mappedData);
+        }
+      }
+      return retData;
+    } else {
+      return null;
+    }
   }
 
   //DMMessage-------------------------------
   async get_DMMessage(DM_id: string, DMMessage_id: string) {
-    return await this.interactor.getSubCollection(this.COLLECTION_NAME, [DM_id, this.SUBCOLLECTION_NAME], DMMessage_id);
+    const docData = await this.interactor.getSubCollection(
+      this.COLLECTION_NAME,
+      [DM_id, this.SUBCOLLECTION_NAME],
+      DMMessage_id
+    );
+    if (docData) {
+      return await DMMapper.mapDocDataToDMMessageDataWithRelativeData(docData);
+    } else {
+      return null;
+    }
   }
   async set_DMMessage(DM_id: string, data: DMMessageCreateData) {
-    return await this.interactor.setSubCollection(
+    const docData = await this.interactor.setSubCollection(
       this.COLLECTION_NAME,
       [DM_id, this.SUBCOLLECTION_NAME],
       this.interactor.uuidv4(),
       data
     );
+    if (docData) {
+      return await DMMapper.mapDocDataToDMMessageDataWithRelativeData(docData);
+    } else {
+      return null;
+    }
   }
 
   //DMのメッセージを全て取得
   async getLatests_DMMessage(DM_id: string, limitNum: number, startId: string | null = null) {
-    return await this.interactor.getSubCollections("DMs", [DM_id, this.SUBCOLLECTION_NAME], limitNum, startId);
+    const docDatas = await this.interactor.getSubCollections(
+      "DMs",
+      [DM_id, this.SUBCOLLECTION_NAME],
+      limitNum,
+      startId
+    );
+    if (docDatas) {
+      let retData: DMMessageDataWithRelativeData[] = [];
+      for (let i = 0; i < docDatas.length; i++) {
+        const mappedData = await DMMapper.mapDocDataToDMMessageDataWithRelativeData(docDatas[i]);
+        if (mappedData) {
+          retData.push(mappedData);
+        }
+      }
+      return retData;
+    } else {
+      return null;
+    }
   }
 
   async makeDM() {}
