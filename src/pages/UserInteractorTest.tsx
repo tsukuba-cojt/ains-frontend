@@ -18,6 +18,7 @@ const FirebaseTestPage = () => {
   const [contentInput, setContentInput] = useState("");
   const [dmMembersInput, setDMMembersInput] = useState("");
   const [dmNameInput, setDMNameInput] = useState("");
+  const [DMdom, setDMdom] = useState<ReactNode>(<></>);
 
   const secondary = useColorModeValue(theme.colors.secondary.ml, theme.colors.secondary.md);
 
@@ -52,11 +53,34 @@ const FirebaseTestPage = () => {
   };
 
   const getDMs = async () => {
-    console.log(await new DMInteractor().getLatests_DM(10));
+    const data = await new DMInteractor().getLatests_DM(10);
+    console.log(data);
+    if (data) {
+      let nextDom = <></>;
+
+      for (let i = 0; i < data.length; i++) {
+        const DMMessages = await new DMInteractor().getLatests_DMMessage(data[i].id, 20);
+        nextDom = (
+          <>
+            {nextDom}
+            <Box key='ss' border={"8px"} padding={"8px"}>
+              <Text key={data[i].id}>{`${data[i].id}`}</Text>
+              <Text key={data[i].id}>{`member:${data[i].members.map((aData) => aData.id)}`}</Text>
+              <Text key={data[i].id}>{`name:${data[i].name}`}</Text>
+              <Text>
+                {DMMessages?.map((aData) => aData.content + `(${aData.sender.id} : ${aData.created_at})` + "<=")}
+              </Text>
+            </Box>
+          </>
+        );
+      }
+      setDMdom(nextDom);
+    }
   };
 
   const GetDMMessage = async (): Promise<void> => {
     const interactor: DMInteractor = new DMInteractor();
+
     console.log(await interactor.getLatests_DMMessage(DMIDInput, 20));
   };
 
@@ -118,6 +142,7 @@ const FirebaseTestPage = () => {
       </Flex>
       <Button onClick={addDM}>addDM</Button>
       <Button onClick={getDMs}>getDM</Button>
+      {DMdom}
     </Box>
   );
 };

@@ -30,8 +30,8 @@ export default class DMMapper {
       id: data.id,
       name: data.name,
       members: members_data,
-      created_at: data.create_data,
-      updated_at: data.update_at,
+      created_at: data.created_at.toDate ? new Date(data.created_at.toDate()) : new Date(),
+      updated_at: data.updated_at.toDate ? new Date(data.updated_at.toDate()) : new Date(),
     };
   }
 
@@ -58,8 +58,8 @@ export default class DMMapper {
       id: data.id,
       content: data.content,
       sender: sender_data,
-      created_at: data.create_data,
-      updated_at: data.update_at,
+      created_at: data.created_at.toDate ? new Date(data.created_at.toDate()) : new Date(),
+      updated_at: data.updated_at.toDate ? new Date(data.updated_at.toDate()) : new Date(),
     };
   }
 }
