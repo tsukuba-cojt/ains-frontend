@@ -79,7 +79,7 @@ const SearchResultPage = () => {
     return (
       <>
         {userPubDatas.map((aData) => {
-          return getUserBox(aData.name, aData.description ? aData.description : "", aData.icon_url, aData);
+          return getUserBox(aData.name, aData.description ? aData.description : "", aData.icon || "", aData);
         })}
       </>
     );
