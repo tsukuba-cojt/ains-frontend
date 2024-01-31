@@ -50,6 +50,13 @@ const ImageUploadForm = () => {
   const icon_fill_color = useColorModeValue("gray.800", "white");
 
   useEffect(() => {
+    const fetchParent = async () => {
+      const parentArtwork = parent && (await new ArtworkInteractor().get(parent as string));
+      if (parentArtwork) setParentArtworks((current) => [parentArtwork].concat(current));
+    };
+  }, []);
+
+  useEffect(() => {
     if (inputFile === null || inputFileType === null) return;
 
     const reader = new FileReader();

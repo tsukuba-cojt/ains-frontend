@@ -48,7 +48,7 @@ const CommunityCreatePage = () => {
   const handleChangeInput = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.type === "checkbox" ? e.target.checked : e.target.value,
+      [e.target.name]: e.target.type === "checkbox" ? (e.target as HTMLInputElement).checked : e.target.value,
     });
   };
 

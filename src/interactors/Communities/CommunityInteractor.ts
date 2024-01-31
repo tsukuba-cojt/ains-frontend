@@ -132,7 +132,7 @@ export default class CommunityInteractor {
     const fileInteractor = new FileInteractor();
     const nullableFiles =
       data.files && (await Promise.all(data.files.map(async (f: File) => fileInteractor.upload(f))));
-    const fileIds = nullableFiles && nullableFiles.filter((f: FileData | null) => f).map((f: FileData) => f!.id);
+    const fileIds = nullableFiles && nullableFiles.filter((f: FileData | null) => f).map((f: FileData | null) => f!.id);
     const createData: PostCreateData = {
       ...data,
       files: fileIds,

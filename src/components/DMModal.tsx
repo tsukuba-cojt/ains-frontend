@@ -14,7 +14,7 @@ import {
   Link,
 } from "@chakra-ui/react";
 import { AnimatePresence, motion } from "framer-motion";
-import React from "react";
+import React, { KeyboardEvent } from "react";
 import { useEffect, useRef } from "react";
 import { useState } from "react";
 
@@ -63,7 +63,7 @@ const DMModal = (props: Props) => {
     }
   };
   // エンターキーで送信するためのハンドラ
-  const handleKeyPress = (event: KeyboardEvent) => {
+  const handleKeyPress = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
       sendMessage();
     }
@@ -93,7 +93,7 @@ const DMModal = (props: Props) => {
       <HStack w='full' bg={secondary} p='4' wrap='wrap' alignItems='center' gap={5}>
         <Flex>
           <Center h='100%'>
-            <Avatar src={userDM.user_src} alt='User Icon' />
+            <Avatar src={userDM.user_src} />
 
             <Link fontSize='2xl' as='u' p={1} onClick={MoveDMDisplay}>
               {userDM.user_name}
@@ -180,7 +180,7 @@ const DMModal = (props: Props) => {
               <>
                 <Box>
                   <Flex justify='left' p='1' color={secondary}>
-                    <Avatar p='1' borderRadius='full' boxSize='40px' src={userIconDM} alt='User Icon' />
+                    <Avatar p='1' borderRadius='full' boxSize='40px' src={userIconDM} />
                     <Text bg={boxbg} p='2' borderRadius='md' w='60%'>
                       ここでメッセージ変えるよ
                     </Text>
@@ -190,13 +190,7 @@ const DMModal = (props: Props) => {
                       <Text bg={boxbg} p='2' borderRadius='md' w='60%'>
                         {message}
                       </Text>
-                      <Avatar
-                        p='1'
-                        borderRadius='full'
-                        boxSize='40px'
-                        src='https://bit.ly/dan-abramov'
-                        alt='User Icon'
-                      />
+                      <Avatar p='1' borderRadius='full' boxSize='40px' src='https://bit.ly/dan-abramov' />
                     </Flex>
                   ))}
                 </Box>

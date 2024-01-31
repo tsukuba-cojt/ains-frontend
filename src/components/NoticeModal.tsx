@@ -24,14 +24,14 @@ interface Props {
   onClose: () => void;
 }
 interface ItemData {
-  item_link: string;
-  item_src: string;
-  item_string: string;
-  user_src: string[];
-  user_name: string;
-  user_number: number;
-  update_text: string;
-  update_title: string;
+  item_link?: string;
+  item_src?: string;
+  item_string?: string;
+  user_src?: string[];
+  user_name?: string;
+  user_number?: number;
+  update_text?: string;
+  update_title?: string;
   item_type: string;
 }
 
@@ -85,7 +85,7 @@ const ComNotice = (itemData: ItemData) => {
         <HStack w='full' bg={secondary} p='4' wrap='wrap' alignItems='center' gap={5}>
           <Link w='30%' as={NextLink} href={itemData.item_link}>
             <AspectRatio w='100%' ratio={1}>
-              <video boxSize='100%' src={itemData.item_src} />
+              <video width='100%' src={itemData.item_src} />
             </AspectRatio>
           </Link>
           <Box flex={1} w='70%' overflowY='auto'>
@@ -97,7 +97,7 @@ const ComNotice = (itemData: ItemData) => {
     case "user-follw": {
       const avatarDisplay = (numbers: number): ReactNode => {
         return Array.from({ length: numbers }).map((n, i) => (
-          <Avatar key={i} name={itemData.user_name} src={itemData.user_src[i]} />
+          <Avatar key={i} name={itemData.user_name} src={itemData.user_src?.[i]} />
         ));
       };
       return (
@@ -105,7 +105,7 @@ const ComNotice = (itemData: ItemData) => {
           <VStack alignItems='left'>
             <Text fontSize='md'> {itemData.user_name}にフォローされました</Text>
             <Flex>
-              <AvatarGroup max={6}>{avatarDisplay(itemData.user_number)}</AvatarGroup>
+              <AvatarGroup max={6}>{avatarDisplay(itemData.user_number || 0)}</AvatarGroup>
             </Flex>
           </VStack>
         </Flex>
@@ -113,19 +113,20 @@ const ComNotice = (itemData: ItemData) => {
     }
     case "notify": {
       return (
-        <Box w='full' bg={secondary} p='4' wrap='wrap' alignItems='center' gap={5}>
+        <Flex w='full' bg={secondary} p='4' wrap='wrap' alignItems='center' gap={5}>
           <Text fontSize='xl'>{itemData.update_title}</Text>
           <Text fontSize='md'>{itemData.update_text}</Text>
-        </Box>
+        </Flex>
       );
     }
     default: {
-      <HStack w='full' bg={secondary} p='4' wrap='wrap' alignItems='center' gap={5}>
-        <Box flex={1} w='70%' overflowY='auto'>
-          <Text fontSize='md'>switchのtypeとかのエラー!!!!!!!!</Text>
-        </Box>
-      </HStack>;
-      break;
+      return (
+        <HStack w='full' bg={secondary} p='4' wrap='wrap' alignItems='center' gap={5}>
+          <Box flex={1} w='70%' overflowY='auto'>
+            <Text fontSize='md'>switchのtypeとかのエラー!!!!!!!!</Text>
+          </Box>
+        </HStack>
+      );
     }
   }
 };
