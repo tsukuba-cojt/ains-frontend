@@ -65,6 +65,7 @@ interface PostCardProps {
 interface PostFormProps {
   communityId: string;
   originPost?: string;
+  isDisabled: boolean;
   mutate: (newPost: PostData) => void;
 }
 
@@ -275,9 +276,9 @@ export const PostCard = ({ post, community_id, mutateLike }: PostCardProps) => {
   );
 };
 
-export const PostForm = ({ communityId, originPost, mutate }: PostFormProps) => {
-  const { user } = useContext(FirebaseAuthContext);
+export const PostForm = ({ communityId, originPost, mutate, isDisabled }: PostFormProps) => {
   const toast = useToast();
+  const { user } = useContext(FirebaseAuthContext);
 
   const [postContent, setPostContent] = useState<string>("");
   const [postFiles, setPostFiles] = useState<File[]>([]);
@@ -324,7 +325,7 @@ export const PostForm = ({ communityId, originPost, mutate }: PostFormProps) => 
     }
   };
 
-  if (!user) return <></>;
+  if (isDisabled || !user) return <></>;
 
   return (
     <Flex direction='column' gap={3} py={3} position='sticky'>
@@ -387,6 +388,7 @@ const CommunityPage = () => {
     data: community,
     isLoading,
     error,
+    mutate,
   } = useSWR(`/communities/${community_id as string}`, () => communityInteractor.get(community_id as string));
   const {
     data: posts,
@@ -446,13 +448,34 @@ const CommunityPage = () => {
             <Text>{all_members.length}人のメンバー</Text>
           </Flex>
           {all_members.find((u: string) => u === user?.id) ? (
-            <Button ml='auto'>コミュニティーを退会</Button>
+            <Button
+              onClick={async () => {
+                if (user) {
+                  await communityInteractor.leave(community_id as string, user.id);
+                  mutate();
+                }
+              }}
+              ml='auto'
+            >
+              コミュニティーを退会
+            </Button>
           ) : (
-            <Button ml='auto'>参加{!community.isPublic && "リクエスト"}</Button>
+            <Button
+              onClick={async () => {
+                if (user) {
+                  await communityInteractor.join(community_id as string, user.id);
+                  mutate();
+                }
+              }}
+              ml='auto'
+            >
+              参加{!community.isPublic && "リクエスト"}
+            </Button>
           )}
         </Flex>
       </Box>
       <PostForm
+        isDisabled={!user || all_members.find((u: string) => u === user.id) === undefined}
         communityId={community_id as string}
         mutate={(result: PostData) => {
           if (posts) mutatePosts([result].concat(posts));

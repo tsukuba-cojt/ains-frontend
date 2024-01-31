@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-import { EditIcon } from "@chakra-ui/icons";
-=======
 import { AddIcon, EditIcon } from "@chakra-ui/icons";
->>>>>>> 4ba1b5138d4460d6a79548e10b45d7224225d2c3
 import {
   Avatar,
   Container,

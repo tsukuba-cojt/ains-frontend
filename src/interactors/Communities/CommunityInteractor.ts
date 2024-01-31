@@ -63,7 +63,6 @@ export default class CommunityInteractor {
 
   async getLikedPosts(community_id: string, user_id: string | null): Promise<PostData[] | null> {
     if (!user_id) return [];
-    console.log(user_id);
     const data = await this.interactor.FilterAndSubCollections(
       this.COLLECTION_NAME,
       [community_id, "posts"],
@@ -163,5 +162,13 @@ export default class CommunityInteractor {
     return await this.interactor.updateSubCollection(this.COLLECTION_NAME, [data.community_id, "posts"], data.post_id, {
       likes: data.remove ? arrayRemove(data.user_id) : arrayUnion(data.user_id),
     });
+  }
+
+  async join(community_id: string, user_id: string): Promise<boolean | null> {
+    return await this.interactor.update(this.COLLECTION_NAME, community_id, { members: arrayUnion(user_id) });
+  }
+
+  async leave(community_id: string, user_id: string): Promise<boolean | null> {
+    return await this.interactor.update(this.COLLECTION_NAME, community_id, { members: arrayRemove(user_id) });
   }
 }
