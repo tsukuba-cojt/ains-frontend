@@ -18,7 +18,7 @@ import { useState, useContext } from "react";
 import useSWR from "swr";
 
 import DMInteractor from "@/interactors/DM/DMInteractor";
-import { DMDataWithRelativeData } from "@/interactors/DM/DMTypes";
+import { DMDataWithRelativeData, DMMessageCreateData, DMMessageDataWithRelativeData } from "@/interactors/DM/DMTypes";
 import { UserPublicData } from "@/interactors/User/UserTypes";
 
 import { FirebaseAuthContext } from "./FirebaseAuthProvider";
@@ -72,30 +72,42 @@ const DMModal = (props: Props) => {
 
   const chatAreaRef = useRef<HTMLDivElement | null>(null);
 
-  const [messages, setMessages] = useState<Message["contents"][]>([]); // メッセージのリスト
   const [newMessage, setNewMessage] = useState(""); // 新しいメッセージの入力値
 
+  const [cachedDMMessage, setCachedDMMessage] = useState<DMMessageDataWithRelativeData[]>([]); //前回のDMMessagesの更新と次の更新との間に投稿したメッセージ
   const {
     data: DMMessages,
     error: DMMessageError,
     isLoading: DMMessageLoading,
-  } = useSWR(`/DMMessage/${OpeningDM ? OpeningDM.id : "None"}`, async () => {
-    if (OpeningDM) {
-      return await interactor.getLatests_DMMessage(OpeningDM.id, 30);
-    } else {
-      return [];
-    }
-  });
+  } = useSWR(
+    `/DMMessage/${OpeningDM ? OpeningDM.id : "None"}`,
+    async () => {
+      if (OpeningDM) {
+        const retval = await interactor.getLatests_DMMessage(OpeningDM.id, 30);
+        setCachedDMMessage([]);
+        return retval;
+      } else {
+        setCachedDMMessage([]);
+        return [];
+      }
+    },
+    { refreshInterval: 10000 }
+  );
+
+  const CurrentDispMessages = cachedDMMessage.concat(DMMessages ? DMMessages : []);
 
   // 新しいメッセージを送信する関数
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (newMessage.trim()) {
       if (OpeningDM && user) {
         const createData: DMMessageCreateData = {
           content: newMessage,
           sender_id: user.id,
         };
-        interactor.set_DMMessage(OpeningDM?.id, createData);
+        const sentMessage = await interactor.set_DMMessage(OpeningDM?.id, createData);
+        if (sentMessage) {
+          setCachedDMMessage([sentMessage, ...cachedDMMessage]);
+        }
       } else {
         console.log("unreachable!");
       }
@@ -114,7 +126,7 @@ const DMModal = (props: Props) => {
       const chatAreaHeight = chatAreaRef.current.scrollHeight;
       chatAreaRef.current.scrollTop = chatAreaHeight;
     }
-  }, [messages]);
+  }, [CurrentDispMessages]);
 
   const ButtonToDM = (dmData: DMDataWithRelativeData) => {
     let MyUserID = user ? user.id : "unreachable";
@@ -188,39 +200,37 @@ const DMModal = (props: Props) => {
               <>
                 {changeUserID == true ? (
                   <Box borderWidth='1px'>
-                    {DMMessages &&
-                      DMMessages.map((message, index) => (
-                        <Flex key={index} justify='left' p='1'>
-                          <Image
-                            p='1'
-                            borderRadius='full'
-                            boxSize='40px'
-                            src={message.sender.icon ? message.sender.icon : "https://bit.ly/dan-abramov"}
-                            alt='User Icon'
-                          />
-                          <Text bg='blue.100' p='2' borderRadius='md' w='60%'>
-                            {message.content}
-                          </Text>
-                        </Flex>
-                      )).reverse()}
+                    {CurrentDispMessages.map((message, index) => (
+                      <Flex key={index} justify='left' p='1'>
+                        <Image
+                          p='1'
+                          borderRadius='full'
+                          boxSize='40px'
+                          src={message.sender.icon ? message.sender.icon : "https://bit.ly/dan-abramov"}
+                          alt='User Icon'
+                        />
+                        <Text bg='blue.100' p='2' borderRadius='md' w='60%'>
+                          {message.content}
+                        </Text>
+                      </Flex>
+                    )).reverse()}
                   </Box>
                 ) : (
                   <Box borderWidth='1px'>
-                    {DMMessages &&
-                      DMMessages.map((message, index) => (
-                        <Flex key={index} justify='left' p='1'>
-                          <Image
-                            p='1'
-                            borderRadius='full'
-                            boxSize='40px'
-                            src={message.sender.icon ? message.sender.icon : "https://bit.ly/dan-abramov"}
-                            alt='User Icon'
-                          />
-                          <Text bg='blue.100' p='2' borderRadius='md' w='60%'>
-                            {message.content}
-                          </Text>
-                        </Flex>
-                      )).reverse()}
+                    {CurrentDispMessages.map((message, index) => (
+                      <Flex key={index} justify='left' p='1'>
+                        <Image
+                          p='1'
+                          borderRadius='full'
+                          boxSize='40px'
+                          src={message.sender.icon ? message.sender.icon : "https://bit.ly/dan-abramov"}
+                          alt='User Icon'
+                        />
+                        <Text bg='blue.100' p='2' borderRadius='md' w='60%'>
+                          {message.content}
+                        </Text>
+                      </Flex>
+                    )).reverse()}
                   </Box>
                 )}
               </>
