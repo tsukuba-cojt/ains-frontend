@@ -54,8 +54,8 @@ const DMModal = (props: Props) => {
 
   const {
     data: MyDMDatas,
-    error,
-    isLoading,
+    error: DMError,
+    isLoading: DMLoading,
   } = useSWR(`/DM/${user ? user.id : "None"}`, async () => {
     if (user) {
       return await interactor.getWithMemberID_DM(user.id);
@@ -74,10 +74,31 @@ const DMModal = (props: Props) => {
 
   const [messages, setMessages] = useState<Message["contents"][]>([]); // メッセージのリスト
   const [newMessage, setNewMessage] = useState(""); // 新しいメッセージの入力値
+
+  const {
+    data: DMMessages,
+    error: DMMessageError,
+    isLoading: DMMessageLoading,
+  } = useSWR(`/DMMessage/${OpeningDM ? OpeningDM.id : "None"}`, async () => {
+    if (OpeningDM) {
+      return await interactor.getLatests_DMMessage(OpeningDM.id, 30);
+    } else {
+      return [];
+    }
+  });
+
   // 新しいメッセージを送信する関数
   const sendMessage = () => {
     if (newMessage.trim()) {
-      setMessages((prevMessages) => [...prevMessages, newMessage]);
+      if (OpeningDM && user) {
+        const createData: DMMessageCreateData = {
+          content: newMessage,
+          sender_id: user.id,
+        };
+        interactor.set_DMMessage(OpeningDM?.id, createData);
+      } else {
+        console.log("unreachable!");
+      }
       setNewMessage(""); // 入力フィールドをクリア
     }
   };
@@ -118,7 +139,7 @@ const DMModal = (props: Props) => {
       >
         <Flex>
           <Image borderRadius='full' boxSize='30px' src={thumbnailURL} alt='User Icon' />
-          <Text fontSize='md'> user name</Text>
+          <Text fontSize='md'> {titleUserName}</Text>
         </Flex>
       </Box>
     );
@@ -144,93 +165,14 @@ const DMModal = (props: Props) => {
             }}
           >
             <motion.div animate='open' exit='closed'>
-              <Card p='4' bg='tomato' variant='outline'>
+              <Card minHeight='100%' p='4' bg='tomato' variant='outline'>
                 <CloseButton onClick={() => props.onClose()} />
                 <CardHeader>
                   <Heading size='xl'>Direct Message</Heading>
                 </CardHeader>
 
                 <CardBody>
-                  <Stack spacing='4'>
-                    <Box bg='black' p='4' onClick={() => setIsMessageOpen(true)}>
-                      <Flex>
-                        <Image borderRadius='full' boxSize='30px' src='https://bit.ly/dan-abramov' alt='User Icon' />
-                        <Text fontSize='md'> user name</Text>
-                      </Flex>
-                    </Box>
-                    <Box bg='black' p='4'>
-                      <Flex>
-                        <Image borderRadius='full' boxSize='30px' src='https://bit.ly/dan-abramov' alt='User Icon' />
-                        <Text fontSize='md'> user name</Text>
-                      </Flex>
-                    </Box>
-                    <Box bg='black' p='4'>
-                      <Flex>
-                        <Image borderRadius='full' boxSize='30px' src='https://bit.ly/dan-abramov' alt='User Icon' />
-                        <Text fontSize='md'> user name</Text>
-                      </Flex>
-                    </Box>
-                    <Box bg='black' p='4'>
-                      <Flex>
-                        <Image borderRadius='full' boxSize='30px' src='https://bit.ly/dan-abramov' alt='User Icon' />
-                        <Text fontSize='md'> user name</Text>
-                      </Flex>
-                    </Box>
-                    <Box bg='black' p='4'>
-                      <Flex>
-                        <Image borderRadius='full' boxSize='30px' src='https://bit.ly/dan-abramov' alt='User Icon' />
-                        <Text fontSize='md'> user name</Text>
-                      </Flex>
-                    </Box>
-                    <Box bg='black' p='4'>
-                      <Flex>
-                        <Image borderRadius='full' boxSize='30px' src='https://bit.ly/dan-abramov' alt='User Icon' />
-                        <Text fontSize='md'> user name</Text>
-                      </Flex>
-                    </Box>
-                    <Box bg='black' p='4'>
-                      <Flex>
-                        <Image borderRadius='full' boxSize='30px' src='https://bit.ly/dan-abramov' alt='User Icon' />
-                        <Text fontSize='md'> user name</Text>
-                      </Flex>
-                    </Box>
-                    <Box bg='black' p='4'>
-                      <Flex>
-                        <Image borderRadius='full' boxSize='30px' src='https://bit.ly/dan-abramov' alt='User Icon' />
-                        <Text fontSize='md'> user name</Text>
-                      </Flex>
-                    </Box>
-                    <Box bg='black' p='4'>
-                      <Flex>
-                        <Image borderRadius='full' boxSize='30px' src='https://bit.ly/dan-abramov' alt='User Icon' />
-                        <Text fontSize='md'> user name</Text>
-                      </Flex>
-                    </Box>
-                    <Box bg='black' p='4'>
-                      <Flex>
-                        <Image borderRadius='full' boxSize='30px' src='https://bit.ly/dan-abramov' alt='User Icon' />
-                        <Text fontSize='md'> user name</Text>
-                      </Flex>
-                    </Box>
-                    <Box bg='black' p='4'>
-                      <Flex>
-                        <Image borderRadius='full' boxSize='30px' src='https://bit.ly/dan-abramov' alt='User Icon' />
-                        <Text fontSize='md'> user name</Text>
-                      </Flex>
-                    </Box>
-                    <Box bg='black' p='4'>
-                      <Flex>
-                        <Image borderRadius='full' boxSize='30px' src='https://bit.ly/dan-abramov' alt='User Icon' />
-                        <Text fontSize='md'> user name</Text>
-                      </Flex>
-                    </Box>
-                    <Box bg='blue' p='4'>
-                      <Flex>
-                        <Image borderRadius='full' boxSize='30px' src='https://bit.ly/dan-abramov' alt='User Icon' />
-                        <Text fontSize='md'> user name</Text>
-                      </Flex>
-                    </Box>
-                  </Stack>
+                  <Stack spacing='4'>{ButtonsToDM_Node}</Stack>
                 </CardBody>
               </Card>
             </motion.div>
@@ -246,37 +188,39 @@ const DMModal = (props: Props) => {
               <>
                 {changeUserID == true ? (
                   <Box borderWidth='1px'>
-                    {messages.map((message, index) => (
-                      <Flex key={index} justify='right' p='1'>
-                        <Text bg='blue.100' p='2' borderRadius='md' w='60%'>
-                          {message}
-                        </Text>
-                        <Image
-                          p='1'
-                          borderRadius='full'
-                          boxSize='40px'
-                          src='https://bit.ly/dan-abramov'
-                          alt='User Icon'
-                        />
-                      </Flex>
-                    ))}
+                    {DMMessages &&
+                      DMMessages.map((message, index) => (
+                        <Flex key={index} justify='left' p='1'>
+                          <Image
+                            p='1'
+                            borderRadius='full'
+                            boxSize='40px'
+                            src={message.sender.icon ? message.sender.icon : "https://bit.ly/dan-abramov"}
+                            alt='User Icon'
+                          />
+                          <Text bg='blue.100' p='2' borderRadius='md' w='60%'>
+                            {message.content}
+                          </Text>
+                        </Flex>
+                      )).reverse()}
                   </Box>
                 ) : (
                   <Box borderWidth='1px'>
-                    {messages.map((message, index) => (
-                      <Flex key={index} justify='left' p='1'>
-                        <Image
-                          p='1'
-                          borderRadius='full'
-                          boxSize='40px'
-                          src='https://bit.ly/dan-abramov'
-                          alt='User Icon'
-                        />
-                        <Text bg='blue.100' p='2' borderRadius='md' w='60%'>
-                          {message}
-                        </Text>
-                      </Flex>
-                    ))}
+                    {DMMessages &&
+                      DMMessages.map((message, index) => (
+                        <Flex key={index} justify='left' p='1'>
+                          <Image
+                            p='1'
+                            borderRadius='full'
+                            boxSize='40px'
+                            src={message.sender.icon ? message.sender.icon : "https://bit.ly/dan-abramov"}
+                            alt='User Icon'
+                          />
+                          <Text bg='blue.100' p='2' borderRadius='md' w='60%'>
+                            {message.content}
+                          </Text>
+                        </Flex>
+                      )).reverse()}
                   </Box>
                 )}
               </>
