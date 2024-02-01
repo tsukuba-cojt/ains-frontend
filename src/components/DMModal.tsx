@@ -55,13 +55,17 @@ const DMModal = (props: Props) => {
     data: MyDMDatas,
     error: DMError,
     isLoading: DMLoading,
-  } = useSWR(`/DM/${user ? user.id : "None"}`, async () => {
-    if (user) {
-      return await interactor.getWithMemberID_DM(user.id);
-    } else {
-      return [];
-    }
-  });
+  } = useSWR(
+    `/DM/${user ? user.id : "None"}`,
+    async () => {
+      if (user) {
+        return await interactor.getWithMemberID_DM(user.id);
+      } else {
+        return [];
+      }
+    },
+    { refreshInterval: 10000 }
+  );
 
   const [isMessageOpen, setIsMessageOpen] = useState<boolean>(false);
 

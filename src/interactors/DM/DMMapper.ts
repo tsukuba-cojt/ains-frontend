@@ -19,7 +19,7 @@ export default class DMMapper {
   static async mapDocDataToDMDataWithRelativeData(data: DocumentData): Promise<DMDataWithRelativeData | null> {
     const interactor = new UserInteractor();
     let members_data: UserPublicData[] = [];
-    console.log(data.member_ids.length);
+    //console.log(data.member_ids.length);
     for (let i = 0; i < data.member_ids.length; i++) {
       const member_pubData = await interactor.getPublicData(data.member_ids[i]);
       if (member_pubData) {
