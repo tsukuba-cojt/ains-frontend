@@ -99,7 +99,8 @@ export default class DMInteractor {
       "DMs",
       [DM_id, this.SUBCOLLECTION_NAME],
       limitNum,
-      startId
+      startId,
+      false
     );
     if (docDatas) {
       let retData: DMMessageDataWithRelativeData[] = [];

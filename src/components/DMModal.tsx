@@ -127,15 +127,8 @@ const DMModal = (props: Props) => {
 
   const ButtonToDM = (dmData: DMDataWithRelativeData) => {
     let MyUserID = user ? user.id : "unreachable";
-    let thumbnailURL = user ? (user.icon ? user.icon : "https://bit.ly/dan-abramov") : "unreachable";
-    let titleUserName = user ? user.name : "unreachable";
-
-    dmData.members.forEach((aMember: UserPublicData) => {
-      if (aMember.id != MyUserID && aMember.icon) {
-        thumbnailURL = aMember.icon;
-        titleUserName = aMember.name;
-      }
-    });
+    const thumbnailURL = GetDMImage(dmData);
+    const titleUserName = GetDMTitle(dmData);
 
     return (
       <Box
@@ -152,6 +145,29 @@ const DMModal = (props: Props) => {
         </Flex>
       </Box>
     );
+  };
+
+  const GetDMTitle = (dmData: DMDataWithRelativeData) => {
+    let MyUserID = user ? user.id : "unreachable";
+    let titleUserName = user ? user.name : "unreachable";
+
+    dmData.members.forEach((aMember: UserPublicData) => {
+      if (aMember.id != MyUserID && aMember.icon) {
+        titleUserName = aMember.name;
+      }
+    });
+    return titleUserName;
+  };
+  const GetDMImage = (dmData: DMDataWithRelativeData) => {
+    let MyUserID = user ? user.id : "unreachable";
+    let thumbnailURL = user ? (user.icon ? user.icon : "https://bit.ly/dan-abramov") : "unreachable";
+
+    dmData.members.forEach((aMember: UserPublicData) => {
+      if (aMember.id != MyUserID && aMember.icon) {
+        thumbnailURL = aMember.icon;
+      }
+      return thumbnailURL;
+    });
   };
 
   let ButtonsToDM_Node = <></>;
@@ -191,14 +207,14 @@ const DMModal = (props: Props) => {
       {isMessageOpen && (
         <Box overflowY='hidden' w='320px' h='calc(100vh - 50px)' bg='gray' p={4}>
           <CloseButton onClick={() => setIsMessageOpen(false)} />
-          <Text fontSize='3xl'>user name</Text>
+          <Text fontSize='3xl'>{OpeningDM ? GetDMTitle(OpeningDM) : "user name"}</Text>
           <Flex direction='column' h='100%'>
             <Stack flex={0.85} overflowY='scroll' ref={chatAreaRef}>
               <>
                 {
                   <Box borderWidth='1px'>
-                    {CurrentDispMessages.map((message, index) => (
-                      <Flex key={index} justify={user && message.sender.id === user.id ? "left" : "right"} p='1'>
+                    {CurrentDispMessages.map((message, index) => {
+                      const imagePart = (
                         <Image
                           p='1'
                           borderRadius='full'
@@ -206,11 +222,29 @@ const DMModal = (props: Props) => {
                           src={message.sender.icon ? message.sender.icon : "https://bit.ly/dan-abramov"}
                           alt='User Icon'
                         />
+                      );
+                      const textPart = (
                         <Text bg='blue.100' p='2' borderRadius='md' w='60%'>
                           {message.content}
                         </Text>
-                      </Flex>
-                    )).reverse()}
+                      );
+                      const isMyMessage = user && message.sender.id === user.id;
+                      return (
+                        <Flex key={index} justify={isMyMessage ? "left" : "right"} p='1'>
+                          {isMyMessage ? (
+                            <>
+                              {imagePart}
+                              {textPart}
+                            </>
+                          ) : (
+                            <>
+                              {textPart}
+                              {imagePart}
+                            </>
+                          )}
+                        </Flex>
+                      );
+                    }).reverse()}
                   </Box>
                 }
               </>
