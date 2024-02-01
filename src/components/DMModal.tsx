@@ -67,9 +67,6 @@ const DMModal = (props: Props) => {
   const [isMessageOpen, setIsMessageOpen] = useState<boolean>(false);
 
   const [OpeningDM, setOpeningDM] = useState<DMDataWithRelativeData | null>(null);
-
-  const [changeUserID, setChangeUserID] = useState<boolean>(false);
-
   const chatAreaRef = useRef<HTMLDivElement | null>(null);
 
   const [newMessage, setNewMessage] = useState(""); // 新しいメッセージの入力値
@@ -198,10 +195,10 @@ const DMModal = (props: Props) => {
           <Flex direction='column' h='100%'>
             <Stack flex={0.85} overflowY='scroll' ref={chatAreaRef}>
               <>
-                {changeUserID == true ? (
+                {
                   <Box borderWidth='1px'>
                     {CurrentDispMessages.map((message, index) => (
-                      <Flex key={index} justify='left' p='1'>
+                      <Flex key={index} justify={user && message.sender.id === user.id ? "left" : "right"} p='1'>
                         <Image
                           p='1'
                           borderRadius='full'
@@ -215,24 +212,7 @@ const DMModal = (props: Props) => {
                       </Flex>
                     )).reverse()}
                   </Box>
-                ) : (
-                  <Box borderWidth='1px'>
-                    {CurrentDispMessages.map((message, index) => (
-                      <Flex key={index} justify='left' p='1'>
-                        <Image
-                          p='1'
-                          borderRadius='full'
-                          boxSize='40px'
-                          src={message.sender.icon ? message.sender.icon : "https://bit.ly/dan-abramov"}
-                          alt='User Icon'
-                        />
-                        <Text bg='blue.100' p='2' borderRadius='md' w='60%'>
-                          {message.content}
-                        </Text>
-                      </Flex>
-                    )).reverse()}
-                  </Box>
-                )}
+                }
               </>
             </Stack>
             <Flex mt={15} top='50' borderRadius='full' bg='white'>
@@ -244,7 +224,7 @@ const DMModal = (props: Props) => {
                 color='tomato'
                 _placeholder={{ color: "tomato" }}
               />
-              <Button colorScheme='blue' ml={2} onClick={() => setChangeUserID(!changeUserID)}>
+              <Button colorScheme='blue' ml={2} onClick={() => sendMessage}>
                 送信
               </Button>
             </Flex>
