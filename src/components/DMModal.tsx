@@ -19,7 +19,6 @@ import useSWR from "swr";
 
 import DMInteractor from "@/interactors/DM/DMInteractor";
 import { DMDataWithRelativeData, DMMessageCreateData, DMMessageDataWithRelativeData } from "@/interactors/DM/DMTypes";
-import { UserPublicData } from "@/interactors/User/UserTypes";
 
 import { FirebaseAuthContext } from "./FirebaseAuthProvider";
 
@@ -151,24 +150,26 @@ const DMModal = (props: Props) => {
     let MyUserID = user ? user.id : "unreachable";
     let titleUserName = user ? user.name : "unreachable";
     //console.log(MyUserID + ":" + titleUserName);
-
-    dmData.members.forEach((aMember: UserPublicData) => {
+    for (let i = 0; i < dmData.members.length; i++) {
+      const aMember = dmData.members[i];
       if (aMember.id != MyUserID) {
         titleUserName = aMember.name;
+        return titleUserName;
       }
-    });
+    }
     return titleUserName;
   };
-  const GetDMImage = (dmData: DMDataWithRelativeData) => {
+  const GetDMImage = (dmData: DMDataWithRelativeData): string => {
     let MyUserID = user ? user.id : "unreachable";
     let thumbnailURL = user ? (user.icon ? user.icon : "https://bit.ly/dan-abramov") : "unreachable";
-
-    dmData.members.forEach((aMember: UserPublicData) => {
+    for (let i = 0; i < dmData.members.length; i++) {
+      const aMember = dmData.members[i];
       if (aMember.id != MyUserID && aMember.icon) {
         thumbnailURL = aMember.icon;
+        return thumbnailURL;
       }
-      return thumbnailURL;
-    });
+    }
+    return thumbnailURL;
   };
 
   let ButtonsToDM_Node = <></>;
