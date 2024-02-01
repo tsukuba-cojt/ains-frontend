@@ -77,6 +77,9 @@ const FirebaseTestPage = () => {
       setDMdom(nextDom);
     }
   };
+  const deleteDM = async () => {
+    await new DMInteractor().delete_DM(DMIDInput);
+  };
 
   const GetDMMessage = async (): Promise<void> => {
     const interactor: DMInteractor = new DMInteractor();
@@ -118,6 +121,7 @@ const FirebaseTestPage = () => {
       </Flex>
 
       <Button onClick={addDMMessage}>addMessage</Button>
+      <Button onClick={deleteDM}>deleteDM</Button>
       <Box margin='50px'></Box>
       <Flex>
         <Text width={"200px"}>DMの名前</Text>

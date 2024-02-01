@@ -31,6 +31,9 @@ export default class DMInteractor {
       return null;
     }
   }
+  async delete_DM(DM_id: string) {
+    await this.interactor.delete(this.COLLECTION_NAME, DM_id);
+  }
 
   //ユーザ-がメンバーとなっているDMを全て取得
   async getWithMemberID_DM(userId: string) {

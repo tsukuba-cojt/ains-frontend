@@ -1,3 +1,4 @@
+import { ChatIcon } from "@chakra-ui/icons";
 import {
   Avatar,
   Container,
@@ -12,17 +13,24 @@ import {
   Tabs,
   Grid,
   GridItem,
+  Button,
+  Box,
+  useToast,
 } from "@chakra-ui/react";
 import { GetServerSideProps } from "next";
 import ErrorPage from "next/error";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import { useContext } from "react";
 import useSWR from "swr";
 
+import { FirebaseAuthContext } from "@/components/FirebaseAuthProvider";
 import GridArtworks from "@/components/GridArtworks";
 import LinkCard from "@/components/LinkCard";
 import LoadingPanel from "@/components/LoadingPanel";
+import DMInteractor from "@/interactors/DM/DMInteractor";
+import { DMCreateData } from "@/interactors/DM/DMTypes";
 import UserInteractor from "@/interactors/User/UserInteractor";
 
 export const getServerSideProps: GetServerSideProps = async () => {
@@ -147,7 +155,10 @@ const UserProfilePage = ({ artworks, communities }: any) => {
     isLoading,
   } = useSWR(`/users/${user_id}`, () => new UserInteractor().getPublicData(user_id as string));
 
+  const { user: myUserData } = useContext(FirebaseAuthContext);
   const [doesExpandDescription, setDoesExpandDescription] = useState<boolean>(false);
+
+  const toast = useToast();
 
   if (error || user === null) return <ErrorPage statusCode={404} />;
   if (isLoading || user === undefined) return <LoadingPanel />;
@@ -168,6 +179,29 @@ const UserProfilePage = ({ artworks, communities }: any) => {
         >
           {user.description}
         </Text>
+        {myUserData && (
+          <Box>
+            <Button height='30px' width='130px'>
+              <ChatIcon boxSize='14px' marginRight={"5px"} />
+              <Text
+                fontSize='14px'
+                onClick={async () => {
+                  const createData: DMCreateData = { name: "", member_ids: [user_id as string, myUserData.id] };
+                  await new DMInteractor().set_DM(createData);
+                  toast({
+                    title: `${user ? user.name : user_id}とのDMを作成しました`,
+                    status: "success",
+                    duration: 9000,
+                    isClosable: true,
+                  });
+                }}
+              >
+                DMを作成する
+              </Text>
+            </Button>
+          </Box>
+        )}
+
         <Tabs w='full' align='center'>
           <TabList>
             <Tab>投稿済み</Tab>
