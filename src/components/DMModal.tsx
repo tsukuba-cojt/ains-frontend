@@ -127,7 +127,7 @@ const DMModal = (props: Props) => {
 
   const ButtonToDM = (dmData: DMDataWithRelativeData) => {
     let MyUserID = user ? user.id : "unreachable";
-    const thumbnailURL = GetDMImage(dmData);
+    const thumbnailURL: string = GetDMImage(dmData);
     const titleUserName = GetDMTitle(dmData);
 
     return (
@@ -150,9 +150,10 @@ const DMModal = (props: Props) => {
   const GetDMTitle = (dmData: DMDataWithRelativeData) => {
     let MyUserID = user ? user.id : "unreachable";
     let titleUserName = user ? user.name : "unreachable";
+    //console.log(MyUserID + ":" + titleUserName);
 
     dmData.members.forEach((aMember: UserPublicData) => {
-      if (aMember.id != MyUserID && aMember.icon) {
+      if (aMember.id != MyUserID) {
         titleUserName = aMember.name;
       }
     });
@@ -258,7 +259,13 @@ const DMModal = (props: Props) => {
                 color='tomato'
                 _placeholder={{ color: "tomato" }}
               />
-              <Button colorScheme='blue' ml={2} onClick={() => sendMessage}>
+              <Button
+                colorScheme='blue'
+                ml={2}
+                onClick={() => {
+                  sendMessage();
+                }}
+              >
                 送信
               </Button>
             </Flex>
