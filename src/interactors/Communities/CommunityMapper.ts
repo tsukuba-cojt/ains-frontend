@@ -22,6 +22,7 @@ export default class CommunityMapper {
       admins: data.admins,
       members: data.members,
       owner: data.owner,
+      tags: data.tags,
       created_at: data.created_at.toDate ? new Date(data.created_at.toDate()) : new Date(),
       updated_at: data.updated_at.toDate ? new Date(data.updated_at.toDate()) : new Date(),
     };

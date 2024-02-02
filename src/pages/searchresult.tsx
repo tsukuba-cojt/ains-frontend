@@ -1,4 +1,4 @@
-import { Box, useColorMode, useColorModeValue } from "@chakra-ui/react";
+import { Box, Grid, GridItem, useColorMode, useColorModeValue } from "@chakra-ui/react";
 import { Tabs, TabList, TabPanels, Tab, TabPanel, TabIndicator } from "@chakra-ui/react";
 import { Text, Flex, Avatar, Link } from "@chakra-ui/react";
 import { getAuth } from "firebase/auth";
@@ -8,8 +8,10 @@ import { useRouter } from "next/router";
 import useSWR from "swr";
 
 import GridArtworks from "@/components/GridArtworks";
+import LinkCard from "@/components/LinkCard";
 import ArtworkInteractor from "@/interactors/Artwork/ArtworkInteractor";
 import BaseInteractor from "@/interactors/BaseInteractor";
+import CommunityInteractor from "@/interactors/Communities/CommunityInteractor";
 import UserInteractor from "@/interactors/User/UserInteractor";
 import { UserPublicData } from "@/interactors/User/UserTypes";
 
@@ -48,6 +50,14 @@ const SearchResultPage = () => {
     new UserInteractor().fullTextSearch(100, searchKeyWords.split(/\s+/))
   );
 
+  const {
+    data: communities,
+    error: errorCommunities,
+    isLoading: isLoadingCommunities,
+  } = useSWR(`/communities/search?tags=${searchTags}`, () =>
+    new CommunityInteractor().fullTextAndTagSearch(100, searchKeyWords.split(/\s+/), searchTags.split(/\s+/))
+  );
+
   const router = useRouter();
 
   const getUserBox = (
@@ -79,7 +89,7 @@ const SearchResultPage = () => {
     return (
       <>
         {userPubDatas.map((aData) => {
-          return getUserBox(aData.name, aData.description ? aData.description : "", aData.icon_url, aData);
+          return getUserBox(aData.name, aData.description ? aData.description : "", aData.icon || "", aData);
         })}
       </>
     );
@@ -104,6 +114,29 @@ const SearchResultPage = () => {
     usersBox = <>{getUserBoxes(users)}</>;
   }
 
+  let communitiesBox: JSX.Element = <>Error!</>;
+  if (errorCommunities || communities === null) {
+    communitiesBox = <>Errorだよ〜</>;
+  } else if (isLoading || communities === undefined) {
+    communitiesBox = <>検索しています!</>;
+  } else {
+    communitiesBox = (
+      <Grid gap={5} templateColumns='repeat(3, 1fr)'>
+        {communities.map((community, i) => (
+          <GridItem key={i}>
+            <LinkCard
+              title={community.name}
+              show_icon
+              icon_type='square'
+              icon={community.icon?.url}
+              href={`/communities/${community.id}`}
+            />
+          </GridItem>
+        ))}
+      </Grid>
+    );
+  }
+
   return (
     <Box>
       {searchKeyWords +
@@ -124,7 +157,7 @@ const SearchResultPage = () => {
         <TabPanels>
           <TabPanel>{artworksBox}</TabPanel>
           <TabPanel>{usersBox}</TabPanel>
-          <TabPanel>{artworksBox}</TabPanel>
+          <TabPanel>{communitiesBox}</TabPanel>
         </TabPanels>
       </Tabs>
     </Box>

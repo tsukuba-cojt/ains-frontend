@@ -1,4 +1,4 @@
-import { Flex, Image, Text, useColorModeValue } from "@chakra-ui/react";
+import { Box, Flex, Image, Text, useColorModeValue } from "@chakra-ui/react";
 import Link from "next/link";
 
 import { theme } from "@/pages/_app";
@@ -29,7 +29,12 @@ const LinkCard = ({ title, show_icon, icon, icon_type, href }: LinkCardProps) =>
   return (
     <Link href={href}>
       <Flex bg={secondary} p={5} rounded='lg' w='full' h='full' direction='row' alignItems='center' gap={5}>
-        {show_icon && <Image w={10} h={10} src={icon} borderRadius={border_style} alt={title} />}
+        {show_icon &&
+          (icon ? (
+            <Image w={10} h={10} src={icon} borderRadius={border_style} alt={title} />
+          ) : (
+            <Box w={10} h={10} borderRadius={border_style} bg='gray.400' />
+          ))}
         <Text fontSize='xl'>{title}</Text>
       </Flex>
     </Link>

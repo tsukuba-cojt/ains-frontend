@@ -10,6 +10,7 @@ import {
   PostData,
   PostFormData,
 } from "./CommunityTypes";
+import { nOrLessGramTokenize } from "../../plugins/Utility/NGramTokenizer";
 import BaseInteractor from "../BaseInteractor";
 import FileInteractor from "../File/FileInteractor";
 import { FileData } from "../File/FileTypes";
@@ -43,6 +44,63 @@ export default class CommunityInteractor {
     return community_data_list;
   }
 
+  async getByUser(user_id: string): Promise<CommunityData[] | null> {
+    const res_data = await this.interactor.FilterOr(this.COLLECTION_NAME, [
+      { key: "owner", operator: "==", value: user_id },
+      { key: "admins", operator: "array-contains", value: user_id },
+      { key: "members", operator: "array-contains", value: user_id },
+    ]);
+    if (!res_data) return null;
+
+    const community_data_list: CommunityData[] = [];
+    for (let i = 0; i < res_data.length; i++) {
+      const new_community_data = await CommunityMapper.mapDocDataToCommunityData(res_data[i]);
+      if (new_community_data !== null) community_data_list.push(new_community_data);
+    }
+
+    return community_data_list;
+  }
+
+  async getWithTags(limitNum: number, tags: Array<string>): Promise<CommunityData[] | null> {
+    const res_data = await this.interactor.getWithTags(this.COLLECTION_NAME, limitNum, tags);
+    if (!res_data) {
+      return null;
+    }
+
+    const community_data_list: CommunityData[] = [];
+    for (let i = 0; i < res_data.length; i++) {
+      const new_community_data = await CommunityMapper.mapDocDataToCommunityData(res_data[i]);
+      if (new_community_data !== null) community_data_list.push(new_community_data);
+    }
+    return community_data_list;
+  }
+
+  async fullTextSearch(limitNum: number, serchWords: Array<string>) {
+    const res_data = await this.interactor.fullTextSearch(this.COLLECTION_NAME, limitNum, serchWords);
+    if (!res_data) return null;
+
+    const community_data_list: CommunityData[] = [];
+    for (let i = 0; i < res_data.length; i++) {
+      const new_community_data = await CommunityMapper.mapDocDataToCommunityData(res_data[i]);
+      if (new_community_data !== null) community_data_list.push(new_community_data);
+    }
+    return community_data_list;
+  }
+
+  async fullTextAndTagSearch(limitNum: number, serchWords: Array<string>, tags: Array<string>) {
+    const res_data = await this.interactor.fullTextAndTagSearch(this.COLLECTION_NAME, limitNum, serchWords, tags);
+    if (!res_data) {
+      return null;
+    }
+
+    const artwork_data_list: CommunityData[] = [];
+    for (let i = 0; i < res_data.length; i++) {
+      const new_artwork_data = await CommunityMapper.mapDocDataToCommunityData(res_data[i]);
+      if (new_artwork_data !== null) artwork_data_list.push(new_artwork_data);
+    }
+    return artwork_data_list;
+  }
+
   async getPost(community_id: string, post_id: string): Promise<PostData | null> {
     const data = await this.interactor.getSubCollection(this.COLLECTION_NAME, [community_id, "posts"], post_id);
     if (!data) return null;
@@ -61,6 +119,18 @@ export default class CommunityInteractor {
     return await Promise.all(data.map((d) => CommunityMapper.mapDocDataToPostData(d, community_id)));
   }
 
+  async getLikedPosts(community_id: string, user_id: string | null): Promise<PostData[] | null> {
+    if (!user_id) return [];
+    const data = await this.interactor.FilterAndSubCollections(
+      this.COLLECTION_NAME,
+      [community_id, "posts"],
+      [{ key: "likes", operator: "array-contains", value: user_id }]
+    );
+    if (!data) return null;
+
+    return await Promise.all(data.map((d) => CommunityMapper.mapDocDataToPostData(d, community_id)));
+  }
+
   async set(data: CommunityFormData): Promise<CommunityData | null> {
     const fileInteractor = new FileInteractor();
     const banner = data.banner && (await fileInteractor.upload(data.banner));
@@ -72,6 +142,23 @@ export default class CommunityInteractor {
       admins: [],
       members: [],
     };
+
+    const bigramtokens_map: any = {};
+    nOrLessGramTokenize(
+      this.interactor.KatakanaToHiragana(createData.name + " " + createData.description).toLowerCase(),
+      2
+    ).forEach((aToken) => {
+      bigramtokens_map[aToken] = true;
+    });
+    const tags_map: any = {};
+    createData.tags.forEach((aTag) => {
+      tags_map[aTag] = true;
+    });
+    const artwork_create_data_with_serchtoken = Object.assign(createData, {
+      bigramtokens_map: bigramtokens_map,
+      tags_map: tags_map,
+    });
+
     const result = await this.interactor.set(this.COLLECTION_NAME, this.interactor.uuidv4(), createData);
     if (!result) return null;
 
@@ -120,7 +207,7 @@ export default class CommunityInteractor {
     const fileInteractor = new FileInteractor();
     const nullableFiles =
       data.files && (await Promise.all(data.files.map(async (f: File) => fileInteractor.upload(f))));
-    const fileIds = nullableFiles && nullableFiles.filter((f: FileData | null) => f).map((f: FileData) => f!.id);
+    const fileIds = nullableFiles && nullableFiles.filter((f: FileData | null) => f).map((f: FileData | null) => f!.id);
     const createData: PostCreateData = {
       ...data,
       files: fileIds,
@@ -150,5 +237,13 @@ export default class CommunityInteractor {
     return await this.interactor.updateSubCollection(this.COLLECTION_NAME, [data.community_id, "posts"], data.post_id, {
       likes: data.remove ? arrayRemove(data.user_id) : arrayUnion(data.user_id),
     });
+  }
+
+  async join(community_id: string, user_id: string): Promise<boolean | null> {
+    return await this.interactor.update(this.COLLECTION_NAME, community_id, { members: arrayUnion(user_id) });
+  }
+
+  async leave(community_id: string, user_id: string): Promise<boolean | null> {
+    return await this.interactor.update(this.COLLECTION_NAME, community_id, { members: arrayRemove(user_id) });
   }
 }

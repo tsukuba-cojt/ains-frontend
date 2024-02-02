@@ -33,6 +33,11 @@ const PostDetailPage = () => {
   } = useSWR(`/communities/${community_id}/${post_id}/replies`, () =>
     new CommunityInteractor().getReplies(community_id as string, post_id as string)
   );
+  const { data: community } = useSWR(`/communities/${community_id as string}`, () =>
+    new CommunityInteractor().get(community_id as string)
+  );
+
+  const all_members = community ? [community.owner].concat(community.admins, community.members) : [];
 
   if (isLoading) return <LoadingPanel />;
   if (error || !post) return <ErrorPage statusCode={404} />;
@@ -52,6 +57,7 @@ const PostDetailPage = () => {
         }}
       />
       <PostForm
+        isDisabled={!user || all_members.find((u: string) => u === user.id) === undefined}
         communityId={community_id as string}
         originPost={post.id}
         mutate={(newPost) => {
