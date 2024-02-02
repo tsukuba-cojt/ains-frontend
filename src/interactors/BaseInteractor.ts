@@ -98,7 +98,8 @@ export default class BaseInteractor {
     collection_name: string,
     sub_path: string[],
     limitNum: number,
-    startId: string | null = null
+    startId: string | null = null,
+    isCacheUsed: boolean = true
   ): Promise<Array<DocumentData> | null> {
     try {
       const collectionRef = collection(this.db, collection_name, ...sub_path);
@@ -110,9 +111,11 @@ export default class BaseInteractor {
       const q = query(collectionRef, ...queryConstraints);
 
       const cacheKey = `getSub/${collection_name}/${sub_path.join("/")}/${limitNum}/${startId ? startId : "head"}`;
-      const cache = window.sessionStorage.getItem(cacheKey);
-      if (cache) {
-        return JSON.parse(cache);
+      if (isCacheUsed) {
+        const cache = window.sessionStorage.getItem(cacheKey);
+        if (cache) {
+          return JSON.parse(cache);
+        }
       }
 
       const snapshot = await getDocs(q);
