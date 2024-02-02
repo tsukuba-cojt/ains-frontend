@@ -140,7 +140,7 @@ const CommunityCreatePage = () => {
     <Container maxW={{ base: "container.sm", md: "container.md", lg: "container.lg" }} p={5}>
       <Box bg={secondary} rounded='lg' p={5}>
         <Heading as='h1' my={10}>
-          アップロード
+          コミュニティー作成
         </Heading>
         <Grid templateColumns={{ base: "repeat(1, 1fr)", md: "repeat(2, 1fr)" }} gap={5}>
           <GridItem>
