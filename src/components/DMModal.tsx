@@ -1,17 +1,16 @@
 import {
   Input,
   Box,
+  Card,
   CloseButton,
   Button,
-  VStack,
-  HStack,
+  CardHeader,
+  CardBody,
+  Heading,
   Text,
   Flex,
   Stack,
-  useColorModeValue,
-  Avatar,
-  Center,
-  Link,
+  Image,
 } from "@chakra-ui/react";
 import { AnimatePresence, motion } from "framer-motion";
 import React, { useEffect, useRef, KeyboardEvent } from "react";
@@ -22,8 +21,6 @@ import DMInteractor from "@/interactors/DM/DMInteractor";
 import { DMDataWithRelativeData, DMMessageCreateData, DMMessageDataWithRelativeData } from "@/interactors/DM/DMTypes";
 
 import { FirebaseAuthContext } from "./FirebaseAuthProvider";
-
-import { theme } from "@/pages/_app";
 
 interface Props {
   isOpen: boolean;
@@ -98,6 +95,7 @@ const DMModal = (props: Props) => {
   );
 
   const CurrentDispMessages = cachedDMMessage.concat(DMMessages ? DMMessages : []);
+
   // 新しいメッセージを送信する関数
   const sendMessage = async () => {
     if (newMessage.trim()) {
@@ -183,35 +181,8 @@ const DMModal = (props: Props) => {
     ButtonsToDM_Node = <>{MyDMDatas.map((aData) => ButtonToDM(aData))}</>;
   }
 
-  interface UserDM {
-    user_name: string;
-    user_src: string;
-  }
-
-  const UserDM = (userDM: UserDM) => {
-    const secondary = useColorModeValue(theme.colors.secondary.ml, "gray.700");
-    const MoveDMDisplay = () => {
-      setUserNameDM(userDM.user_name);
-      setUserIconDM(userDM.user_src);
-      setIsMessageOpen(true);
-    };
-
-    return (
-      <HStack w='full' bg={secondary} p='4' wrap='wrap' alignItems='center' gap={5}>
-        <Flex>
-          <Center h='100%'>
-            <Avatar src={userDM.user_src} />
-
-            <Link fontSize='2xl' as='u' p={1} onClick={MoveDMDisplay}>
-              {userDM.user_name}
-            </Link>
-          </Center>
-        </Flex>
-      </HStack>
-    );
-  };
   return (
-    <Box overflowY='scroll' position='fixed' top='50px' right='0px' h='calc(100vh - 50px)' bg={boxbg}>
+    <Box overflowY='auto' position='fixed' top='50px' right='0px' h='calc(100vh - 50px)' bg='green'>
       <AnimatePresence>
         {props.isOpen && isMessageOpen == false && (
           <motion.aside
@@ -240,11 +211,11 @@ const DMModal = (props: Props) => {
         )}
       </AnimatePresence>
       {isMessageOpen && (
-        <Box overflowY='hidden' w='300px' h='calc(100vh - 50px)' bg={secondary} p={4}>
+        <Box overflowY='hidden' w='320px' h='calc(100vh - 50px)' bg='gray' p={4}>
           <CloseButton onClick={() => setIsMessageOpen(false)} />
           <Text fontSize='3xl'>{OpeningDM ? GetDMTitle(OpeningDM) : "user name"}</Text>
           <Flex direction='column' h='100%'>
-            <Stack flex={0.85} borderRadius={10} overflowY='scroll' id='chat-Area' ref={chatAreaRef} bg={dmbg}>
+            <Stack flex={0.85} overflowY='scroll' ref={chatAreaRef}>
               <>
                 {
                   <Box borderWidth='1px'>
@@ -284,12 +255,14 @@ const DMModal = (props: Props) => {
                 }
               </>
             </Stack>
-            <Flex mt={15} top='50' borderRadius='full' bg={secondary}>
+            <Flex mt={15} top='50' borderRadius='full' bg='white'>
               <Input
                 placeholder='メッセージを入力'
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 onKeyDown={handleKeyPress}
+                color='tomato'
+                _placeholder={{ color: "tomato" }}
               />
               <Button
                 colorScheme='blue'
