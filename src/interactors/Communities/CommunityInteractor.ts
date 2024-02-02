@@ -44,6 +44,23 @@ export default class CommunityInteractor {
     return community_data_list;
   }
 
+  async getByUser(user_id: string): Promise<CommunityData[] | null> {
+    const res_data = await this.interactor.FilterOr(this.COLLECTION_NAME, [
+      { key: "owner", operator: "==", value: user_id },
+      { key: "admins", operator: "array-contains", value: user_id },
+      { key: "members", operator: "array-contains", value: user_id },
+    ]);
+    if (!res_data) return null;
+
+    const community_data_list: CommunityData[] = [];
+    for (let i = 0; i < res_data.length; i++) {
+      const new_community_data = await CommunityMapper.mapDocDataToCommunityData(res_data[i]);
+      if (new_community_data !== null) community_data_list.push(new_community_data);
+    }
+
+    return community_data_list;
+  }
+
   async getWithTags(limitNum: number, tags: Array<string>): Promise<CommunityData[] | null> {
     const res_data = await this.interactor.getWithTags(this.COLLECTION_NAME, limitNum, tags);
     if (!res_data) {

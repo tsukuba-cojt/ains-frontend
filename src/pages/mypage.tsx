@@ -25,11 +25,13 @@ import {
   ModalBody,
   ModalFooter,
   useToast,
+  Spinner,
 } from "@chakra-ui/react";
 import { GetServerSideProps } from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { ChangeEvent, useContext, useEffect, useState } from "react";
+import useSWR from "swr";
 
 import { FirebaseAuthContext } from "@/components/FirebaseAuthProvider";
 import GridArtworks from "@/components/GridArtworks";
@@ -37,6 +39,7 @@ import IdeaBoxThumbnail from "@/components/IdeaBoxThumbnail";
 import ImageFileInput from "@/components/ImageFileInput";
 import LinkCard from "@/components/LinkCard";
 import OverlayAdminMenu from "@/components/OverlayAdminMenu";
+import CommunityInteractor from "@/interactors/Communities/CommunityInteractor";
 import IdeaBoxInteractor from "@/interactors/IdeaBox/IdeaBoxInteractor";
 import UserInteractor from "@/interactors/User/UserInteractor";
 
@@ -179,7 +182,7 @@ interface FormData {
 }
 type FormFields = keyof FormData;
 
-const UserProfilePage = ({ artworks, communities, ideaboxes }: any) => {
+const UserProfilePage = ({ artworks, ideaboxes }: any) => {
   const router = useRouter();
   const toast = useToast();
   const { user, reload } = useContext(FirebaseAuthContext);
@@ -195,6 +198,12 @@ const UserProfilePage = ({ artworks, communities, ideaboxes }: any) => {
   const [iconFile, setIconFile] = useState<File | null>(null);
   const [showIconOverlay, setShowIconOverlay] = useState<boolean>(false);
   const [showUploadModal, setShowUploadModal] = useState<boolean>(false);
+
+  const {
+    data: communities,
+    isLoading: isLoadingCommunities,
+    error: errorCommunities,
+  } = useSWR(`/mypage/communities/${user?.id}`, () => new CommunityInteractor().getByUser(user?.id || ""));
 
   const handleOnChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData((current) => {
@@ -391,18 +400,29 @@ const UserProfilePage = ({ artworks, communities, ideaboxes }: any) => {
               </Grid>
             </TabPanel>
             <TabPanel>
+              <Flex justifyContent='end' py={10} w='full'>
+                <Link href='/communities/new'>
+                  <Button>コミュニティーを作成する</Button>
+                </Link>
+              </Flex>
               <Grid gap={5} templateColumns='repeat(3, 1fr)'>
-                {communities.map((community: any, i: number) => (
-                  <GridItem key={i}>
-                    <LinkCard
-                      title={community.title}
-                      show_icon
-                      icon_type='square'
-                      icon={community.thumbnail_url}
-                      href={`/search?community=${community.id}`}
-                    />
-                  </GridItem>
-                ))}
+                {isLoadingCommunities ? (
+                  <Spinner />
+                ) : errorCommunities || !communities ? (
+                  <>error!</>
+                ) : (
+                  communities.map((community: any, i: number) => (
+                    <GridItem key={i}>
+                      <LinkCard
+                        title={community.name}
+                        show_icon
+                        icon_type='square'
+                        icon={community.icon}
+                        href={`/communities/${community.id}`}
+                      />
+                    </GridItem>
+                  ))
+                )}
               </Grid>
             </TabPanel>
           </TabPanels>
